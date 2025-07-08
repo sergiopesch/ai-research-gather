@@ -14,7 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      paper_assets: {
+        Row: {
+          created_at: string
+          full_text_path: string | null
+          id: string
+          paper_id: string
+          script: string | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_text_path?: string | null
+          id?: string
+          paper_id: string
+          script?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_text_path?: string | null
+          id?: string
+          paper_id?: string
+          script?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paper_assets_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      papers: {
+        Row: {
+          created_at: string
+          doi: string | null
+          id: string
+          published_date: string
+          source: string
+          status: Database["public"]["Enums"]["paper_status"]
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          doi?: string | null
+          id?: string
+          published_date: string
+          source: string
+          status?: Database["public"]["Enums"]["paper_status"]
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          doi?: string | null
+          id?: string
+          published_date?: string
+          source?: string
+          status?: Database["public"]["Enums"]["paper_status"]
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +96,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      paper_status: "NEW" | "SELECTED" | "PROCESSED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +223,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      paper_status: ["NEW", "SELECTED", "PROCESSED"],
+    },
   },
 } as const
