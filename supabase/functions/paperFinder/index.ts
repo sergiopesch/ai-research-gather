@@ -61,6 +61,7 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
   const timeoutId = setTimeout(() => controller.abort(), timeout)
   
   try {
+    console.log(`Searching arXiv with query: ${searchQuery}`)
     const response = await fetch(`${baseUrl}?${params}`, {
       signal: controller.signal
     })
@@ -68,11 +69,14 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
     if (!response.ok) throw new Error(`ArXiv API error: ${response.status}`)
     
     const xmlText = await response.text()
+    console.log(`ArXiv response length: ${xmlText.length} characters`)
+    
     const papers: Paper[] = []
     
     // Simple XML parsing for ArXiv entries
     const entryRegex = /<entry>(.*?)<\/entry>/gs
     const entries = xmlText.match(entryRegex) || []
+    console.log(`Found ${entries.length} entries in arXiv response`)
     
     for (const entry of entries) {
       const titleMatch = entry.match(/<title>(.*?)<\/title>/s)
@@ -82,25 +86,35 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
       
       if (titleMatch && publishedMatch && idMatch) {
         const publishedDate = publishedMatch[1].split('T')[0]
+        console.log(`Paper "${titleMatch[1].substring(0, 50)}..." published: ${publishedDate}, since: ${since}`)
         
-        if (publishedDate >= since) {
+        // Make date filtering more lenient - get papers from the last 7 days
+        const paperDate = new Date(publishedDate)
+        const sinceDate = new Date(since)
+        const daysDiff = Math.floor((sinceDate.getTime() - paperDate.getTime()) / (1000 * 60 * 60 * 24))
+        
+        console.log(`Days difference: ${daysDiff}`)
+        
+        if (daysDiff <= 7) { // Get papers from last 7 days instead of just today
           const arxivId = idMatch[1].split('/').pop()?.split('v')[0]
           const pdfUrl = pdfMatch ? pdfMatch[1] : `https://arxiv.org/pdf/${arxivId}.pdf`
           
-          // Check if PDF is accessible and not too large
-          if (await checkPdfSize(pdfUrl)) {
-            papers.push({
-              title: titleMatch[1].replace(/\s+/g, ' ').trim(),
-              url: idMatch[1],
-              doi: arxivId,
-              source: 'arXiv',
-              published_date: publishedDate
-            })
-          }
+          console.log(`Adding paper: ${titleMatch[1].substring(0, 50)}...`)
+          
+          papers.push({
+            title: titleMatch[1].replace(/\s+/g, ' ').trim(),
+            url: idMatch[1],
+            doi: arxivId,
+            source: 'arXiv',
+            published_date: publishedDate
+          })
+        } else {
+          console.log(`Skipping paper - too old (${daysDiff} days)`)
         }
       }
     }
     
+    console.log(`Returning ${papers.length} papers from arXiv`)
     return papers
   } catch (error) {
     console.warn('ArXiv fetch error:', error.message)
