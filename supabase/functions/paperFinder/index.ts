@@ -292,7 +292,7 @@ function categorizePaper(title: string): string {
   return 'Artificial Intelligence' // Default to AI
 }
 
-// Select diverse papers ensuring at least one from each area
+// Select diverse papers ensuring exactly 2 papers from each area
 function selectDiversePapers(papers: Paper[], limit: number): Paper[] {
   console.log(`Selecting diverse papers from ${papers.length} total papers`)
   
@@ -311,31 +311,36 @@ function selectDiversePapers(papers: Paper[], limit: number): Paper[] {
   
   const selectedPapers: Paper[] = []
   const areas = RESEARCH_AREAS.map(area => area.name)
+  const papersPerArea = Math.floor(limit / areas.length) // 2 papers per area for limit 6
   
-  // First, ensure we get at least one paper from each area if available
+  // Select exactly 2 papers from each area
   for (const area of areas) {
-    if (categorizedPapers[area] && categorizedPapers[area].length > 0 && selectedPapers.length < limit) {
-      selectedPapers.push(categorizedPapers[area][0])
-      categorizedPapers[area] = categorizedPapers[area].slice(1)
-    }
-  }
-  
-  // Then fill remaining slots with papers from any area, prioritizing areas with fewer papers selected
-  while (selectedPapers.length < limit) {
-    let paperAdded = false
-    
-    for (const area of areas) {
-      if (categorizedPapers[area] && categorizedPapers[area].length > 0 && selectedPapers.length < limit) {
-        selectedPapers.push(categorizedPapers[area][0])
-        categorizedPapers[area] = categorizedPapers[area].slice(1)
-        paperAdded = true
+    if (categorizedPapers[area] && categorizedPapers[area].length > 0) {
+      const areaLimit = Math.min(papersPerArea, categorizedPapers[area].length)
+      for (let i = 0; i < areaLimit && selectedPapers.length < limit; i++) {
+        selectedPapers.push(categorizedPapers[area][i])
       }
     }
-    
-    if (!paperAdded) break // No more papers available
   }
   
-  console.log(`Selected ${selectedPapers.length} diverse papers`)
+  // If we still need more papers and some areas have extras, fill from any area
+  if (selectedPapers.length < limit) {
+    const usedIndices = new Set<string>()
+    
+    for (const area of areas) {
+      if (categorizedPapers[area] && selectedPapers.length < limit) {
+        for (let i = papersPerArea; i < categorizedPapers[area].length && selectedPapers.length < limit; i++) {
+          const paperKey = `${area}-${i}`
+          if (!usedIndices.has(paperKey)) {
+            selectedPapers.push(categorizedPapers[area][i])
+            usedIndices.add(paperKey)
+          }
+        }
+      }
+    }
+  }
+  
+  console.log(`Selected ${selectedPapers.length} diverse papers (target: ${papersPerArea} per area)`)
   return selectedPapers
 }
 

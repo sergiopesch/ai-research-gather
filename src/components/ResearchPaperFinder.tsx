@@ -95,7 +95,7 @@ const ResearchPaperFinder = () => {
       console.log('Request body:', {
         since: today,
         keywords,
-        limit: 5
+        limit: 6
       });
 
       const response = await fetch(apiUrl, {
@@ -106,7 +106,7 @@ const ResearchPaperFinder = () => {
         body: JSON.stringify({
           since: today,
           keywords,
-          limit: 5
+          limit: 6
         })
       });
       if (!response.ok) {
