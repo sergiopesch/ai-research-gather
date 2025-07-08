@@ -1,8 +1,9 @@
-import { Calendar, FileText, ExternalLink, Users } from 'lucide-react';
+import { Calendar, FileText, ExternalLink, Users, Brain } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
+import { usePaperActions } from '@/hooks/usePaperActions';
 import type { Paper } from '@/types/research';
 
 interface PaperCardProps {
@@ -11,6 +12,16 @@ interface PaperCardProps {
 }
 
 export const PaperCard = ({ paper, index }: PaperCardProps) => {
+  const { selectPaper, isSelecting } = usePaperActions();
+
+  const handleSelectPaper = async () => {
+    try {
+      await selectPaper(paper.id);
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
+
   const getPaperAreaInfo = (title: string) => {
     const titleLower = title.toLowerCase();
     let bestMatch = { area: RESEARCH_AREAS[0], score: 0 };
@@ -128,12 +139,24 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
               )}
             </div>
             
-            <Button variant="outline" asChild className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-              <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                <ExternalLink className="w-4 h-4" />
-                Read Paper
-              </a>
-            </Button>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleSelectPaper}
+                disabled={isSelecting}
+                className="flex items-center gap-2"
+              >
+                <Brain className="w-4 h-4" />
+                {isSelecting ? "Selecting..." : "Select for Processing"}
+              </Button>
+              
+              <Button variant="outline" asChild className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  Read Paper
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

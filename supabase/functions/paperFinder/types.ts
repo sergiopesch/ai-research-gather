@@ -10,6 +10,7 @@ export const RequestSchema = z.object({
 export type RequestData = z.infer<typeof RequestSchema>
 
 export interface Paper {
+  id: string
   title: string
   url: string
   doi?: string

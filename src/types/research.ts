@@ -1,4 +1,5 @@
 export interface Paper {
+  id: string;
   title: string;
   url: string;
   doi?: string;
