@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export const usePaperActions = () => {
   const [isSelecting, setIsSelecting] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedPapers, setSelectedPapers] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
-  const selectPaper = async (paperId: string) => {
+  const selectPaper = useCallback(async (paperId: string) => {
+    if (isSelecting || selectedPapers.has(paperId)) return;
+    
     setIsSelecting(true);
     try {
       const { data, error } = await supabase.functions.invoke('selectPaper', {
@@ -16,6 +19,8 @@ export const usePaperActions = () => {
 
       if (error) throw error;
 
+      setSelectedPapers(prev => new Set(prev).add(paperId));
+      
       toast({
         title: "Paper Selected",
         description: "Paper has been queued for processing",
@@ -33,9 +38,11 @@ export const usePaperActions = () => {
     } finally {
       setIsSelecting(false);
     }
-  };
+  }, [isSelecting, selectedPapers, toast]);
 
-  const processPaper = async (paperId: string, model?: string) => {
+  const processPaper = useCallback(async (paperId: string, model?: string) => {
+    if (isProcessing) return;
+    
     setIsProcessing(true);
     try {
       const { data, error } = await supabase.functions.invoke('processPaper', {
@@ -61,12 +68,18 @@ export const usePaperActions = () => {
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [isProcessing, toast]);
+
+  const isPaperSelected = useCallback((paperId: string) => {
+    return selectedPapers.has(paperId);
+  }, [selectedPapers]);
 
   return {
     selectPaper,
     processPaper,
+    isPaperSelected,
     isSelecting,
-    isProcessing
+    isProcessing,
+    selectedPapersCount: selectedPapers.size
   };
 };

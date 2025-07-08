@@ -76,19 +76,20 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
   return (
     <Card className="research-card group">
-      <CardContent className="p-8">
-        <div className="space-y-6">
+      <CardContent className="p-4 sm:p-6 lg:p-8">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex items-start justify-between gap-6">
-            <h3 className="text-xl font-semibold text-foreground leading-relaxed flex-1 group-hover:text-primary transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-relaxed flex-1 group-hover:text-primary transition-colors">
               {paper.title}
             </h3>
-            <div className="flex gap-3 flex-shrink-0">
-              <Badge variant="outline" className={areaInfo.color}>
-                <AreaIcon className="w-3 h-3 mr-1.5" />
-                {areaInfo.label}
+            <div className="flex flex-wrap gap-2 sm:gap-3 flex-shrink-0">
+              <Badge variant="outline" className={`${areaInfo.color} text-xs sm:text-sm`}>
+                <AreaIcon className="w-3 h-3 mr-1 sm:mr-1.5" />
+                <span className="hidden sm:inline">{areaInfo.label}</span>
+                <span className="sm:hidden">{areaInfo.label.split(' ')[0]}</span>
               </Badge>
-              <Badge variant="outline" className={getSourceColor(paper.source)}>
+              <Badge variant="outline" className={`${getSourceColor(paper.source)} text-xs sm:text-sm`}>
                 {paper.source}
               </Badge>
             </div>
@@ -96,17 +97,17 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
           {/* Summary */}
           {paper.summary && (
-            <div className="space-y-4 p-6 bg-muted/30 rounded-xl border border-border/50">
-              <div className="space-y-3">
+            <div className="space-y-3 sm:space-y-4 p-4 sm:p-6 bg-muted/30 rounded-lg sm:rounded-xl border border-border/50">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-foreground">Summary</span>
                 </div>
-                <p className="text-foreground leading-relaxed">
+                <p className="text-sm sm:text-base text-foreground leading-relaxed">
                   {paper.summary}
                 </p>
                 {paper.importance && (
-                  <div className="pt-3 border-t border-border/50">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                  <div className="pt-2 sm:pt-3 border-t border-border/50">
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                       <span className="font-medium">Impact:</span> {paper.importance}
                     </p>
                   </div>
@@ -116,44 +117,48 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
           )}
 
           {/* Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-border/50">
-            <div className="space-y-3">
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between pt-3 sm:pt-4 border-t border-border/50 gap-4">
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
                 <span className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                   {formatDate(paper.published_date)}
                 </span>
                 {paper.doi && (
                   <span className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    {paper.doi}
+                    <FileText className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <span className="truncate">{paper.doi}</span>
                   </span>
                 )}
               </div>
               {paper.authors && paper.authors.length > 0 && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Users className="w-4 h-4" />
-                  <span className="font-medium">Authors:</span> 
-                  <span>{paper.authors.join(', ')}</span>
+                <div className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
+                  <Users className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-medium">Authors:</span> 
+                    <span className="ml-1">{paper.authors.slice(0, 3).join(', ')}{paper.authors.length > 3 ? '...' : ''}</span>
+                  </div>
                 </div>
               )}
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button 
                 variant="outline" 
                 onClick={handleSelectPaper}
                 disabled={isSelecting}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
               >
-                <Brain className="w-4 h-4" />
-                {isSelecting ? "Selecting..." : "Select for Processing"}
+                <Brain className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">{isSelecting ? "Selecting..." : "Select for Processing"}</span>
+                <span className="sm:hidden">{isSelecting ? "Selecting..." : "Select"}</span>
               </Button>
               
-              <Button variant="outline" asChild className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+              <Button variant="outline" asChild className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4">
                 <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                  <ExternalLink className="w-4 h-4" />
-                  Read Paper
+                  <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Read Paper</span>
+                  <span className="sm:hidden">Read</span>
                 </a>
               </Button>
             </div>

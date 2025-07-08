@@ -58,29 +58,31 @@ const ResearchPaperFinder = () => {
     <div className="min-h-screen bg-background">
       <HeroSection />
 
-      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-12 relative z-10">
         <AreaSelector 
           selectedAreas={selectedAreas} 
           onToggleArea={handleAreaToggle} 
         />
 
         {/* Search Button */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-8 sm:mb-12">
           <Button 
             onClick={handleSearch} 
             disabled={loading || selectedAreas.length === 0} 
-            className="px-8 py-4 h-auto text-lg font-semibold bg-primary hover:bg-primary/90 shadow-medium transition-all duration-200 hover:scale-105"
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 h-auto text-base sm:text-lg font-semibold bg-primary hover:bg-primary/90 shadow-medium transition-all duration-200 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
             size="lg"
           >
             {loading ? (
               <>
-                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                Generating summary...
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 animate-spin" />
+                <span className="hidden sm:inline">Generating summary...</span>
+                <span className="sm:hidden">Loading...</span>
               </>
             ) : (
               <>
-                <Play className="w-5 h-5 mr-3" />
-                Discover Today's Papers
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
+                <span className="hidden sm:inline">Discover Today's Papers</span>
+                <span className="sm:hidden">Discover Papers</span>
               </>
             )}
           </Button>
@@ -88,22 +90,22 @@ const ResearchPaperFinder = () => {
 
         {/* Results */}
         {papers.length > 0 && (
-          <div className="space-y-8 pb-16">
-            <div className="flex items-center justify-between">
+          <div className="space-y-6 sm:space-y-8 pb-12 sm:pb-16">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
                   Latest Research Papers
                 </h2>
-                <p className="text-muted-foreground">
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Papers from {formatDate(new Date().toISOString())}
                 </p>
               </div>
-              <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
+              <Badge variant="secondary" className="px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium w-fit">
                 {papers.length} papers found
               </Badge>
             </div>
 
-            <div className="grid gap-6">
+            <div className="grid gap-4 sm:gap-6">
               {papers.map((paper, index) => (
                 <PaperCard key={`${paper.doi || paper.url}-${index}`} paper={paper} index={index} />
               ))}

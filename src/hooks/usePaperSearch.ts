@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import type { Paper } from '@/types/research';
 
@@ -7,27 +7,45 @@ const API_URL = 'https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/paperFind
 export const usePaperSearch = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const searchPapers = async (keywords: string[], limit: number = 6) => {
+  const searchPapers = useCallback(async (keywords: string[], limit: number = 6) => {
+    if (loading) return; // Prevent multiple concurrent requests
+    
     setLoading(true);
+    setError(null);
     
     try {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const since = yesterday.toISOString().split('T')[0];
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ since, keywords, limit })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ since, keywords, limit }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
+      
+      if (!data.papers || !Array.isArray(data.papers)) {
+        throw new Error('Invalid response format');
+      }
+
       setPapers(data.papers);
       
       toast({
@@ -36,16 +54,26 @@ export const usePaperSearch = () => {
       });
     } catch (error) {
       console.error('Search error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(errorMessage);
+      
       toast({
         title: "Failed to fetch papers",
-        description: error instanceof Error ? error.message : "Please check your connection and try again",
+        description: error instanceof Error && error.name === 'AbortError' 
+          ? "Request timed out. Please try again." 
+          : "Please check your connection and try again",
         variant: "destructive"
       });
       setPapers([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, toast]);
 
-  return { papers, loading, searchPapers };
+  const clearPapers = useCallback(() => {
+    setPapers([]);
+    setError(null);
+  }, []);
+
+  return { papers, loading, error, searchPapers, clearPapers };
 };
