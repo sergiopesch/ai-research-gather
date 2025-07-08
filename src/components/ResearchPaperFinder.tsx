@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Play, Loader2, ExternalLink, Calendar, FileText } from 'lucide-react';
+import { Play, Loader2, ExternalLink, Calendar, FileText, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 interface Paper {
   title: string;
@@ -11,29 +13,63 @@ interface Paper {
   doi?: string;
   source: string;
   published_date: string;
-  summary?: string; // Note: API doesn't provide this yet
+  summary?: string;
+  importance?: string;
 }
+
+const RESEARCH_AREAS = [
+  { id: 'ai', label: 'Artificial Intelligence', keywords: ['artificial intelligence', 'AI'] },
+  { id: 'ml', label: 'Machine Learning', keywords: ['machine learning', 'ML', 'deep learning'] },
+  { id: 'robotics', label: 'Robotics', keywords: ['robotics', 'robot', 'autonomous'] },
+  { id: 'cv', label: 'Computer Vision', keywords: ['computer vision', 'image processing', 'visual'] }
+];
 
 const ResearchPaperFinder = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedAreas, setSelectedAreas] = useState<string[]>(['ai', 'ml', 'robotics', 'cv']);
   const { toast } = useToast();
 
   const getTodaysDate = () => {
     return new Date().toISOString().split('T')[0];
   };
 
+  const getSelectedKeywords = () => {
+    return selectedAreas.flatMap(areaId => {
+      const area = RESEARCH_AREAS.find(a => a.id === areaId);
+      return area ? area.keywords : [];
+    });
+  };
+
+  const handleAreaToggle = (areaId: string) => {
+    setSelectedAreas(prev => 
+      prev.includes(areaId) 
+        ? prev.filter(id => id !== areaId)
+        : [...prev, areaId]
+    );
+  };
+
   const fetchTodaysPapers = async () => {
+    if (selectedAreas.length === 0) {
+      toast({
+        title: "No research areas selected",
+        description: "Please select at least one research area to search for papers.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
       const today = getTodaysDate();
       const apiUrl = 'https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/paperFinder';
+      const keywords = getSelectedKeywords();
       
       console.log('Making API call to:', apiUrl);
       console.log('Request body:', {
         since: today,
-        keywords: ["artificial intelligence", "machine learning", "robotics", "computer vision"],
+        keywords,
         limit: 5
       });
       
@@ -45,7 +81,7 @@ const ResearchPaperFinder = () => {
         },
         body: JSON.stringify({
           since: today,
-          keywords: ["artificial intelligence", "machine learning", "robotics", "computer vision"],
+          keywords,
           limit: 5
         }),
       });
@@ -58,8 +94,8 @@ const ResearchPaperFinder = () => {
       setPapers(data.papers);
       
       toast({
-        title: "Papers fetched from arXiv",
-        description: `Found ${data.papers.length} papers published since ${formatDate(today)}`,
+        title: "Papers fetched successfully",
+        description: `Found ${data.papers.length} papers with AI-generated summaries`,
       });
     } catch (error) {
       console.error('Fetch error:', error);
@@ -103,17 +139,41 @@ const ResearchPaperFinder = () => {
           </p>
         </div>
 
+        {/* Research Area Filters */}
+        <div className="mb-8">
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Filter className="w-4 h-4" />
+              <h3 className="text-sm font-medium">Research Areas</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {RESEARCH_AREAS.map((area) => (
+                <div key={area.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={area.id}
+                    checked={selectedAreas.includes(area.id)}
+                    onCheckedChange={() => handleAreaToggle(area.id)}
+                  />
+                  <Label htmlFor={area.id} className="text-sm cursor-pointer">
+                    {area.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
         {/* Action Button */}
         <div className="flex justify-center mb-8">
           <Button
             onClick={fetchTodaysPapers}
-            disabled={loading}
+            disabled={loading || selectedAreas.length === 0}
             className="px-6 py-3 h-auto text-base font-medium"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Fetching papers...
+                Generating AI summaries...
               </>
             ) : (
               <>
@@ -151,10 +211,19 @@ const ResearchPaperFinder = () => {
                         </Badge>
                       </div>
 
-                      {/* Summary Placeholder */}
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {paper.summary || "Summary not available - this feature requires additional processing of the paper content."}
-                      </p>
+                      {/* AI-Generated Summary */}
+                      {paper.summary && (
+                        <div className="space-y-2">
+                          <div className="text-sm text-foreground leading-relaxed">
+                            <span className="font-medium">What it's about:</span> {paper.summary}
+                          </div>
+                          {paper.importance && (
+                            <div className="text-sm text-muted-foreground leading-relaxed">
+                              <span className="font-medium">Why it matters:</span> {paper.importance}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       {/* Metadata and Link */}
                       <div className="flex items-center justify-between pt-2">
