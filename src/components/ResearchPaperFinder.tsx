@@ -116,7 +116,7 @@ const ResearchPaperFinder = () => {
       setPapers(data.papers);
       toast({
         title: "Papers fetched successfully",
-        description: `Found ${data.papers.length} papers with AI-generated summaries`
+        description: `Found ${data.papers.length} papers with summaries`
       });
     } catch (error) {
       console.error('Fetch error:', error);
@@ -199,7 +199,7 @@ const ResearchPaperFinder = () => {
             </div>
             <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
               Discover the latest breakthroughs in AI, Robotics, and Computer Vision with 
-              <span className="font-semibold"> AI-powered summaries</span>
+              <span className="font-semibold"> intelligent summaries</span>
             </p>
           </div>
         </div>
@@ -257,7 +257,7 @@ const ResearchPaperFinder = () => {
           <Button 
             onClick={fetchTodaysPapers} 
             disabled={loading || selectedAreas.length === 0} 
-            className="px-8 py-4 h-auto text-lg font-semibold bg-primary hover:bg-primary/90 shadow-glow transition-all duration-200 hover:scale-105"
+            className="px-8 py-4 h-auto text-lg font-semibold bg-primary hover:bg-primary/90 shadow-medium transition-all duration-200 hover:scale-105"
             size="lg"
           >
             {loading ? (
@@ -283,7 +283,7 @@ const ResearchPaperFinder = () => {
                   Latest Research Papers
                 </h2>
                 <p className="text-muted-foreground">
-                  Papers from {formatDate(getTodaysDate())} • Powered by AI
+                  Papers from {formatDate(getTodaysDate())}
                 </p>
               </div>
               <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
@@ -321,8 +321,7 @@ const ResearchPaperFinder = () => {
                           <div className="space-y-4 p-6 bg-muted/30 rounded-xl border border-border/50">
                             <div className="space-y-3">
                               <div className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-primary" />
-                                <span className="text-sm font-medium text-primary">AI Summary</span>
+                                <span className="text-sm font-medium text-foreground">Summary</span>
                               </div>
                               <p className="text-foreground leading-relaxed">
                                 {paper.summary}
@@ -389,7 +388,7 @@ const ResearchPaperFinder = () => {
                 Ready to explore research?
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Select your research areas above and click the discover button to find today's latest papers with AI-powered insights.
+                Select your research areas above and click the discover button to find today's latest papers with intelligent insights.
               </p>
             </div>
           </div>
