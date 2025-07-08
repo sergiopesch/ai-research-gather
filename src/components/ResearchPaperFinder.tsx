@@ -28,7 +28,7 @@ const ResearchPaperFinder = () => {
     
     try {
       const today = getTodaysDate();
-      const apiUrl = 'https://fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5.supabase.co/functions/v1/paperFinder';
+      const apiUrl = 'https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/paperFinder';
       
       console.log('Making API call to:', apiUrl);
       console.log('Request body:', {
