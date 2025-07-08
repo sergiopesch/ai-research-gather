@@ -1,7 +1,7 @@
-import PaperFinder from '@/components/PaperFinder';
+import ResearchPaperFinder from '@/components/ResearchPaperFinder';
 
 const Index = () => {
-  return <PaperFinder />;
+  return <ResearchPaperFinder />;
 };
 
 export default Index;
