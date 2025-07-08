@@ -6,15 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+
 interface Paper {
   title: string;
   url: string;
   doi?: string;
   source: string;
   published_date: string;
+  authors?: string[];
   summary?: string;
   importance?: string;
 }
+
 const RESEARCH_AREAS = [{
   id: 'ai',
   label: 'Artificial Intelligence',
@@ -31,27 +34,30 @@ const RESEARCH_AREAS = [{
   keywords: ['computer vision', 'image processing', 'visual', 'vision', 'opencv', 'segmentation', 'detection', 'recognition', 'cnn', 'yolo', 'object detection', 'image classification'],
   color: 'bg-purple-50 text-purple-700 border-purple-200'
 }];
+
 const ResearchPaperFinder = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedAreas, setSelectedAreas] = useState<string[]>(['ai', 'robotics', 'cv']);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   const getTodaysDate = () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     return yesterday.toISOString().split('T')[0];
   };
+
   const getSelectedKeywords = () => {
     return selectedAreas.flatMap(areaId => {
       const area = RESEARCH_AREAS.find(a => a.id === areaId);
       return area ? area.keywords : [];
     });
   };
+
   const handleAreaToggle = (areaId: string) => {
     setSelectedAreas(prev => prev.includes(areaId) ? prev.filter(id => id !== areaId) : [...prev, areaId]);
   };
+
   const fetchTodaysPapers = async () => {
     if (selectedAreas.length === 0) {
       toast({
@@ -73,7 +79,6 @@ const ResearchPaperFinder = () => {
         limit: 5
       });
 
-      // Real API call to Supabase function
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -105,6 +110,7 @@ const ResearchPaperFinder = () => {
       setLoading(false);
     }
   };
+
   const getSourceColor = (source: string) => {
     const colors: Record<string, string> = {
       'arXiv': 'bg-blue-50 text-blue-700 border-blue-200',
@@ -113,6 +119,7 @@ const ResearchPaperFinder = () => {
     };
     return colors[source] || 'bg-gray-50 text-gray-700 border-gray-200';
   };
+
   const getPaperAreaColor = (paperTitle: string) => {
     const title = paperTitle.toLowerCase();
 
@@ -132,6 +139,7 @@ const ResearchPaperFinder = () => {
       color: 'bg-blue-50 text-blue-700 border-blue-200'
     };
   };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'long',
@@ -139,6 +147,7 @@ const ResearchPaperFinder = () => {
       year: 'numeric'
     });
   };
+
   return <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
@@ -222,15 +231,22 @@ const ResearchPaperFinder = () => {
 
                       {/* Metadata and Link */}
                       <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(paper.published_date)}
-                          </span>
-                          {paper.doi && <span className="flex items-center gap-1">
-                              <FileText className="w-3 h-3" />
-                              {paper.doi}
-                            </span>}
+                        <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-4">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {formatDate(paper.published_date)}
+                            </span>
+                            {paper.doi && <span className="flex items-center gap-1">
+                                <FileText className="w-3 h-3" />
+                                {paper.doi}
+                              </span>}
+                          </div>
+                          {paper.authors && paper.authors.length > 0 && (
+                            <div className="text-muted-foreground">
+                              <span className="font-medium">Authors:</span> {paper.authors.join(', ')}
+                            </div>
+                          )}
                         </div>
                         
                         <Button variant="ghost" size="sm" asChild className="h-8 px-3 text-xs">
@@ -258,10 +274,8 @@ const ResearchPaperFinder = () => {
               </p>
             </div>
           </div>}
-
-        {/* Daily Schedule Note */}
-        
       </div>
     </div>;
 };
+
 export default ResearchPaperFinder;

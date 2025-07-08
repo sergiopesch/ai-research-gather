@@ -16,6 +16,7 @@ interface Paper {
   doi?: string
   source: string
   published_date: string
+  authors?: string[]
   summary?: string
   importance?: string
 }
@@ -23,6 +24,12 @@ interface Paper {
 interface PaperResponse {
   papers: Paper[]
 }
+
+const RESEARCH_AREAS = [
+  { name: 'Artificial Intelligence', keywords: ['artificial intelligence', 'ai', 'machine learning', 'ml', 'deep learning', 'neural network', 'llm', 'language model', 'transformer', 'gpt', 'bert', 'nlp', 'natural language'] },
+  { name: 'Robotics', keywords: ['robotics', 'robot', 'autonomous', 'robotic', 'manipulation', 'navigation', 'slam', 'motion planning', 'humanoid', 'drone', 'uav'] },
+  { name: 'Computer Vision', keywords: ['computer vision', 'image processing', 'visual', 'vision', 'opencv', 'segmentation', 'detection', 'recognition', 'cnn', 'yolo', 'object detection', 'image classification'] }
+]
 
 // Utility function to check PDF size
 async function checkPdfSize(url: string): Promise<boolean> {
@@ -83,6 +90,7 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
       const publishedMatch = entry.match(/<published>(.*?)<\/published>/)
       const idMatch = entry.match(/<id>(.*?)<\/id>/)
       const pdfMatch = entry.match(/<link[^>]*href="([^"]*\.pdf)"/)
+      const authorMatches = entry.match(/<author>[\s\S]*?<name>(.*?)<\/name>[\s\S]*?<\/author>/g)
       
       if (titleMatch && publishedMatch && idMatch) {
         const publishedDate = publishedMatch[1].split('T')[0]
@@ -99,6 +107,11 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
           const arxivId = idMatch[1].split('/').pop()?.split('v')[0]
           const pdfUrl = pdfMatch ? pdfMatch[1] : `https://arxiv.org/pdf/${arxivId}.pdf`
           
+          // Extract authors
+          const authors = authorMatches ? 
+            authorMatches.map(match => match.replace(/<author>[\s\S]*?<name>(.*?)<\/name>[\s\S]*?<\/author>/, '$1')).slice(0, 3) : 
+            []
+          
           console.log(`Adding paper: ${titleMatch[1].substring(0, 50)}...`)
           
           papers.push({
@@ -106,7 +119,8 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
             url: idMatch[1],
             doi: arxivId,
             source: 'arXiv',
-            published_date: publishedDate
+            published_date: publishedDate,
+            authors
           })
         } else {
           console.log(`Skipping paper - too old (${daysDiff} days)`)
@@ -265,6 +279,66 @@ function deduplicatePapers(papers: Paper[]): Paper[] {
   return deduplicated
 }
 
+// Categorize papers by research area
+function categorizePaper(title: string): string {
+  const titleLower = title.toLowerCase()
+  
+  for (const area of RESEARCH_AREAS) {
+    if (area.keywords.some(keyword => titleLower.includes(keyword.toLowerCase()))) {
+      return area.name
+    }
+  }
+  
+  return 'Artificial Intelligence' // Default to AI
+}
+
+// Select diverse papers ensuring at least one from each area
+function selectDiversePapers(papers: Paper[], limit: number): Paper[] {
+  console.log(`Selecting diverse papers from ${papers.length} total papers`)
+  
+  // Categorize papers by research area
+  const categorizedPapers: { [key: string]: Paper[] } = {}
+  
+  papers.forEach(paper => {
+    const category = categorizePaper(paper.title)
+    if (!categorizedPapers[category]) {
+      categorizedPapers[category] = []
+    }
+    categorizedPapers[category].push(paper)
+  })
+  
+  console.log('Papers by category:', Object.keys(categorizedPapers).map(cat => `${cat}: ${categorizedPapers[cat].length}`))
+  
+  const selectedPapers: Paper[] = []
+  const areas = RESEARCH_AREAS.map(area => area.name)
+  
+  // First, ensure we get at least one paper from each area if available
+  for (const area of areas) {
+    if (categorizedPapers[area] && categorizedPapers[area].length > 0 && selectedPapers.length < limit) {
+      selectedPapers.push(categorizedPapers[area][0])
+      categorizedPapers[area] = categorizedPapers[area].slice(1)
+    }
+  }
+  
+  // Then fill remaining slots with papers from any area, prioritizing areas with fewer papers selected
+  while (selectedPapers.length < limit) {
+    let paperAdded = false
+    
+    for (const area of areas) {
+      if (categorizedPapers[area] && categorizedPapers[area].length > 0 && selectedPapers.length < limit) {
+        selectedPapers.push(categorizedPapers[area][0])
+        categorizedPapers[area] = categorizedPapers[area].slice(1)
+        paperAdded = true
+      }
+    }
+    
+    if (!paperAdded) break // No more papers available
+  }
+  
+  console.log(`Selected ${selectedPapers.length} diverse papers`)
+  return selectedPapers
+}
+
 // Generate AI summary for a paper
 async function generatePaperSummary(title: string): Promise<{ summary: string; importance: string }> {
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
@@ -283,7 +357,7 @@ async function generatePaperSummary(title: string): Promise<{ summary: string; i
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -377,10 +451,12 @@ serve(async (req: Request): Promise<Response> => {
     const allPapers = arxivPapers
     const deduplicatedPapers = deduplicatePapers(allPapers)
     
-    // Sort by published_date descending and limit results
-    const sortedPapers = deduplicatedPapers
+    // Select diverse papers (at least one from each area) before sorting
+    const diversePapers = selectDiversePapers(deduplicatedPapers, limit)
+    
+    // Sort by published_date descending
+    const sortedPapers = diversePapers
       .sort((a, b) => b.published_date.localeCompare(a.published_date))
-      .slice(0, limit)
     
     // Generate AI summaries for each paper
     const papersWithSummaries = await Promise.all(
