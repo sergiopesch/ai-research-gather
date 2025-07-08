@@ -276,16 +276,12 @@ serve(async (req: Request): Promise<Response> => {
     
     console.log(`Fetching papers since ${since} with keywords: ${keywords.join(', ')} (limit: ${limit})`)
     
-    // Fetch from all sources in parallel with 5s timeout
+    // Fetch from arXiv only for now (no API key required)
     const timeout = 5000
-    const [arxivPapers, scholarPapers, ieeePapers] = await Promise.all([
-      fetchArxivPapers(since, keywords, timeout),
-      fetchSemanticScholarPapers(since, keywords, timeout),
-      fetchIeeePapers(since, keywords, timeout)
-    ])
+    const arxivPapers = await fetchArxivPapers(since, keywords, timeout)
     
-    // Combine and process papers
-    const allPapers = [...arxivPapers, ...scholarPapers, ...ieeePapers]
+    // Use only arXiv papers
+    const allPapers = arxivPapers
     const deduplicatedPapers = deduplicatePapers(allPapers)
     
     // Sort by published_date descending and limit results
