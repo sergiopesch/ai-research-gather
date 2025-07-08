@@ -139,15 +139,15 @@ All colors MUST be HSL.
   }
 
   .bg-gradient-ai {
-    background: var(--gradient-ai);
+    background: linear-gradient(135deg, hsl(var(--ai-primary)) 0%, hsl(var(--ai-bg)) 100%);
   }
 
   .bg-gradient-robotics {
-    background: var(--gradient-robotics);
+    background: linear-gradient(135deg, hsl(var(--robotics-primary)) 0%, hsl(var(--robotics-bg)) 100%);
   }
 
   .bg-gradient-cv {
-    background: var(--gradient-cv);
+    background: linear-gradient(135deg, hsl(var(--cv-primary)) 0%, hsl(var(--cv-bg)) 100%);
   }
 
   .shadow-soft {
