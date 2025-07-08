@@ -61,6 +61,21 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				ai: {
+					primary: 'hsl(var(--ai-primary))',
+					bg: 'hsl(var(--ai-bg))',
+					border: 'hsl(var(--ai-border))'
+				},
+				robotics: {
+					primary: 'hsl(var(--robotics-primary))',
+					bg: 'hsl(var(--robotics-bg))',
+					border: 'hsl(var(--robotics-border))'
+				},
+				cv: {
+					primary: 'hsl(var(--cv-primary))',
+					bg: 'hsl(var(--cv-bg))',
+					border: 'hsl(var(--cv-border))'
 				}
 			},
 			borderRadius: {

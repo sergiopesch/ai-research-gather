@@ -215,14 +215,14 @@ All colors MUST be HSL.
   }
 
   .area-badge-ai {
-    @apply bg-gradient-ai text-ai-primary border-ai-border font-medium;
+    @apply bg-ai-bg text-ai-primary border-ai-border font-medium;
   }
 
   .area-badge-robotics {
-    @apply bg-gradient-robotics text-robotics-primary border-robotics-border font-medium;
+    @apply bg-robotics-bg text-robotics-primary border-robotics-border font-medium;
   }
 
   .area-badge-cv {
-    @apply bg-gradient-cv text-cv-primary border-cv-border font-medium;
+    @apply bg-cv-bg text-cv-primary border-cv-border font-medium;
   }
 }
