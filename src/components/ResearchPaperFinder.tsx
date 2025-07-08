@@ -28,7 +28,43 @@ const ResearchPaperFinder = () => {
     
     try {
       const today = getTodaysDate();
-      const response = await fetch('/functions/v1/paperFinder', {
+      
+      // TODO: Replace with actual Supabase function call once deployed
+      // For now, using mock data to test the UI
+      const mockData = {
+        papers: [
+          {
+            title: "Advanced Transformer Architectures for Real-Time Robotics Applications",
+            url: "https://arxiv.org/abs/2024.12345",
+            doi: "2024.12345",
+            source: "arXiv",
+            published_date: today,
+            summary: "This paper presents novel transformer architectures optimized for real-time robotics control. The proposed method achieves 40% faster inference while maintaining accuracy."
+          },
+          {
+            title: "Few-Shot Learning in Computer Vision: A Comprehensive Survey",
+            url: "https://ieeexplore.ieee.org/document/12345",
+            doi: "10.1109/TPAMI.2024.12345",
+            source: "IEEE Xplore",
+            published_date: today,
+            summary: "We provide a comprehensive review of few-shot learning techniques in computer vision. Our analysis covers 200+ recent papers and identifies key research directions."
+          },
+          {
+            title: "Multimodal AI for Autonomous Navigation in Dynamic Environments",
+            url: "https://semanticscholar.org/paper/12345",
+            source: "Semantic Scholar",
+            published_date: today,
+            summary: "This work introduces a multimodal AI system that combines vision and language for robust autonomous navigation. Tested on real-world scenarios with 95% success rate."
+          }
+        ]
+      };
+
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      /* 
+      // Actual API call (commented out until function is deployed):
+      const response = await fetch('https://fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5.supabase.co/functions/v1/paperFinder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,11 +81,13 @@ const ResearchPaperFinder = () => {
       }
 
       const data = await response.json();
-      setPapers(data.papers);
+      */
+      
+      setPapers(mockData.papers);
       
       toast({
-        title: "Papers fetched",
-        description: `Found ${data.papers.length} papers published today`,
+        title: "Papers fetched (Demo Mode)",
+        description: `Found ${mockData.papers.length} papers published today`,
       });
     } catch (error) {
       toast({
