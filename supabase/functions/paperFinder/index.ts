@@ -59,7 +59,7 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
   const params = new URLSearchParams({
     search_query: searchQuery,
     start: '0',
-    max_results: '100',
+    max_results: '200',  // Increased to get more papers
     sortBy: 'submittedDate',
     sortOrder: 'descending'
   })
@@ -103,7 +103,8 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
         
         console.log(`Days difference: ${daysDiff}`)
         
-        if (daysDiff <= 7) { // Get papers from last 7 days instead of just today
+        // More lenient date filtering - get papers from last 30 days to ensure we have enough
+        if (daysDiff <= 30) {
           const arxivId = idMatch[1].split('/').pop()?.split('v')[0]
           const pdfUrl = pdfMatch ? pdfMatch[1] : `https://arxiv.org/pdf/${arxivId}.pdf`
           
@@ -123,7 +124,7 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
             authors
           })
         } else {
-          console.log(`Skipping paper - too old (${daysDiff} days)`)
+          console.log(`Skipping paper - published ${daysDiff} days ago`)
         }
       }
     }
@@ -294,53 +295,75 @@ function categorizePaper(title: string): string {
 
 // Select diverse papers ensuring exactly 2 papers from each area
 function selectDiversePapers(papers: Paper[], limit: number): Paper[] {
-  console.log(`Selecting diverse papers from ${papers.length} total papers`)
+  console.log(`=== DIVERSITY SELECTION START ===`)
+  console.log(`Selecting from ${papers.length} total papers, target limit: ${limit}`)
   
   // Categorize papers by research area
   const categorizedPapers: { [key: string]: Paper[] } = {}
   
-  papers.forEach(paper => {
+  papers.forEach((paper, index) => {
     const category = categorizePaper(paper.title)
     if (!categorizedPapers[category]) {
       categorizedPapers[category] = []
     }
     categorizedPapers[category].push(paper)
+    console.log(`Paper ${index + 1}: "${paper.title.substring(0, 50)}..." → ${category}`)
   })
   
-  console.log('Papers by category:', Object.keys(categorizedPapers).map(cat => `${cat}: ${categorizedPapers[cat].length}`))
+  console.log('=== CATEGORIZATION RESULTS ===')
+  Object.keys(categorizedPapers).forEach(cat => {
+    console.log(`${cat}: ${categorizedPapers[cat].length} papers`)
+  })
   
   const selectedPapers: Paper[] = []
   const areas = RESEARCH_AREAS.map(area => area.name)
-  const papersPerArea = Math.floor(limit / areas.length) // 2 papers per area for limit 6
+  const papersPerArea = Math.max(1, Math.floor(limit / areas.length)) // At least 1 per area
   
-  // Select exactly 2 papers from each area
+  console.log(`Target papers per area: ${papersPerArea}`)
+  
+  // Select papers from each area
   for (const area of areas) {
+    console.log(`=== SELECTING FROM ${area.toUpperCase()} ===`)
     if (categorizedPapers[area] && categorizedPapers[area].length > 0) {
-      const areaLimit = Math.min(papersPerArea, categorizedPapers[area].length)
-      for (let i = 0; i < areaLimit && selectedPapers.length < limit; i++) {
+      const available = categorizedPapers[area].length
+      const toSelect = Math.min(papersPerArea, available, limit - selectedPapers.length)
+      console.log(`Available: ${available}, Will select: ${toSelect}`)
+      
+      for (let i = 0; i < toSelect; i++) {
         selectedPapers.push(categorizedPapers[area][i])
+        console.log(`Selected: "${categorizedPapers[area][i].title.substring(0, 50)}..."`)
       }
+    } else {
+      console.log(`No papers available for ${area}`)
     }
   }
   
-  // If we still need more papers and some areas have extras, fill from any area
+  // Fill remaining slots if needed
   if (selectedPapers.length < limit) {
-    const usedIndices = new Set<string>()
+    console.log(`=== FILLING REMAINING SLOTS ===`)
+    console.log(`Need ${limit - selectedPapers.length} more papers`)
     
     for (const area of areas) {
-      if (categorizedPapers[area] && selectedPapers.length < limit) {
-        for (let i = papersPerArea; i < categorizedPapers[area].length && selectedPapers.length < limit; i++) {
-          const paperKey = `${area}-${i}`
-          if (!usedIndices.has(paperKey)) {
-            selectedPapers.push(categorizedPapers[area][i])
-            usedIndices.add(paperKey)
-          }
+      if (selectedPapers.length >= limit) break
+      
+      if (categorizedPapers[area] && categorizedPapers[area].length > papersPerArea) {
+        const remaining = categorizedPapers[area].slice(papersPerArea)
+        for (const paper of remaining) {
+          if (selectedPapers.length >= limit) break
+          selectedPapers.push(paper)
+          console.log(`Added extra: "${paper.title.substring(0, 50)}..." from ${area}`)
         }
       }
     }
   }
   
-  console.log(`Selected ${selectedPapers.length} diverse papers (target: ${papersPerArea} per area)`)
+  console.log(`=== FINAL SELECTION ===`)
+  console.log(`Selected ${selectedPapers.length} papers (target was ${limit})`)
+  selectedPapers.forEach((paper, index) => {
+    const category = categorizePaper(paper.title)
+    console.log(`${index + 1}. [${category}] "${paper.title.substring(0, 50)}..."`)
+  })
+  
   return selectedPapers
 }
 
@@ -448,13 +471,19 @@ serve(async (req: Request): Promise<Response> => {
     
     console.log(`Fetching papers since ${since} with keywords: ${keywords.join(', ')} (limit: ${limit})`)
     
-    // Fetch from arXiv only for now (no API key required)
-    const timeout = 5000
+    // Fetch from arXiv with increased timeout and papers
+    const timeout = 10000  // Increased timeout
     const arxivPapers = await fetchArxivPapers(since, keywords, timeout)
+    
+    console.log(`=== RAW ARXIV RESULTS ===`)
+    console.log(`ArXiv returned ${arxivPapers.length} papers`)
     
     // Use only arXiv papers
     const allPapers = arxivPapers
+    console.log(`Total papers before deduplication: ${allPapers.length}`)
+    
     const deduplicatedPapers = deduplicatePapers(allPapers)
+    console.log(`Papers after deduplication: ${deduplicatedPapers.length}`)
     
     // Select diverse papers (at least one from each area) before sorting
     const diversePapers = selectDiversePapers(deduplicatedPapers, limit)
