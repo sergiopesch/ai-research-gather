@@ -50,10 +50,22 @@ async function checkPdfSize(url: string): Promise<boolean> {
 async function fetchArxivPapers(since: string, keywords: string[], timeout: number): Promise<Paper[]> {
   const baseUrl = Deno.env.get('ARXIV_BASE_URL') || 'http://export.arxiv.org/api/query'
   
-  let searchQuery = 'cat:cs.AI OR cat:cs.RO OR cat:cs.CV OR cat:cs.LG'
+  // Build a comprehensive search query targeting all areas equally
+  let searchQuery = 'cat:cs.AI OR cat:cs.RO OR cat:cs.CV OR cat:cs.LG OR cat:cs.CL OR cat:cs.CR'
   if (keywords.length > 0) {
-    const keywordQuery = keywords.map(k => `all:"${k}"`).join(' OR ')
-    searchQuery = `(${searchQuery}) AND (${keywordQuery})`
+    // Create balanced keyword groups for each area
+    const aiKeywords = keywords.filter(k => ['artificial intelligence', 'ai', 'machine learning', 'ml', 'deep learning', 'neural network', 'llm', 'language model', 'transformer', 'gpt', 'bert', 'nlp', 'natural language'].includes(k.toLowerCase()))
+    const roboticsKeywords = keywords.filter(k => ['robotics', 'robot', 'autonomous', 'robotic', 'manipulation', 'navigation', 'slam', 'motion planning', 'humanoid', 'drone', 'uav'].includes(k.toLowerCase()))
+    const cvKeywords = keywords.filter(k => ['computer vision', 'image processing', 'visual', 'vision', 'opencv', 'segmentation', 'detection', 'recognition', 'cnn', 'yolo', 'object detection', 'image classification'].includes(k.toLowerCase()))
+    
+    const keywordQueries = []
+    if (aiKeywords.length > 0) keywordQueries.push(`(${aiKeywords.map(k => `all:"${k}"`).join(' OR ')})`)
+    if (roboticsKeywords.length > 0) keywordQueries.push(`(${roboticsKeywords.map(k => `all:"${k}"`).join(' OR ')})`)
+    if (cvKeywords.length > 0) keywordQueries.push(`(${cvKeywords.map(k => `all:"${k}"`).join(' OR ')})`)
+    
+    if (keywordQueries.length > 0) {
+      searchQuery = `(${searchQuery}) AND (${keywordQueries.join(' OR ')})`
+    }
   }
   
   const params = new URLSearchParams({
@@ -293,12 +305,12 @@ function categorizePaper(title: string): string {
   return 'Artificial Intelligence' // Default to AI
 }
 
-// Select diverse papers ensuring exactly 2 papers from each area
+// CRITICAL: Ensure exactly equal distribution with perfect randomization
 function selectDiversePapers(papers: Paper[], limit: number): Paper[] {
-  console.log(`=== DIVERSITY SELECTION START ===`)
-  console.log(`Selecting from ${papers.length} total papers, target limit: ${limit}`)
+  console.log(`=== PERFECT DISTRIBUTION ALGORITHM START ===`)
+  console.log(`Target: ${limit} papers with equal distribution across areas`)
   
-  // Categorize papers by research area
+  // Categorize papers by research area with detailed logging
   const categorizedPapers: { [key: string]: Paper[] } = {}
   
   papers.forEach((paper, index) => {
@@ -307,64 +319,79 @@ function selectDiversePapers(papers: Paper[], limit: number): Paper[] {
       categorizedPapers[category] = []
     }
     categorizedPapers[category].push(paper)
-    console.log(`Paper ${index + 1}: "${paper.title.substring(0, 50)}..." → ${category}`)
+    console.log(`Paper ${index + 1}: "${paper.title.substring(0, 60)}..." → ${category}`)
   })
   
-  console.log('=== CATEGORIZATION RESULTS ===')
-  Object.keys(categorizedPapers).forEach(cat => {
-    console.log(`${cat}: ${categorizedPapers[cat].length} papers`)
-  })
-  
-  const selectedPapers: Paper[] = []
+  console.log(`=== CATEGORIZATION COMPLETE ===`)
   const areas = RESEARCH_AREAS.map(area => area.name)
-  const papersPerArea = Math.max(1, Math.floor(limit / areas.length)) // At least 1 per area
+  areas.forEach(area => {
+    const count = categorizedPapers[area]?.length || 0
+    console.log(`${area}: ${count} papers available`)
+  })
   
-  console.log(`Target papers per area: ${papersPerArea}`)
+  // Calculate EXACT distribution
+  const papersPerArea = Math.floor(limit / areas.length) // 2 papers per area for 6 total
+  console.log(`EXACT TARGET: ${papersPerArea} papers per area`)
   
-  // Select papers from each area
+  // STEP 1: Select exactly the required number from each area
+  const selectedByArea: { [key: string]: Paper[] } = {}
+  
   for (const area of areas) {
-    console.log(`=== SELECTING FROM ${area.toUpperCase()} ===`)
+    selectedByArea[area] = []
     if (categorizedPapers[area] && categorizedPapers[area].length > 0) {
-      const available = categorizedPapers[area].length
-      const toSelect = Math.min(papersPerArea, available, limit - selectedPapers.length)
-      console.log(`Available: ${available}, Will select: ${toSelect}`)
+      // Shuffle papers in this area first for randomness
+      const shuffledAreaPapers = [...categorizedPapers[area]].sort(() => Math.random() - 0.5)
       
-      for (let i = 0; i < toSelect; i++) {
-        selectedPapers.push(categorizedPapers[area][i])
-        console.log(`Selected: "${categorizedPapers[area][i].title.substring(0, 50)}..."`)
-      }
+      // Take exactly papersPerArea papers
+      const selectedCount = Math.min(papersPerArea, shuffledAreaPapers.length)
+      selectedByArea[area] = shuffledAreaPapers.slice(0, selectedCount)
+      
+      console.log(`${area}: Selected ${selectedCount} papers (target: ${papersPerArea})`)
+      selectedByArea[area].forEach((paper, i) => {
+        console.log(`  ${i + 1}. "${paper.title.substring(0, 50)}..."`)
+      })
     } else {
-      console.log(`No papers available for ${area}`)
+      console.log(`${area}: NO PAPERS AVAILABLE!`)
     }
   }
   
-  // Fill remaining slots if needed
-  if (selectedPapers.length < limit) {
-    console.log(`=== FILLING REMAINING SLOTS ===`)
-    console.log(`Need ${limit - selectedPapers.length} more papers`)
-    
+  // STEP 2: Create perfectly alternating list
+  const finalList: Paper[] = []
+  const maxRounds = papersPerArea
+  
+  console.log(`=== CREATING ALTERNATING LIST ===`)
+  for (let round = 0; round < maxRounds; round++) {
+    console.log(`Round ${round + 1}:`)
     for (const area of areas) {
-      if (selectedPapers.length >= limit) break
-      
-      if (categorizedPapers[area] && categorizedPapers[area].length > papersPerArea) {
-        const remaining = categorizedPapers[area].slice(papersPerArea)
-        for (const paper of remaining) {
-          if (selectedPapers.length >= limit) break
-          selectedPapers.push(paper)
-          console.log(`Added extra: "${paper.title.substring(0, 50)}..." from ${area}`)
-        }
+      if (selectedByArea[area] && selectedByArea[area][round]) {
+        finalList.push(selectedByArea[area][round])
+        console.log(`  Added from ${area}: "${selectedByArea[area][round].title.substring(0, 50)}..."`)
       }
     }
   }
   
-  console.log(`=== FINAL SELECTION ===`)
-  console.log(`Selected ${selectedPapers.length} papers (target was ${limit})`)
-  selectedPapers.forEach((paper, index) => {
+  // STEP 3: Final shuffle for randomness while maintaining distribution
+  console.log(`=== FINAL RANDOMIZATION ===`)
+  const shuffledFinal = [...finalList].sort(() => Math.random() - 0.5)
+  
+  console.log(`=== FINAL RESULT ===`)
+  console.log(`Successfully selected ${shuffledFinal.length} papers`)
+  
+  // Verify distribution
+  const finalDistribution: { [key: string]: number } = {}
+  shuffledFinal.forEach((paper, index) => {
     const category = categorizePaper(paper.title)
+    finalDistribution[category] = (finalDistribution[category] || 0) + 1
     console.log(`${index + 1}. [${category}] "${paper.title.substring(0, 50)}..."`)
   })
   
-  return selectedPapers
+  console.log(`=== DISTRIBUTION VERIFICATION ===`)
+  areas.forEach(area => {
+    const count = finalDistribution[area] || 0
+    console.log(`${area}: ${count} papers (target: ${papersPerArea}) ${count === papersPerArea ? '✅' : '❌'}`)
+  })
+  
+  return shuffledFinal
 }
 
 // Generate AI summary for a paper
@@ -485,12 +512,21 @@ serve(async (req: Request): Promise<Response> => {
     const deduplicatedPapers = deduplicatePapers(allPapers)
     console.log(`Papers after deduplication: ${deduplicatedPapers.length}`)
     
-    // Select diverse papers (at least one from each area) before sorting
+    // Select diverse papers with perfect distribution and randomization
     const diversePapers = selectDiversePapers(deduplicatedPapers, limit)
     
-    // Sort by published_date descending
+    console.log(`=== BEFORE SUMMARY GENERATION ===`)
+    console.log(`About to generate summaries for ${diversePapers.length} papers`)
+    
+    // Sort by published_date descending but maintain the distribution
     const sortedPapers = diversePapers
       .sort((a, b) => b.published_date.localeCompare(a.published_date))
+    
+    console.log(`=== FINAL PAPER LIST FOR SUMMARIES ===`)
+    sortedPapers.forEach((paper, index) => {
+      const category = categorizePaper(paper.title)
+      console.log(`${index + 1}. [${category}] "${paper.title.substring(0, 60)}..." (${paper.published_date})`)
+    })
     
     // Generate AI summaries for each paper
     const papersWithSummaries = await Promise.all(
