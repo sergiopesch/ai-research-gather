@@ -8,83 +8,105 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    --background: 220 13% 96%;
+    --foreground: 220 8% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 220 8% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 220 8% 15%;
 
-    --primary: 0 0% 9%;
+    --primary: 220 70% 50%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 220 13% 91%;
+    --secondary-foreground: 220 8% 25%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 220 13% 95%;
+    --muted-foreground: 220 8% 45%;
 
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
+    --accent: 220 13% 91%;
+    --accent-foreground: 220 8% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 9%;
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 220 70% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --radius: 0.5rem;
+    /* Research area colors */
+    --ai-primary: 220 70% 50%;
+    --ai-bg: 220 100% 96%;
+    --ai-border: 220 60% 85%;
+
+    --robotics-primary: 142 70% 45%;
+    --robotics-bg: 142 100% 96%;
+    --robotics-border: 142 60% 80%;
+
+    --cv-primary: 280 70% 50%;
+    --cv-bg: 280 100% 96%;
+    --cv-border: 280 60% 85%;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(220 70% 50%) 0%, hsl(260 70% 55%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
+    --gradient-ai: linear-gradient(135deg, hsl(220 100% 96%) 0%, hsl(220 80% 92%) 100%);
+    --gradient-robotics: linear-gradient(135deg, hsl(142 100% 96%) 0%, hsl(142 80% 92%) 100%);
+    --gradient-cv: linear-gradient(135deg, hsl(280 100% 96%) 0%, hsl(280 80% 92%) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(220 13% 8% / 0.08);
+    --shadow-medium: 0 4px 24px -4px hsl(220 13% 8% / 0.12);
+    --shadow-large: 0 8px 40px -8px hsl(220 13% 8% / 0.16);
+    --shadow-glow: 0 0 32px hsl(220 70% 50% / 0.15);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 15% 8%;
+    --foreground: 220 13% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 15% 10%;
+    --card-foreground: 220 13% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 220 13% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 220 70% 60%;
+    --primary-foreground: 220 15% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 220 13% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 15% 12%;
+    --muted-foreground: 220 13% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 220 15% 15%;
+    --accent-foreground: 220 13% 95%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 220 70% 60%;
+
+    /* Dark mode gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(220 70% 30%) 0%, hsl(260 70% 35%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 15% 10%) 0%, hsl(220 15% 12%) 100%);
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -102,6 +124,105 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .bg-gradient-ai {
+    background: var(--gradient-ai);
+  }
+
+  .bg-gradient-robotics {
+    background: var(--gradient-robotics);
+  }
+
+  .bg-gradient-cv {
+    background: var(--gradient-cv);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-large {
+    box-shadow: var(--shadow-large);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glass {
+    backdrop-filter: blur(16px);
+    background: hsl(0 0% 100% / 0.8);
+  }
+
+  .dark .glass {
+    background: hsl(220 15% 10% / 0.8);
+  }
+
+  .text-gradient-ai {
+    background: linear-gradient(135deg, hsl(220 70% 50%) 0%, hsl(220 80% 60%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-robotics {
+    background: linear-gradient(135deg, hsl(142 70% 45%) 0%, hsl(142 80% 55%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-cv {
+    background: linear-gradient(135deg, hsl(280 70% 50%) 0%, hsl(280 80% 60%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@layer components {
+  .research-card {
+    @apply relative overflow-hidden rounded-xl border bg-gradient-card shadow-soft transition-all duration-300 hover:shadow-large hover:-translate-y-1;
+  }
+
+  .research-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity duration-300;
+  }
+
+  .research-card:hover::before {
+    @apply opacity-100;
+  }
+
+  .area-badge-ai {
+    @apply bg-gradient-ai text-ai-primary border-ai-border font-medium;
+  }
+
+  .area-badge-robotics {
+    @apply bg-gradient-robotics text-robotics-primary border-robotics-border font-medium;
+  }
+
+  .area-badge-cv {
+    @apply bg-gradient-cv text-cv-primary border-cv-border font-medium;
   }
 }
