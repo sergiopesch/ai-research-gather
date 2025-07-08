@@ -28,9 +28,17 @@ const ResearchPaperFinder = () => {
     
     try {
       const today = getTodaysDate();
+      const apiUrl = 'https://fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5.supabase.co/functions/v1/paperFinder';
+      
+      console.log('Making API call to:', apiUrl);
+      console.log('Request body:', {
+        since: today,
+        keywords: ["artificial intelligence", "machine learning", "robotics", "computer vision"],
+        limit: 5
+      });
       
       // Real API call to Supabase function
-      const response = await fetch('https://fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5.supabase.co/functions/v1/paperFinder', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
