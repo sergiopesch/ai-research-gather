@@ -146,9 +146,7 @@ const ResearchPaperFinder = () => {
           <h1 className="text-2xl font-medium text-foreground mb-2">
             Research Paper Finder
           </h1>
-          <p className="text-muted-foreground">
-            Get yesterday's top 5 research papers in AI, Robotics, and Computer Vision
-          </p>
+          <p className="text-muted-foreground">Latest top 5 research papers in AI, Robotics, and Computer Vision</p>
         </div>
 
         {/* Research Area Filters */}
