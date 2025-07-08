@@ -27,11 +27,23 @@ export const usePaperActions = () => {
       });
 
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error selecting paper:', error);
+      
+      // Handle specific error cases with better messaging
+      let errorMessage = "Failed to select paper";
+      if (error?.message) {
+        try {
+          const errorData = JSON.parse(error.message);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Selection Failed",
-        description: error instanceof Error ? error.message : "Failed to select paper",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
@@ -57,11 +69,23 @@ export const usePaperActions = () => {
       });
 
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing paper:', error);
+      
+      // Handle specific error cases with better messaging
+      let errorMessage = "Failed to process paper";
+      if (error?.message) {
+        try {
+          const errorData = JSON.parse(error.message);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Processing Failed",
-        description: error instanceof Error ? error.message : "Failed to process paper",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;

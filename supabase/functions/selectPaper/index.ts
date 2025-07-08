@@ -65,15 +65,32 @@ serve(async (req: Request): Promise<Response> => {
       })
     }
 
-    // Check if paper is already processed
+    // Check if paper is already processed or selected
     if (paper.status === 'PROCESSED') {
       console.log(`Paper ${paper_id} already processed`)
       return new Response(JSON.stringify({ 
         error: 'Paper already processed',
+        message: 'This paper has already been processed',
         paper_id,
         current_status: paper.status
       }), {
-        status: 404,
+        status: 409,
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        }
+      })
+    }
+
+    if (paper.status === 'SELECTED') {
+      console.log(`Paper ${paper_id} already selected`)
+      return new Response(JSON.stringify({ 
+        error: 'Paper already selected',
+        message: 'This paper has already been selected for processing',
+        paper_id,
+        current_status: paper.status
+      }), {
+        status: 409,
         headers: { 
           'Content-Type': 'application/json',
           ...corsHeaders,
