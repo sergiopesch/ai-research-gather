@@ -18,20 +18,21 @@ interface Paper {
 }
 
 const RESEARCH_AREAS = [
-  { id: 'ai', label: 'Artificial Intelligence', keywords: ['artificial intelligence', 'AI'] },
-  { id: 'ml', label: 'Machine Learning', keywords: ['machine learning', 'ML', 'deep learning'] },
-  { id: 'robotics', label: 'Robotics', keywords: ['robotics', 'robot', 'autonomous'] },
-  { id: 'cv', label: 'Computer Vision', keywords: ['computer vision', 'image processing', 'visual'] }
+  { id: 'ai', label: 'Artificial Intelligence', keywords: ['artificial intelligence', 'AI'], color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  { id: 'robotics', label: 'Robotics', keywords: ['robotics', 'robot', 'autonomous'], color: 'bg-green-100 text-green-800 border-green-200' },
+  { id: 'cv', label: 'Computer Vision', keywords: ['computer vision', 'image processing', 'visual'], color: 'bg-purple-100 text-purple-800 border-purple-200' }
 ];
 
 const ResearchPaperFinder = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedAreas, setSelectedAreas] = useState<string[]>(['ai', 'ml', 'robotics', 'cv']);
+  const [selectedAreas, setSelectedAreas] = useState<string[]>(['ai', 'robotics', 'cv']);
   const { toast } = useToast();
 
   const getTodaysDate = () => {
-    return new Date().toISOString().split('T')[0];
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split('T')[0];
   };
 
   const getSelectedKeywords = () => {
@@ -118,6 +119,20 @@ const ResearchPaperFinder = () => {
     return colors[source] || 'bg-gray-50 text-gray-700 border-gray-200';
   };
 
+  const getPaperAreaColor = (paperTitle: string) => {
+    const title = paperTitle.toLowerCase();
+    
+    // Check which research area this paper belongs to based on keywords
+    for (const area of RESEARCH_AREAS) {
+      if (area.keywords.some(keyword => title.includes(keyword.toLowerCase()))) {
+        return { label: area.label, color: area.color };
+      }
+    }
+    
+    // Default fallback
+    return { label: 'General', color: 'bg-gray-100 text-gray-800 border-gray-200' };
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'long',
@@ -135,7 +150,7 @@ const ResearchPaperFinder = () => {
             Research Paper Finder
           </h1>
           <p className="text-muted-foreground">
-            Get today's top 5 research papers in AI, ML, Robotics, and Computer Vision
+            Get yesterday's top 5 research papers in AI, Robotics, and Computer Vision
           </p>
         </div>
 
@@ -201,14 +216,19 @@ const ResearchPaperFinder = () => {
                 <Card key={index} className="border border-border hover:border-border/80 transition-colors">
                   <CardContent className="p-6">
                     <div className="space-y-3">
-                      {/* Title and Source */}
+                      {/* Title, Source, and Research Area */}
                       <div className="flex items-start justify-between gap-4">
                         <h3 className="text-base font-medium text-foreground leading-snug flex-1">
                           {paper.title}
                         </h3>
-                        <Badge variant="outline" className={getSourceColor(paper.source)}>
-                          {paper.source}
-                        </Badge>
+                        <div className="flex gap-2">
+                          <Badge variant="outline" className={getPaperAreaColor(paper.title).color}>
+                            {getPaperAreaColor(paper.title).label}
+                          </Badge>
+                          <Badge variant="outline" className={getSourceColor(paper.source)}>
+                            {paper.source}
+                          </Badge>
+                        </div>
                       </div>
 
                       {/* AI-Generated Summary */}
