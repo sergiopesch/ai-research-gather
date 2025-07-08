@@ -198,8 +198,7 @@ const ResearchPaperFinder = () => {
               </h1>
             </div>
             <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-              Discover the latest breakthroughs in AI, Robotics, and Computer Vision with 
-              <span className="font-semibold"> intelligent summaries</span>
+              Here are the latest breakthroughs in AI, Robotics and Computer Vision
             </p>
           </div>
         </div>
