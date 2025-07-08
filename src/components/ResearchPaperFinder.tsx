@@ -18,18 +18,18 @@ interface Paper {
 const RESEARCH_AREAS = [{
   id: 'ai',
   label: 'Artificial Intelligence',
-  keywords: ['artificial intelligence', 'AI'],
-  color: 'bg-blue-100 text-blue-800 border-blue-200'
+  keywords: ['artificial intelligence', 'ai', 'machine learning', 'ml', 'deep learning', 'neural network', 'llm', 'language model', 'transformer', 'gpt', 'bert', 'nlp', 'natural language'],
+  color: 'bg-blue-50 text-blue-700 border-blue-200'
 }, {
   id: 'robotics',
   label: 'Robotics',
-  keywords: ['robotics', 'robot', 'autonomous'],
-  color: 'bg-green-100 text-green-800 border-green-200'
+  keywords: ['robotics', 'robot', 'autonomous', 'robotic', 'manipulation', 'navigation', 'slam', 'motion planning', 'humanoid', 'drone', 'uav'],
+  color: 'bg-emerald-50 text-emerald-700 border-emerald-200'
 }, {
   id: 'cv',
   label: 'Computer Vision',
-  keywords: ['computer vision', 'image processing', 'visual'],
-  color: 'bg-purple-100 text-purple-800 border-purple-200'
+  keywords: ['computer vision', 'image processing', 'visual', 'vision', 'opencv', 'segmentation', 'detection', 'recognition', 'cnn', 'yolo', 'object detection', 'image classification'],
+  color: 'bg-purple-50 text-purple-700 border-purple-200'
 }];
 const ResearchPaperFinder = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
@@ -126,10 +126,10 @@ const ResearchPaperFinder = () => {
       }
     }
 
-    // Default fallback
+    // Default to AI if no specific match found (since most papers are AI-related)
     return {
-      label: 'General',
-      color: 'bg-gray-100 text-gray-800 border-gray-200'
+      label: 'Artificial Intelligence',
+      color: 'bg-blue-50 text-blue-700 border-blue-200'
     };
   };
   const formatDate = (dateString: string) => {
@@ -172,7 +172,7 @@ const ResearchPaperFinder = () => {
           <Button onClick={fetchTodaysPapers} disabled={loading || selectedAreas.length === 0} className="px-6 py-3 h-auto text-base font-medium">
             {loading ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating AI summaries...
+                Generating summary...
               </> : <>
                 <Play className="w-4 h-4 mr-2" />
                 Fetch Today's Papers
