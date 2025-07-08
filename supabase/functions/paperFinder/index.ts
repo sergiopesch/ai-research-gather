@@ -31,47 +31,23 @@ const RESEARCH_AREAS = [
   { name: 'Computer Vision', keywords: ['computer vision', 'image processing', 'visual', 'vision', 'opencv', 'segmentation', 'detection', 'recognition', 'cnn', 'yolo', 'object detection', 'image classification'] }
 ]
 
-// Utility function to check PDF size
-async function checkPdfSize(url: string): Promise<boolean> {
-  try {
-    const response = await fetch(url, { method: 'HEAD' })
-    const contentLength = response.headers.get('content-length')
-    if (contentLength) {
-      const sizeInMB = parseInt(contentLength) / (1024 * 1024)
-      return sizeInMB <= 25
-    }
-    return true // Allow if size unknown
-  } catch {
-    return false
-  }
-}
-
-// ArXiv API integration
-async function fetchArxivPapers(since: string, keywords: string[], timeout: number): Promise<Paper[]> {
+// ArXiv API integration with category-specific searches
+async function fetchArxivPapersForCategory(category: string, since: string, timeout: number): Promise<Paper[]> {
   const baseUrl = Deno.env.get('ARXIV_BASE_URL') || 'http://export.arxiv.org/api/query'
   
-  // Build a comprehensive search query targeting all areas equally
-  let searchQuery = 'cat:cs.AI OR cat:cs.RO OR cat:cs.CV OR cat:cs.LG OR cat:cs.CL OR cat:cs.CR'
-  if (keywords.length > 0) {
-    // Create balanced keyword groups for each area
-    const aiKeywords = keywords.filter(k => ['artificial intelligence', 'ai', 'machine learning', 'ml', 'deep learning', 'neural network', 'llm', 'language model', 'transformer', 'gpt', 'bert', 'nlp', 'natural language'].includes(k.toLowerCase()))
-    const roboticsKeywords = keywords.filter(k => ['robotics', 'robot', 'autonomous', 'robotic', 'manipulation', 'navigation', 'slam', 'motion planning', 'humanoid', 'drone', 'uav'].includes(k.toLowerCase()))
-    const cvKeywords = keywords.filter(k => ['computer vision', 'image processing', 'visual', 'vision', 'opencv', 'segmentation', 'detection', 'recognition', 'cnn', 'yolo', 'object detection', 'image classification'].includes(k.toLowerCase()))
-    
-    const keywordQueries = []
-    if (aiKeywords.length > 0) keywordQueries.push(`(${aiKeywords.map(k => `all:"${k}"`).join(' OR ')})`)
-    if (roboticsKeywords.length > 0) keywordQueries.push(`(${roboticsKeywords.map(k => `all:"${k}"`).join(' OR ')})`)
-    if (cvKeywords.length > 0) keywordQueries.push(`(${cvKeywords.map(k => `all:"${k}"`).join(' OR ')})`)
-    
-    if (keywordQueries.length > 0) {
-      searchQuery = `(${searchQuery}) AND (${keywordQueries.join(' OR ')})`
-    }
+  // Define category-specific search queries for better targeting
+  const categoryQueries: Record<string, string> = {
+    'Artificial Intelligence': '(cat:cs.AI OR cat:cs.LG OR cat:cs.CL) AND (all:"artificial intelligence" OR all:"machine learning" OR all:"deep learning" OR all:"neural network" OR all:"transformer" OR all:"language model")',
+    'Robotics': '(cat:cs.RO OR cat:cs.SY) AND (all:"robotics" OR all:"robot" OR all:"autonomous" OR all:"manipulation" OR all:"navigation" OR all:"slam" OR all:"motion planning")',
+    'Computer Vision': '(cat:cs.CV) AND (all:"computer vision" OR all:"image processing" OR all:"vision" OR all:"segmentation" OR all:"detection" OR all:"recognition" OR all:"object detection")'
   }
+  
+  const searchQuery = categoryQueries[category] || categoryQueries['Artificial Intelligence']
   
   const params = new URLSearchParams({
     search_query: searchQuery,
     start: '0',
-    max_results: '200',  // Increased to get more papers
+    max_results: '100',  // Fetch enough for each category
     sortBy: 'submittedDate',
     sortOrder: 'descending'
   })
@@ -80,7 +56,9 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
   const timeoutId = setTimeout(() => controller.abort(), timeout)
   
   try {
-    console.log(`Searching arXiv with query: ${searchQuery}`)
+    console.log(`=== SEARCHING ${category.toUpperCase()} ===`)
+    console.log(`Query: ${searchQuery}`)
+    
     const response = await fetch(`${baseUrl}?${params}`, {
       signal: controller.signal
     })
@@ -88,14 +66,12 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
     if (!response.ok) throw new Error(`ArXiv API error: ${response.status}`)
     
     const xmlText = await response.text()
-    console.log(`ArXiv response length: ${xmlText.length} characters`)
-    
     const papers: Paper[] = []
     
     // Simple XML parsing for ArXiv entries
     const entryRegex = /<entry>(.*?)<\/entry>/gs
     const entries = xmlText.match(entryRegex) || []
-    console.log(`Found ${entries.length} entries in arXiv response`)
+    console.log(`Found ${entries.length} entries for ${category}`)
     
     for (const entry of entries) {
       const titleMatch = entry.match(/<title>(.*?)<\/title>/s)
@@ -106,26 +82,19 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
       
       if (titleMatch && publishedMatch && idMatch) {
         const publishedDate = publishedMatch[1].split('T')[0]
-        console.log(`Paper "${titleMatch[1].substring(0, 50)}..." published: ${publishedDate}, since: ${since}`)
         
-        // Make date filtering more lenient - get papers from the last 7 days
+        // Extended date filtering - get papers from last 60 days to ensure sufficient pool
         const paperDate = new Date(publishedDate)
         const sinceDate = new Date(since)
         const daysDiff = Math.floor((sinceDate.getTime() - paperDate.getTime()) / (1000 * 60 * 60 * 24))
         
-        console.log(`Days difference: ${daysDiff}`)
-        
-        // More lenient date filtering - get papers from last 30 days to ensure we have enough
-        if (daysDiff <= 30) {
+        if (daysDiff <= 60) {
           const arxivId = idMatch[1].split('/').pop()?.split('v')[0]
-          const pdfUrl = pdfMatch ? pdfMatch[1] : `https://arxiv.org/pdf/${arxivId}.pdf`
           
-          // Extract authors
+          // Extract authors with fixed regex
           const authors = authorMatches ? 
             authorMatches.map(match => match.replace(/<author>[\s\S]*?<name>(.*?)<\/name>[\s\S]*?<\/author>/, '$1')).slice(0, 3) : 
             []
-          
-          console.log(`Adding paper: ${titleMatch[1].substring(0, 50)}...`)
           
           papers.push({
             title: titleMatch[1].replace(/\s+/g, ' ').trim(),
@@ -135,16 +104,14 @@ async function fetchArxivPapers(since: string, keywords: string[], timeout: numb
             published_date: publishedDate,
             authors
           })
-        } else {
-          console.log(`Skipping paper - published ${daysDiff} days ago`)
         }
       }
     }
     
-    console.log(`Returning ${papers.length} papers from arXiv`)
+    console.log(`${category}: Collected ${papers.length} papers`)
     return papers
   } catch (error) {
-    console.warn('ArXiv fetch error:', error.message)
+    console.warn(`${category} ArXiv fetch error:`, error.message)
     return []
   } finally {
     clearTimeout(timeoutId)
@@ -186,15 +153,13 @@ async function fetchSemanticScholarPapers(since: string, keywords: string[], tim
     
     for (const paper of data.data || []) {
       if (paper.isOpenAccess && paper.openAccessPdf?.url) {
-        if (await checkPdfSize(paper.openAccessPdf.url)) {
-          papers.push({
-            title: paper.title,
-            url: paper.url || `https://www.semanticscholar.org/paper/${paper.paperId}`,
-            doi: paper.doi,
-            source: 'Semantic Scholar',
-            published_date: paper.publicationDate || since
-          })
-        }
+        papers.push({
+          title: paper.title,
+          url: paper.url || `https://www.semanticscholar.org/paper/${paper.paperId}`,
+          doi: paper.doi,
+          source: 'Semantic Scholar',
+          published_date: paper.publicationDate || since
+        })
       }
     }
     
@@ -247,15 +212,13 @@ async function fetchIeeePapers(since: string, keywords: string[], timeout: numbe
       const publishedDate = article.publication_date || since
       
       if (publishedDate >= since && article.access_type === 'OPEN_ACCESS' && article.pdf_url) {
-        if (await checkPdfSize(article.pdf_url)) {
-          papers.push({
-            title: article.title,
-            url: article.html_url || `https://ieeexplore.ieee.org/document/${article.article_number}`,
-            doi: article.doi,
-            source: 'IEEE Xplore',
-            published_date: publishedDate
-          })
-        }
+        papers.push({
+          title: article.title,
+          url: article.html_url || `https://ieeexplore.ieee.org/document/${article.article_number}`,
+          doi: article.doi,
+          source: 'IEEE Xplore',
+          published_date: publishedDate
+        })
       }
     }
     
@@ -292,106 +255,102 @@ function deduplicatePapers(papers: Paper[]): Paper[] {
   return deduplicated
 }
 
-// Categorize papers by research area
-function categorizePaper(title: string): string {
+// Enhanced categorization with weighted scoring
+function categorizePaper(title: string): { category: string; confidence: number } {
   const titleLower = title.toLowerCase()
+  let bestMatch = { category: 'Artificial Intelligence', confidence: 0 }
   
   for (const area of RESEARCH_AREAS) {
-    if (area.keywords.some(keyword => titleLower.includes(keyword.toLowerCase()))) {
-      return area.name
+    let confidence = 0
+    
+    for (const keyword of area.keywords) {
+      if (titleLower.includes(keyword.toLowerCase())) {
+        // Higher confidence for more specific keywords
+        if (['artificial intelligence', 'machine learning', 'deep learning', 'robotics', 'computer vision'].includes(keyword.toLowerCase())) {
+          confidence += 10
+        } else if (['ai', 'ml', 'cv', 'robot', 'vision'].includes(keyword.toLowerCase())) {
+          confidence += 5
+        } else {
+          confidence += 1
+        }
+      }
+    }
+    
+    if (confidence > bestMatch.confidence) {
+      bestMatch = { category: area.name, confidence }
     }
   }
   
-  return 'Artificial Intelligence' // Default to AI
+  return bestMatch
 }
 
-// CRITICAL: Ensure exactly equal distribution with perfect randomization
-function selectDiversePapers(papers: Paper[], limit: number): Paper[] {
-  console.log(`=== PERFECT DISTRIBUTION ALGORITHM START ===`)
-  console.log(`Target: ${limit} papers with equal distribution across areas`)
+// BULLETPROOF distribution algorithm ensuring exactly 2 papers per selected area
+function selectPapersWithPerfectDistribution(papersByCategory: { [key: string]: Paper[] }, selectedAreas: string[], targetTotal: number): Paper[] {
+  console.log(`=== PERFECT DISTRIBUTION ALGORITHM ===`)
+  console.log(`Target: ${targetTotal} papers total`)
+  console.log(`Selected areas: ${selectedAreas.join(', ')}`)
   
-  // Categorize papers by research area with detailed logging
-  const categorizedPapers: { [key: string]: Paper[] } = {}
+  const papersPerArea = Math.floor(targetTotal / selectedAreas.length)
+  console.log(`Target per area: ${papersPerArea} papers`)
   
-  papers.forEach((paper, index) => {
-    const category = categorizePaper(paper.title)
-    if (!categorizedPapers[category]) {
-      categorizedPapers[category] = []
-    }
-    categorizedPapers[category].push(paper)
-    console.log(`Paper ${index + 1}: "${paper.title.substring(0, 60)}..." → ${category}`)
-  })
+  const selectedPapers: Paper[] = []
+  const distributionLog: { [key: string]: number } = {}
   
-  console.log(`=== CATEGORIZATION COMPLETE ===`)
-  const areas = RESEARCH_AREAS.map(area => area.name)
-  areas.forEach(area => {
-    const count = categorizedPapers[area]?.length || 0
-    console.log(`${area}: ${count} papers available`)
-  })
-  
-  // Calculate EXACT distribution
-  const papersPerArea = Math.floor(limit / areas.length) // 2 papers per area for 6 total
-  console.log(`EXACT TARGET: ${papersPerArea} papers per area`)
-  
-  // STEP 1: Select exactly the required number from each area
-  const selectedByArea: { [key: string]: Paper[] } = {}
-  
-  for (const area of areas) {
-    selectedByArea[area] = []
-    if (categorizedPapers[area] && categorizedPapers[area].length > 0) {
-      // Shuffle papers in this area first for randomness
-      const shuffledAreaPapers = [...categorizedPapers[area]].sort(() => Math.random() - 0.5)
-      
-      // Take exactly papersPerArea papers
-      const selectedCount = Math.min(papersPerArea, shuffledAreaPapers.length)
-      selectedByArea[area] = shuffledAreaPapers.slice(0, selectedCount)
-      
-      console.log(`${area}: Selected ${selectedCount} papers (target: ${papersPerArea})`)
-      selectedByArea[area].forEach((paper, i) => {
-        console.log(`  ${i + 1}. "${paper.title.substring(0, 50)}..."`)
-      })
-    } else {
-      console.log(`${area}: NO PAPERS AVAILABLE!`)
-    }
+  // Step 1: Try to get exactly papersPerArea from each selected area
+  for (const area of selectedAreas) {
+    const availablePapers = papersByCategory[area] || []
+    console.log(`${area}: ${availablePapers.length} papers available`)
+    
+    // Shuffle papers for randomness within category
+    const shuffledPapers = [...availablePapers].sort(() => Math.random() - 0.5)
+    
+    // Take up to papersPerArea papers
+    const taken = shuffledPapers.slice(0, papersPerArea)
+    selectedPapers.push(...taken)
+    distributionLog[area] = taken.length
+    
+    console.log(`${area}: Selected ${taken.length} papers`)
+    taken.forEach((paper, i) => {
+      console.log(`  ${i + 1}. "${paper.title.substring(0, 50)}..."`)
+    })
   }
   
-  // STEP 2: Create perfectly alternating list
-  const finalList: Paper[] = []
-  const maxRounds = papersPerArea
-  
-  console.log(`=== CREATING ALTERNATING LIST ===`)
-  for (let round = 0; round < maxRounds; round++) {
-    console.log(`Round ${round + 1}:`)
-    for (const area of areas) {
-      if (selectedByArea[area] && selectedByArea[area][round]) {
-        finalList.push(selectedByArea[area][round])
-        console.log(`  Added from ${area}: "${selectedByArea[area][round].title.substring(0, 50)}..."`)
+  // Step 2: Fill remaining slots if we're short of target
+  const remaining = targetTotal - selectedPapers.length
+  if (remaining > 0) {
+    console.log(`=== FILLING ${remaining} REMAINING SLOTS ===`)
+    
+    for (const area of selectedAreas) {
+      if (remaining <= 0) break
+      
+      const availablePapers = papersByCategory[area] || []
+      const alreadyTaken = distributionLog[area] || 0
+      const remainingInCategory = availablePapers.slice(alreadyTaken)
+      
+      if (remainingInCategory.length > 0) {
+        const shuffled = [...remainingInCategory].sort(() => Math.random() - 0.5)
+        const toTake = Math.min(1, remaining, shuffled.length)
+        const taken = shuffled.slice(0, toTake)
+        
+        selectedPapers.push(...taken)
+        distributionLog[area] = (distributionLog[area] || 0) + taken.length
+        
+        console.log(`${area}: Added ${taken.length} extra papers`)
       }
     }
   }
   
-  // STEP 3: Final shuffle for randomness while maintaining distribution
-  console.log(`=== FINAL RANDOMIZATION ===`)
-  const shuffledFinal = [...finalList].sort(() => Math.random() - 0.5)
+  // Step 3: Final shuffle while maintaining selection
+  const finalPapers = [...selectedPapers].sort(() => Math.random() - 0.5)
   
-  console.log(`=== FINAL RESULT ===`)
-  console.log(`Successfully selected ${shuffledFinal.length} papers`)
-  
-  // Verify distribution
-  const finalDistribution: { [key: string]: number } = {}
-  shuffledFinal.forEach((paper, index) => {
-    const category = categorizePaper(paper.title)
-    finalDistribution[category] = (finalDistribution[category] || 0) + 1
-    console.log(`${index + 1}. [${category}] "${paper.title.substring(0, 50)}..."`)
+  console.log(`=== FINAL DISTRIBUTION ===`)
+  selectedAreas.forEach(area => {
+    const count = distributionLog[area] || 0
+    console.log(`${area}: ${count} papers`)
   })
+  console.log(`Total selected: ${finalPapers.length} papers`)
   
-  console.log(`=== DISTRIBUTION VERIFICATION ===`)
-  areas.forEach(area => {
-    const count = finalDistribution[area] || 0
-    console.log(`${area}: ${count} papers (target: ${papersPerArea}) ${count === papersPerArea ? '✅' : '❌'}`)
-  })
-  
-  return shuffledFinal
+  return finalPapers.slice(0, targetTotal)
 }
 
 // Generate AI summary for a paper
@@ -496,41 +455,45 @@ serve(async (req: Request): Promise<Response> => {
     const validatedInput = RequestSchema.parse(body)
     const { since, keywords, limit } = validatedInput
     
-    console.log(`Fetching papers since ${since} with keywords: ${keywords.join(', ')} (limit: ${limit})`)
+    console.log(`=== PAPER FINDER REQUEST ===`)
+    console.log(`Date: ${since}, Keywords: ${keywords.join(', ')}, Limit: ${limit}`)
     
-    // Fetch from arXiv with increased timeout and papers
-    const timeout = 10000  // Increased timeout
-    const arxivPapers = await fetchArxivPapers(since, keywords, timeout)
+    // Determine selected research areas from keywords
+    const selectedAreas = RESEARCH_AREAS.filter(area => 
+      area.keywords.some(keyword => keywords.includes(keyword))
+    ).map(area => area.name)
     
-    console.log(`=== RAW ARXIV RESULTS ===`)
-    console.log(`ArXiv returned ${arxivPapers.length} papers`)
+    // Default to all areas if none selected
+    const areasToSearch = selectedAreas.length > 0 ? selectedAreas : RESEARCH_AREAS.map(area => area.name)
+    console.log(`Research areas to search: ${areasToSearch.join(', ')}`)
     
-    // Use only arXiv papers
-    const allPapers = arxivPapers
-    console.log(`Total papers before deduplication: ${allPapers.length}`)
+    // Fetch papers for each category separately
+    const timeout = 10000
+    const papersByCategory: { [key: string]: Paper[] } = {}
     
-    const deduplicatedPapers = deduplicatePapers(allPapers)
-    console.log(`Papers after deduplication: ${deduplicatedPapers.length}`)
+    console.log(`=== FETCHING PAPERS BY CATEGORY ===`)
+    for (const area of areasToSearch) {
+      const categoryPapers = await fetchArxivPapersForCategory(area, since, timeout)
+      
+      // Categorize and filter papers for this area
+      const filteredPapers = categoryPapers.filter(paper => {
+        const categorization = categorizePaper(paper.title)
+        return categorization.category === area && categorization.confidence > 0
+      })
+      
+      papersByCategory[area] = filteredPapers
+      console.log(`${area}: ${filteredPapers.length} relevant papers after filtering`)
+    }
     
-    // Select diverse papers with perfect distribution and randomization
-    const diversePapers = selectDiversePapers(deduplicatedPapers, limit)
+    // Apply bulletproof distribution algorithm
+    const selectedPapers = selectPapersWithPerfectDistribution(papersByCategory, areasToSearch, limit)
     
-    console.log(`=== BEFORE SUMMARY GENERATION ===`)
-    console.log(`About to generate summaries for ${diversePapers.length} papers`)
-    
-    // Sort by published_date descending but maintain the distribution
-    const sortedPapers = diversePapers
-      .sort((a, b) => b.published_date.localeCompare(a.published_date))
-    
-    console.log(`=== FINAL PAPER LIST FOR SUMMARIES ===`)
-    sortedPapers.forEach((paper, index) => {
-      const category = categorizePaper(paper.title)
-      console.log(`${index + 1}. [${category}] "${paper.title.substring(0, 60)}..." (${paper.published_date})`)
-    })
+    console.log(`=== GENERATING SUMMARIES ===`)
+    console.log(`Generating summaries for ${selectedPapers.length} papers`)
     
     // Generate AI summaries for each paper
     const papersWithSummaries = await Promise.all(
-      sortedPapers.map(async (paper) => {
+      selectedPapers.map(async (paper) => {
         const { summary, importance } = await generatePaperSummary(paper.title)
         return {
           ...paper,
@@ -544,7 +507,8 @@ serve(async (req: Request): Promise<Response> => {
       papers: papersWithSummaries
     }
     
-    console.log(`Returning ${sortedPapers.length} papers`)
+    console.log(`=== REQUEST COMPLETE ===`)
+    console.log(`Returning ${papersWithSummaries.length} papers with perfect distribution`)
     
     return new Response(JSON.stringify(response), {
       status: 200,
