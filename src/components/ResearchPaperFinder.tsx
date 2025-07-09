@@ -1,18 +1,21 @@
 import { useState } from 'react';
-import { Play, Loader2 } from 'lucide-react';
+import { Play, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { usePaperSearch } from '@/hooks/usePaperSearch';
+import { usePaperActions } from '@/hooks/usePaperActions';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
 import { HeroSection } from '@/components/research/HeroSection';
 import { AreaSelector } from '@/components/research/AreaSelector';
 import { PaperCard } from '@/components/research/PaperCard';
 import { EmptyState } from '@/components/research/EmptyState';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 const ResearchPaperFinder = () => {
   const [selectedAreas, setSelectedAreas] = useState<string[]>(['ai', 'robotics', 'cv']);
   const { papers, loading, searchPapers } = usePaperSearch();
+  const { hasSelectedPaper } = usePaperActions();
   const { toast } = useToast();
 
   const getSelectedKeywords = () => {
@@ -63,6 +66,18 @@ const ResearchPaperFinder = () => {
           selectedAreas={selectedAreas} 
           onToggleArea={handleAreaToggle} 
         />
+
+        {/* Processing Hub Access */}
+        {hasSelectedPaper && (
+          <div className="flex justify-center mb-6">
+            <Button variant="outline" asChild className="px-6 py-3 h-auto text-base font-medium">
+              <Link to="/processing">
+                <ArrowRight className="w-4 h-4 mr-2" />
+                Go to Processing Hub
+              </Link>
+            </Button>
+          </div>
+        )}
 
         {/* Search Button */}
         <div className="flex justify-center mb-8 sm:mb-12">

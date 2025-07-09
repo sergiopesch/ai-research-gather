@@ -5,13 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 export const usePaperActions = () => {
   const [isSelecting, setIsSelecting] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPapers, setSelectedPapers] = useState<Set<string>>(new Set());
+  const [selectedPaper, setSelectedPaper] = useState<string | null>(null);
   const { toast } = useToast();
 
   const selectPaper = useCallback(async (paperId: string) => {
-    console.log('🔥 MOBILE DEBUG: selectPaper called with:', { paperId, isSelecting, hasSelected: selectedPapers.has(paperId) });
+    console.log('🔥 MOBILE DEBUG: selectPaper called with:', { paperId, isSelecting, hasSelected: selectedPaper === paperId });
     
-    if (isSelecting || selectedPapers.has(paperId)) {
+    if (isSelecting || selectedPaper === paperId) {
       console.log('🚫 MOBILE DEBUG: Early return - already selecting or selected');
       return;
     }
@@ -27,7 +27,7 @@ export const usePaperActions = () => {
 
       if (error) throw error;
 
-      setSelectedPapers(prev => new Set(prev).add(paperId));
+      setSelectedPaper(paperId);
       
       toast({
         title: "Paper Selected",
@@ -60,7 +60,7 @@ export const usePaperActions = () => {
       setIsSelecting(false);
       console.log('🏁 MOBILE DEBUG: setIsSelecting(false) called');
     }
-  }, [isSelecting, selectedPapers, toast]);
+  }, [isSelecting, selectedPaper, toast]);
 
   const processPaper = useCallback(async (paperId: string, model?: string) => {
     if (isProcessing) return;
@@ -105,8 +105,8 @@ export const usePaperActions = () => {
   }, [isProcessing, toast]);
 
   const isPaperSelected = useCallback((paperId: string) => {
-    return selectedPapers.has(paperId);
-  }, [selectedPapers]);
+    return selectedPaper === paperId;
+  }, [selectedPaper]);
 
   return {
     selectPaper,
@@ -114,6 +114,7 @@ export const usePaperActions = () => {
     isPaperSelected,
     isSelecting,
     isProcessing,
-    selectedPapersCount: selectedPapers.size
+    selectedPaper,
+    hasSelectedPaper: selectedPaper !== null
   };
 };

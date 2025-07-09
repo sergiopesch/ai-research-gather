@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
 import { usePaperActions } from '@/hooks/usePaperActions';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import type { Paper } from '@/types/research';
 
 interface PaperCardProps {
@@ -15,6 +16,7 @@ interface PaperCardProps {
 export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const { selectPaper, isSelecting, isPaperSelected } = usePaperActions();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSelectPaper = async () => {
     console.log('🔥 MOBILE DEBUG: Button clicked!', { paperId: paper.id, paper });
@@ -33,6 +35,9 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
       console.log('🚀 MOBILE DEBUG: Calling selectPaper with ID:', paper.id);
       await selectPaper(paper.id);
       console.log('✅ MOBILE DEBUG: selectPaper completed successfully');
+      
+      // Navigate to processing hub after successful selection
+      navigate('/processing');
     } catch (error) {
       console.error('❌ MOBILE DEBUG: selectPaper failed:', error);
       // Error handling is done in the hook
