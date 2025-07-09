@@ -113,23 +113,28 @@ Rules:
 
 Current paper: "${title}" by ${authorsText}`
 
-  // Start with Dr Ada's welcome
-  const welcomeMessage = `Welcome to The Notebook Pod, Episode ${episode}! Today we're exploring "${title}" by ${authorsText}.`
-  
-  sendSSEEvent(controller, 'dialogue', {
-    speaker: "Dr Ada",
-    text: welcomeMessage
-  })
-  
-  conversationHistory.push({ role: "assistant", content: welcomeMessage })
-  
-  // Small delay before starting the conversation
-  await new Promise(resolve => setTimeout(resolve, 2000))
-  
-  // Continue conversation for about 10 seconds (4-5 exchanges)
-  for (let turn = 0; turn < 4; turn++) {
-    try {
+  try {
+    // Start with Dr Ada's welcome
+    const welcomeMessage = `Welcome to The Notebook Pod, Episode ${episode}! Today we're exploring "${title}" by ${authorsText}.`
+    
+    console.log('📺 LIVE: Dr Ada speaking...')
+    sendSSEEvent(controller, 'dialogue', {
+      speaker: "Dr Ada",
+      text: welcomeMessage
+    })
+    
+    conversationHistory.push({ role: "assistant", content: welcomeMessage })
+    
+    // Real delay before starting the conversation
+    console.log('⏱️ LIVE: Waiting 3 seconds before Sam responds...')
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    
+    // Continue conversation for live streaming (4-5 exchanges)
+    for (let turn = 0; turn < 4; turn++) {
+      console.log(`🔄 LIVE: Starting turn ${turn + 1}`)
+      
       // Sam's turn (GPT-4O mini)
+      console.log('🎯 LIVE: Sam is thinking...')
       const samMessages = [
         { role: "system", content: samSystemPrompt },
         ...conversationHistory.map(msg => ({
@@ -140,6 +145,7 @@ Current paper: "${title}" by ${authorsText}`
       
       const samResponse = await callOpenAIForResponse(apiKey, samMessages, "gpt-4o-mini")
       
+      console.log(`🗣️ LIVE: Sam says: "${samResponse}"`)
       sendSSEEvent(controller, 'dialogue', {
         speaker: "Sam",
         text: samResponse
@@ -147,11 +153,13 @@ Current paper: "${title}" by ${authorsText}`
       
       conversationHistory.push({ role: "user", content: samResponse })
       
-      // Small delay for natural pacing
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Real delay for natural pacing
+      console.log('⏱️ LIVE: Waiting 4 seconds for natural pacing...')
+      await new Promise(resolve => setTimeout(resolve, 4000))
       
       // Dr Ada's turn (GPT-4O) - but not on the last iteration
       if (turn < 3) {
+        console.log('🎯 LIVE: Dr Ada is thinking...')
         const drAdaMessages = [
           { role: "system", content: drAdaSystemPrompt },
           ...conversationHistory
@@ -159,6 +167,7 @@ Current paper: "${title}" by ${authorsText}`
         
         const drAdaResponse = await callOpenAIForResponse(apiKey, drAdaMessages, "gpt-4o")
         
+        console.log(`👩‍⚕️ LIVE: Dr Ada says: "${drAdaResponse}"`)
         sendSSEEvent(controller, 'dialogue', {
           speaker: "Dr Ada", 
           text: drAdaResponse
@@ -166,24 +175,25 @@ Current paper: "${title}" by ${authorsText}`
         
         conversationHistory.push({ role: "assistant", content: drAdaResponse })
         
-        // Small delay for natural pacing
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        // Real delay for natural pacing
+        console.log('⏱️ LIVE: Waiting 4 seconds for natural pacing...')
+        await new Promise(resolve => setTimeout(resolve, 4000))
       }
-      
-    } catch (error) {
-      console.error(`Error in conversation turn ${turn}:`, error)
-      sendSSEEvent(controller, 'error', {
-        message: 'Conversation encountered an error',
-        turn
-      })
-      break
     }
+    
+    // End the conversation
+    console.log('🏁 LIVE: Conversation ending...')
+    sendSSEEvent(controller, 'end', {
+      message: 'Thanks for tuning in to The Notebook Pod! Stay curious!'
+    })
+    
+  } catch (error) {
+    console.error('❌ LIVE: Error in conversation:', error)
+    sendSSEEvent(controller, 'error', {
+      message: 'Live conversation encountered an error',
+      error: error.message
+    })
   }
-  
-  // End the conversation
-  sendSSEEvent(controller, 'end', {
-    message: 'Thanks for tuning in to The Notebook Pod! Stay curious!'
-  })
 }
 
 serve(async (req: Request): Promise<Response> => {
