@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, Suspense } from 'react';
 import { Play, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -108,11 +108,13 @@ const ResearchPaperFinder = () => {
               </Badge>
             </div>
 
-            <div className="grid gap-4 sm:gap-6">
-              {papers.map((paper, index) => (
-                <PaperCard key={`${paper.doi || paper.url}-${index}`} paper={paper} index={index} />
-              ))}
-            </div>
+            <Suspense fallback={<div className="space-y-4"><div className="h-32 bg-muted animate-pulse rounded-lg"></div></div>}>
+              <div className="grid gap-4 sm:gap-6">
+                {papers.map((paper, index) => (
+                  <PaperCard key={`${paper.doi || paper.url}-${index}`} paper={paper} index={index} />
+                ))}
+              </div>
+            </Suspense>
           </div>
         )}
 

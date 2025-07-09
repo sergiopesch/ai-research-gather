@@ -13,10 +13,7 @@ export const validateUrl = (url: string): boolean => {
   }
 };
 
-export const validateDate = (dateString: string): boolean => {
-  const date = new Date(dateString);
-  return !isNaN(date.getTime()) && date <= new Date();
-};
+// Removed unused validateDate function
 
 export const sanitizeText = (text: string): string => {
   return text.trim().replace(/\s+/g, ' ');

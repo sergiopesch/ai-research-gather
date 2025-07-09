@@ -38,7 +38,8 @@ export const usePaperSearch = () => {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const data = await response.json();
@@ -62,7 +63,9 @@ export const usePaperSearch = () => {
         title: "Failed to fetch papers",
         description: error instanceof Error && error.name === 'AbortError' 
           ? "Request timed out. Please try again." 
-          : "Please check your connection and try again",
+          : errorMessage.includes('API Error') 
+            ? "Server error. Please try again later."
+            : "Please check your connection and try again",
         variant: "destructive"
       });
       setPapers([]);

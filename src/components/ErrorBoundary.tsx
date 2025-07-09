@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 interface ErrorBoundaryState {
   hasError: boolean;
   error?: Error;
+  errorInfo?: React.ErrorInfo;
 }
 
 export class ErrorBoundary extends React.Component<
@@ -23,6 +24,13 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
+    this.setState({ errorInfo });
+    
+    // Log to external service in production
+    if (process.env.NODE_ENV === 'production') {
+      // Add your error reporting service here
+      console.error('Production error:', { error: error.message, stack: error.stack, errorInfo });
+    }
   }
 
   render() {
@@ -38,14 +46,34 @@ export class ErrorBoundary extends React.Component<
                 Something went wrong
               </h2>
               <p className="text-muted-foreground mb-6">
-                An unexpected error occurred. Please refresh the page to try again.
+                An unexpected error occurred. Please try again.
               </p>
-              <Button 
-                onClick={() => window.location.reload()}
-                className="w-full"
-              >
-                Refresh Page
-              </Button>
+              {process.env.NODE_ENV === 'development' && this.state.error && (
+                <details className="text-left mb-6">
+                  <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                    Error details (Development)
+                  </summary>
+                  <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
+                    {this.state.error.message}
+                    {this.state.errorInfo && `\n\nComponent Stack:\n${this.state.errorInfo.componentStack}`}
+                  </pre>
+                </details>
+              )}
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => this.setState({ hasError: false, error: undefined, errorInfo: undefined })} 
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Try Again
+                </Button>
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="flex-1"
+                >
+                  Refresh Page
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

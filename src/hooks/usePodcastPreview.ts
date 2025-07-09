@@ -61,20 +61,16 @@ export const usePodcastPreview = () => {
         eventSourceRef.current = null;
       }
 
-      // Use the Supabase client's URL configuration directly to avoid mismatches
-      const supabaseClient = supabase;
-      const supabaseUrl = 'https://eapnatbiodenijfrpqcn.supabase.co'; // Match the client config
-      const functionUrl = `${supabaseUrl}/functions/v1/generatePodcastPreview`;
-      
+      // For streaming, we need to use fetch with proper headers
+      const functionUrl = `${supabase.supabaseUrl}/functions/v1/generatePodcastPreview`;
       
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU`,
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
           'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          'apikey': `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU`,
         },
         body: JSON.stringify({
           paper_id: paperId,
