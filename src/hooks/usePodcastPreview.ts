@@ -61,25 +61,24 @@ export const usePodcastPreview = () => {
         eventSourceRef.current = null;
       }
 
-      // Use the correct Supabase URL from the client configuration
-      const supabaseUrl = 'https://eapnatbiodenijfrpqcn.supabase.co';
+      // Use the CORRECT Supabase project URL - this was the bug!
+      const supabaseUrl = 'https://fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5.supabase.co';
       const functionUrl = `${supabaseUrl}/functions/v1/generatePodcastPreview`;
       
-      console.log('🎙️ Making streaming request to:', functionUrl);
-      console.log('🔍 Request headers:', {
-        'Authorization': 'Bearer eyJ***',
-        'Content-Type': 'application/json',
-        'Accept': 'text/event-stream'
+      console.log('🎙️ Making streaming request to CORRECT URL:', functionUrl);
+      console.log('🔍 Request headers and body:', {
+        headers: 'Bearer + apikey set',
+        body: { paper_id: paperId, episode, duration }
       });
       
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU`,
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiZGMyYjExLWY3YzYtNDliYi04Yjk4LWNkYmVjNmVkY2VjNSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM2NDUyNjQyLCJleHAiOjIwNTIwMjg2NDJ9.H7P3qRP-4F0NwOqmq6mN2hrfoMrce6kA12m4LbRO0fE`,
           'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          'apikey': `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU`,
+          'apikey': `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiZGMyYjExLWY3YzYtNDliYi04Yjk4LWNkYmVjNmVkY2VjNSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM2NDUyNjQyLCJleHAiOjIwNTIwMjg2NDJ9.H7P3qRP-4F0NwOqmq6mN2hrfoMrce6kA12m4LbRO0fE`,
         },
         body: JSON.stringify({
           paper_id: paperId,
