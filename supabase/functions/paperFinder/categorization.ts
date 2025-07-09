@@ -1,5 +1,11 @@
 import { RESEARCH_AREAS } from './research-areas.ts'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept, cache-control',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
 // Enhanced categorization with weighted scoring for MAXIMUM accuracy
 export function categorizePaper(title: string): { category: string; confidence: number } {
   const titleLower = title.toLowerCase()
