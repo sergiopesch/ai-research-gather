@@ -44,121 +44,91 @@ export const usePodcastPreview = () => {
     try {
       console.log('🎙️ Starting live podcast conversation for paper:', paperId);
       
-      // Close any existing EventSource
+      // Close any existing connections
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
+        eventSourceRef.current = null;
       }
 
-      const { data, error } = await supabase.functions.invoke('generatePodcastPreview', {
-        body: { 
-          paper_id: paperId, 
-          episode, 
-          duration 
-        },
-        headers: {
-          'Accept': 'text/event-stream'
-        }
-      });
-
-      // For SSE, we need to handle the response differently
-      const SUPABASE_URL = "https://eapnatbiodenijfrpqcn.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU";
+      // Create WebSocket connection for real-time conversation
+      const wsUrl = `wss://eapnatbiodenijfrpqcn.functions.supabase.co/functions/v1/realtimePodcastChat`;
+      const ws = new WebSocket(wsUrl);
       
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/generatePodcastPreview`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-          'apikey': SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
+      ws.onopen = () => {
+        console.log('🔌 WebSocket connected, starting conversation...');
+        setIsGenerating(false);
+        setIsLive(true);
+        
+        toast({
+          title: "Live Conversation Started",
+          description: "Dr. Ada and Sam are having a real conversation!",
+        });
+
+        // Start the conversation
+        ws.send(JSON.stringify({
+          type: 'start_conversation',
           paper_id: paperId,
           episode,
           duration
-        })
-      });
+        }));
+      };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body reader available');
-      }
-
-      setIsGenerating(false);
-      setIsLive(true);
-
-      toast({
-        title: "Live Conversation Started",
-        description: "Dr. Ada and Sam are having a real conversation!",
-      });
-
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('📡 Received WebSocket message:', data);
           
-          if (done) {
+          if (data.type === 'dialogue' && data.speaker && data.text) {
+            console.log(`🗣️ ${data.speaker}: ${data.text}`);
+            
+            setDialogue(prev => [...prev, {
+              speaker: data.speaker,
+              text: data.text,
+              timestamp: Date.now()
+            }]);
+          } else if (data.type === 'end') {
             console.log('✅ Live conversation completed');
             setIsLive(false);
-            break;
+            ws.close();
+          } else if (data.type === 'error') {
+            console.error('❌ WebSocket error:', data.message);
+            toast({
+              title: "Live Conversation Error",
+              description: data.message,
+              variant: "destructive",
+            });
+            setIsLive(false);
+            ws.close();
           }
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.startsWith('event: ') || line.startsWith('data: ')) {
-              const eventMatch = line.match(/^event: (.+)$/);
-              const dataMatch = line.match(/^data: (.+)$/);
-              
-              if (eventMatch) {
-                const eventType = eventMatch[1];
-                console.log('📡 Received event:', eventType);
-              }
-              
-              if (dataMatch) {
-                try {
-                  const data = JSON.parse(dataMatch[1]);
-                  
-                  if (data.speaker && data.text) {
-                    console.log(`🗣️ ${data.speaker}: ${data.text}`);
-                    
-                    setDialogue(prev => [...prev, {
-                      speaker: data.speaker,
-                      text: data.text,
-                      timestamp: Date.now()
-                    }]);
-                  } else if (data.message) {
-                    console.log('📝 Event message:', data.message);
-                    
-                    if (data.message.includes('Thanks for tuning in')) {
-                      setIsLive(false);
-                    }
-                  }
-                } catch (parseError) {
-                  console.warn('Failed to parse SSE data:', parseError);
-                }
-              }
-            }
-          }
+        } catch (parseError) {
+          console.warn('Failed to parse WebSocket message:', parseError);
         }
-      } catch (streamError) {
-        console.error('Stream reading error:', streamError);
-        throw streamError;
-      } finally {
-        reader.releaseLock();
+      };
+
+      ws.onerror = (error) => {
+        console.error('❌ WebSocket error:', error);
+        toast({
+          title: "Connection Error",
+          description: "Failed to establish live conversation",
+          variant: "destructive",
+        });
         setIsLive(false);
-      }
+        setIsGenerating(false);
+      };
+
+      ws.onclose = (event) => {
+        console.log('🔌 WebSocket closed:', event.code, event.reason);
+        setIsLive(false);
+        if (isGenerating) {
+          setIsGenerating(false);
+        }
+      };
+
+      // Store WebSocket reference for cleanup
+      eventSourceRef.current = ws as any;
 
     } catch (error: any) {
-      console.error('❌ Error generating live preview:', error);
+      console.error('❌ Error starting live preview:', error);
       
       let errorMessage = "Failed to start live conversation";
       if (error?.message) {
@@ -174,7 +144,9 @@ export const usePodcastPreview = () => {
       setIsLive(false);
       throw error;
     } finally {
-      setIsGenerating(false);
+      if (!isLive) {
+        setIsGenerating(false);
+      }
     }
   }, [isGenerating, isLive, toast]);
 
