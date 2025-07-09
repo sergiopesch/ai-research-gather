@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
 import { usePaperActions } from '@/hooks/usePaperActions';
+import { useToast } from '@/hooks/use-toast';
 import type { Paper } from '@/types/research';
 
 interface PaperCardProps {
@@ -13,11 +14,27 @@ interface PaperCardProps {
 
 export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const { selectPaper, isSelecting } = usePaperActions();
+  const { toast } = useToast();
 
   const handleSelectPaper = async () => {
+    console.log('🔥 MOBILE DEBUG: Button clicked!', { paperId: paper.id, paper });
+    
+    if (!paper.id) {
+      console.error('❌ CRITICAL: Paper ID is missing!', paper);
+      toast({
+        title: "Error",
+        description: "Paper ID is missing. Cannot select paper.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
+      console.log('🚀 MOBILE DEBUG: Calling selectPaper with ID:', paper.id);
       await selectPaper(paper.id);
+      console.log('✅ MOBILE DEBUG: selectPaper completed successfully');
     } catch (error) {
+      console.error('❌ MOBILE DEBUG: selectPaper failed:', error);
       // Error handling is done in the hook
     }
   };

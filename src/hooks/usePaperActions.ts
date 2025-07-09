@@ -9,13 +9,21 @@ export const usePaperActions = () => {
   const { toast } = useToast();
 
   const selectPaper = useCallback(async (paperId: string) => {
-    if (isSelecting || selectedPapers.has(paperId)) return;
+    console.log('🔥 MOBILE DEBUG: selectPaper called with:', { paperId, isSelecting, hasSelected: selectedPapers.has(paperId) });
+    
+    if (isSelecting || selectedPapers.has(paperId)) {
+      console.log('🚫 MOBILE DEBUG: Early return - already selecting or selected');
+      return;
+    }
     
     setIsSelecting(true);
     try {
+      console.log('🚀 MOBILE DEBUG: Invoking selectPaper function...');
       const { data, error } = await supabase.functions.invoke('selectPaper', {
         body: { paper_id: paperId }
       });
+
+      console.log('📡 MOBILE DEBUG: Function response:', { data, error });
 
       if (error) throw error;
 
@@ -26,9 +34,10 @@ export const usePaperActions = () => {
         description: "Paper has been queued for processing",
       });
 
+      console.log('✅ MOBILE DEBUG: Selection completed successfully');
       return data;
     } catch (error: any) {
-      console.error('Error selecting paper:', error);
+      console.error('❌ MOBILE DEBUG: Error selecting paper:', error);
       
       // Handle specific error cases with better messaging
       let errorMessage = "Failed to select paper";
@@ -49,6 +58,7 @@ export const usePaperActions = () => {
       throw error;
     } finally {
       setIsSelecting(false);
+      console.log('🏁 MOBILE DEBUG: setIsSelecting(false) called');
     }
   }, [isSelecting, selectedPapers, toast]);
 
