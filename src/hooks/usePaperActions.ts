@@ -46,7 +46,26 @@ export const usePaperActions = () => {
         body: { paper_id: paperId }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error cases
+        if (error.message && error.message.includes('409')) {
+          // Paper already selected - this is actually good news!
+          setSelectedPaper(paperId);
+          
+          toast({
+            title: "Paper Already Selected",
+            description: "This paper is ready for processing. Redirecting...",
+          });
+
+          // Automatically redirect to processing hub
+          setTimeout(() => {
+            navigate('/processing');
+          }, 1000);
+
+          return { success: true, already_selected: true };
+        }
+        throw error;
+      }
 
       setSelectedPaper(paperId);
       
@@ -62,21 +81,63 @@ export const usePaperActions = () => {
 
       return data;
     } catch (error: any) {
+      console.error('❌ Selection error:', error);
+      
+      // Enhanced error parsing for better user experience
       let errorMessage = "Failed to select paper";
+      let errorTitle = "Selection Failed";
+      
       if (error?.message) {
         try {
+          // Try to parse JSON error response
           const errorData = JSON.parse(error.message);
+          
+          if (errorData.error === "Paper already selected") {
+            // Handle already selected case gracefully
+            setSelectedPaper(paperId);
+            
+            toast({
+              title: "Paper Ready",
+              description: "This paper is already selected and ready for processing!",
+            });
+
+            // Redirect to processing hub
+            setTimeout(() => {
+              navigate('/processing');
+            }, 1000);
+
+            return { success: true, already_selected: true };
+          }
+          
           errorMessage = errorData.message || errorData.error || errorMessage;
+          errorTitle = errorData.error || errorTitle;
         } catch {
+          // If not JSON, check for specific error patterns
+          if (error.message.includes('409') || error.message.includes('already selected')) {
+            setSelectedPaper(paperId);
+            
+            toast({
+              title: "Paper Ready",
+              description: "This paper is already selected and ready for processing!",
+            });
+
+            setTimeout(() => {
+              navigate('/processing');
+            }, 1000);
+
+            return { success: true, already_selected: true };
+          }
+          
           errorMessage = error.message;
         }
       }
       
       toast({
-        title: "Selection Failed",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });
+      
       throw error;
     } finally {
       setIsSelecting(false);
