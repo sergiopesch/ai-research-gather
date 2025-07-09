@@ -1,11 +1,5 @@
 import type { Paper } from './types.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept, cache-control',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-
 // ArXiv API integration with category-specific searches
 export async function fetchArxivPapersForCategory(category: string, since: string, timeout: number): Promise<Paper[]> {
   const baseUrl = Deno.env.get('ARXIV_BASE_URL') || 'http://export.arxiv.org/api/query'

@@ -1,11 +1,5 @@
 import type { Paper } from './types.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept, cache-control',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-
 // BULLETPROOF distribution algorithm - GUARANTEED equal distribution
 export function selectPapersWithAbsolutePerfectDistribution(
   papersByCategory: { [key: string]: Paper[] }, 
