@@ -197,8 +197,11 @@ Current paper: "${title}" by ${authorsText}`
 }
 
 serve(async (req: Request): Promise<Response> => {
+  console.log(`📨 Request received: ${req.method} ${req.url}`)
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    console.log('✅ Handling CORS preflight')
     return new Response(null, {
       status: 200,
       headers: corsHeaders,
@@ -206,6 +209,7 @@ serve(async (req: Request): Promise<Response> => {
   }
   
   if (req.method !== 'POST') {
+    console.log('❌ Method not allowed:', req.method)
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 
@@ -216,7 +220,10 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log('🔍 Parsing request body...')
     const body = await req.json()
+    console.log('📦 Request body:', body)
+    
     const { paper_id, episode, duration } = RequestSchema.parse(body)
     
     console.log(`=== GENERATE LIVE PODCAST CONVERSATION ===`)
@@ -227,12 +234,25 @@ serve(async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')!
     
+    console.log('🔑 Checking environment variables...')
+    console.log('Supabase URL:', supabaseUrl ? 'SET' : 'MISSING')
+    console.log('Supabase Service Key:', supabaseServiceKey ? 'SET' : 'MISSING')
+    console.log('OpenAI API Key:', openAIApiKey ? 'SET' : 'MISSING')
+    
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured')
+      console.error('❌ OpenAI API key not configured')
+      return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
+        status: 500,
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        }
+      })
     }
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+    console.log('🔍 Fetching paper from database...')
     // Fetch paper with SELECTED status
     const { data: paper, error: fetchError } = await supabase
       .from('papers')
@@ -242,7 +262,7 @@ serve(async (req: Request): Promise<Response> => {
       .single()
 
     if (fetchError || !paper) {
-      console.error('Paper not found or not selected:', fetchError)
+      console.error('❌ Paper not found or not selected:', fetchError)
       return new Response(JSON.stringify({ 
         error: 'Paper not found or not in SELECTED status',
         paper_id 
@@ -255,27 +275,30 @@ serve(async (req: Request): Promise<Response> => {
       })
     }
 
-    console.log(`Starting live conversation for: "${paper.title}"`)
+    console.log(`✅ Paper found: "${paper.title}"`)
 
     // Extract authors from title or use source as fallback
     const authors = paper.source ? [paper.source] : ['the researchers']
 
-    // Always return SSE stream for live conversation with immediate flush
+    console.log('🚀 Starting SSE stream...')
+    // Return SSE stream for live conversation with immediate response
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          console.log('🚀 Starting SSE stream for live conversation')
+          console.log('📡 SSE stream started')
           
           // Send conversation start event immediately
+          console.log('📤 Sending start event...')
           sendSSEEvent(controller, 'start', { 
             paper_id,
             episode,
             title: paper.title
           })
           
-          // Small delay to ensure client is ready
-          await new Promise(resolve => setTimeout(resolve, 100))
+          // Small delay to ensure client receives start event
+          await new Promise(resolve => setTimeout(resolve, 200))
           
+          console.log('🎙️ Starting live conversation generation...')
           // Generate live conversation with immediate streaming
           await generateLiveConversation(
             paper.title,
@@ -285,33 +308,39 @@ serve(async (req: Request): Promise<Response> => {
             controller
           )
           
-          console.log('✅ Live conversation stream completed')
+          console.log('✅ Live conversation stream completed successfully')
           // Close stream
           controller.close()
         } catch (error) {
           console.error('❌ Stream error:', error)
-          sendSSEEvent(controller, 'error', {
-            message: error instanceof Error ? error.message : 'Unknown error'
-          })
+          try {
+            sendSSEEvent(controller, 'error', {
+              message: error instanceof Error ? error.message : 'Unknown stream error'
+            })
+          } catch (sendError) {
+            console.error('❌ Failed to send error event:', sendError)
+          }
           controller.close()
         }
       }
     })
 
+    console.log('📡 Returning SSE response...')
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Connection': 'keep-alive',
-        'X-Accel-Buffering': 'no', // Disable nginx buffering
+        'X-Accel-Buffering': 'no', // Disable nginx buffering for immediate streaming
         ...corsHeaders,
       }
     })
     
   } catch (error) {
-    console.error('GeneratePodcastPreview error:', error)
+    console.error('❌ GeneratePodcastPreview error:', error)
     
     if (error instanceof z.ZodError) {
+      console.error('❌ Validation error:', error.errors)
       return new Response(JSON.stringify({ 
         error: 'Invalid input', 
         details: error.errors 
