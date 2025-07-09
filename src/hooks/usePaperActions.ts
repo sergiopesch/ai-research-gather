@@ -80,62 +80,52 @@ export const usePaperActions = () => {
       return data;
     } catch (error: any) {
       console.error('Selection error:', error);
-      
-      // Enhanced error parsing for better user experience
       let errorMessage = "Failed to select paper";
       let errorTitle = "Selection Failed";
-      
-      if (error?.message) {
+      // Try to get the real error message from the Edge Function response
+      if (error?.context?.response) {
         try {
-          // Try to parse JSON error response
+          const data = await error.context.response.json();
+          if (data.error) errorMessage = data.error;
+          else if (data.message) errorMessage = data.message;
+        } catch {
+          try {
+            const text = await error.context.response.text();
+            if (text) errorMessage = text;
+          } catch {}
+        }
+      } else if (error?.message) {
+        try {
           const errorData = JSON.parse(error.message);
-          
           if (errorData.error === "Paper already selected") {
-            // Handle already selected case gracefully
             setSelectedPaper(paperId);
-            
             toast({
               title: "Paper Ready",
               description: "This paper is already selected and ready for processing!",
             });
-
-            // Redirect to processing hub
-            setTimeout(() => {
-              navigate('/processing');
-            }, 1000);
-
+            setTimeout(() => { navigate('/processing'); }, 1000);
             return { success: true, already_selected: true };
           }
-          
           errorMessage = errorData.message || errorData.error || errorMessage;
           errorTitle = errorData.error || errorTitle;
         } catch {
-          // If not JSON, check for specific error patterns
           if (error.message.includes('409') || error.message.includes('already selected')) {
             setSelectedPaper(paperId);
-            
             toast({
               title: "Paper Ready",
               description: "This paper is already selected and ready for processing!",
             });
-
-            setTimeout(() => {
-              navigate('/processing');
-            }, 1000);
-
+            setTimeout(() => { navigate('/processing'); }, 1000);
             return { success: true, already_selected: true };
           }
-          
           errorMessage = error.message;
         }
       }
-      
       toast({
         title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });
-      
       throw error;
     } finally {
       setIsSelecting(false);
@@ -161,10 +151,20 @@ export const usePaperActions = () => {
       return data;
     } catch (error: any) {
       console.error('Error processing paper:', error);
-      
-      // Handle specific error cases with better messaging
       let errorMessage = "Failed to process paper";
-      if (error?.message) {
+      // Try to get the real error message from the Edge Function response
+      if (error?.context?.response) {
+        try {
+          const data = await error.context.response.json();
+          if (data.error) errorMessage = data.error;
+          else if (data.message) errorMessage = data.message;
+        } catch {
+          try {
+            const text = await error.context.response.text();
+            if (text) errorMessage = text;
+          } catch {}
+        }
+      } else if (error?.message) {
         try {
           const errorData = JSON.parse(error.message);
           errorMessage = errorData.message || errorData.error || errorMessage;
@@ -172,7 +172,6 @@ export const usePaperActions = () => {
           errorMessage = error.message;
         }
       }
-      
       toast({
         title: "Processing Failed",
         description: errorMessage,
