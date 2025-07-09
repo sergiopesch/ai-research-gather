@@ -42,7 +42,7 @@ export const usePodcastPreview = () => {
     setIsLive(false);
 
     try {
-      console.log('🎙️ Starting live podcast conversation for paper:', paperId);
+      console.log('🎙️ Starting real-time AI conversation for paper:', paperId);
       
       // Close any existing connections
       if (eventSourceRef.current) {
@@ -50,56 +50,117 @@ export const usePodcastPreview = () => {
         eventSourceRef.current = null;
       }
 
-      // Use proper Supabase client function invocation
-      const { data, error } = await supabase.functions.invoke('generatePodcastPreview', {
-        body: {
+      // Use proper Supabase function URL with streaming
+      const SUPABASE_URL = "https://eapnatbiodenijfrpqcn.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU";
+      
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/generatePodcastPreview`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
           paper_id: paperId,
           episode,
           duration
-        }
+        })
       });
 
-      if (error) {
-        throw new Error(`Supabase function error: ${error.message}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // If the function returns immediate data, handle it
-      if (data && data.dialogue) {
-        setIsLive(true);
-        setIsGenerating(false);
-        
-        toast({
-          title: "Live Conversation Started",
-          description: "Dr. Ada and Sam are having a real conversation!",
-        });
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body reader available');
+      }
 
-        // Simulate real-time streaming of the dialogue
-        for (let i = 0; i < data.dialogue.length; i++) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay between messages
+      setIsGenerating(false);
+      setIsLive(true);
+
+      toast({
+        title: "Live Conversation Started",
+        description: "Dr. Ada and Sam are having a REAL conversation!",
+      });
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
           
-          setDialogue(prev => [...prev, {
-            speaker: data.dialogue[i].speaker,
-            text: data.dialogue[i].text,
-            timestamp: Date.now()
-          }]);
-        }
-        
-        setIsLive(false);
-        return;
-      }
+          if (done) {
+            console.log('✅ Real-time conversation completed');
+            setIsLive(false);
+            break;
+          }
 
-      throw new Error('No valid response from function');
+          // Process stream immediately for real-time effect
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+          
+          // Process each complete line immediately
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.trim() === '') continue;
+            
+            if (line.startsWith('event: ')) {
+              const eventType = line.slice(7).trim();
+              continue;
+            }
+            
+            if (line.startsWith('data: ')) {
+              try {
+                const jsonStr = line.slice(6); // Remove 'data: '
+                const data = JSON.parse(jsonStr);
+                
+                if (data.speaker && data.text) {
+                  console.log(`🗣️ REAL-TIME: ${data.speaker}: ${data.text}`);
+                  
+                  // Add dialogue immediately for real-time effect
+                  setDialogue(prev => [...prev, {
+                    speaker: data.speaker,
+                    text: data.text,
+                    timestamp: Date.now()
+                  }]);
+                } else if (data.message && data.message.includes('Conversation completed')) {
+                  console.log('📝 Real-time conversation ending...');
+                  setIsLive(false);
+                } else if (data.speaker && data.chunk) {
+                  // Handle real-time chunks (word-by-word streaming)
+                  console.log(`🔤 CHUNK: ${data.speaker}: ${data.chunk}`);
+                }
+              } catch (parseError) {
+                console.warn('Failed to parse SSE data:', parseError);
+              }
+            }
+          }
+        }
+      } catch (streamError) {
+        console.error('Stream reading error:', streamError);
+        throw streamError;
+      } finally {
+        reader.releaseLock();
+        setIsLive(false);
+      }
 
     } catch (error: any) {
-      console.error('❌ Error starting live preview:', error);
+      console.error('❌ Error starting real-time conversation:', error);
       
-      let errorMessage = "Failed to start live conversation";
+      let errorMessage = "Failed to start real-time conversation";
       if (error?.message) {
         errorMessage = error.message;
       }
       
       toast({
-        title: "Live Conversation Failed",
+        title: "Real-time Conversation Failed",
         description: errorMessage,
         variant: "destructive",
       });

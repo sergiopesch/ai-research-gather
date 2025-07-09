@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const SELECTED_PAPER_KEY = 'selectedPaper';
 
@@ -16,6 +17,7 @@ export const usePaperActions = () => {
     }
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Persist selectedPaper to localStorage whenever it changes
   const setSelectedPaper = useCallback((paperId: string | null) => {
@@ -50,8 +52,13 @@ export const usePaperActions = () => {
       
       toast({
         title: "Paper Selected",
-        description: "Paper has been queued for processing",
+        description: "Redirecting to processing hub...",
       });
+
+      // Automatically redirect to processing hub
+      setTimeout(() => {
+        navigate('/processing');
+      }, 1000);
 
       return data;
     } catch (error: any) {
@@ -74,7 +81,7 @@ export const usePaperActions = () => {
     } finally {
       setIsSelecting(false);
     }
-  }, [isSelecting, selectedPaper, toast, setSelectedPaper]);
+  }, [isSelecting, selectedPaper, toast, setSelectedPaper, navigate]);
 
   const processPaper = useCallback(async (paperId: string, model?: string) => {
     if (isProcessing) return;

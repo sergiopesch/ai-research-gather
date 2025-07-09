@@ -261,9 +261,9 @@ const ProcessingHub = () => {
                   </div>
 
                   {isLive && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                      <span>Live conversation in progress between GPT-4O (Dr Ada) and GPT-4O mini (Sam)</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span>🎙️ LIVE: Real-time AI conversation between GPT-4.1-mini models</span>
                     </div>
                   )}
                 </div>
