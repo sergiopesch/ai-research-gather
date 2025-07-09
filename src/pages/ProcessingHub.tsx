@@ -1,15 +1,27 @@
 import { useState } from 'react';
-import { ArrowLeft, Brain, FileText, Play, Loader2, X } from 'lucide-react';
+import { ArrowLeft, Brain, FileText, Play, Loader2, X, Mic, Square, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { usePaperActions } from '@/hooks/usePaperActions';
+import { usePodcastPreview } from '@/hooks/usePodcastPreview';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ProcessingHub = () => {
   const { selectedPaper, hasSelectedPaper, processPaper, isProcessing, clearSelectedPaper } = usePaperActions();
+  const { 
+    generatePreview, 
+    playPreview, 
+    stopPreview, 
+    clearPreview,
+    isGenerating, 
+    preview, 
+    isPlaying, 
+    currentUtteranceIndex,
+    hasPreview 
+  } = usePodcastPreview();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [selectedModel, setSelectedModel] = useState<string>('gpt-4o');
@@ -33,7 +45,35 @@ const ProcessingHub = () => {
 
   const handleClearSelection = () => {
     clearSelectedPaper();
+    clearPreview();
     navigate('/');
+  };
+
+  const handleGeneratePreview = async () => {
+    if (!selectedPaper) {
+      toast({
+        title: "No Paper Selected",
+        description: "Please select a paper first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await generatePreview(selectedPaper, 1, 10);
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
+
+  const handlePlayPreview = () => {
+    if (hasPreview) {
+      if (isPlaying) {
+        stopPreview();
+      } else {
+        playPreview();
+      }
+    }
   };
 
   if (!hasSelectedPaper) {
@@ -208,6 +248,117 @@ const ProcessingHub = () => {
                   </>
                 )}
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Podcast Preview Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <Radio className="w-5 h-5" />
+                The Notebook Pod Preview
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Generate a 10-second podcast preview with AI hosts Dr. Ada and Sam
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Preview Generation */}
+              <div className="space-y-4">
+                <Button 
+                  onClick={handleGeneratePreview}
+                  disabled={isGenerating || !selectedPaper}
+                  className="w-full"
+                  variant="outline"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating Preview...
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-4 h-4 mr-2" />
+                      Generate Podcast Preview
+                    </>
+                  )}
+                </Button>
+
+                {/* Preview Display */}
+                {hasPreview && preview && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-sm">Episode {preview.episode}</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {preview.dialogue.length} lines • {preview.metadata.duration_seconds}s duration
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={handlePlayPreview}
+                          size="sm"
+                          variant={isPlaying ? "destructive" : "default"}
+                        >
+                          {isPlaying ? (
+                            <>
+                              <Square className="w-3 h-3 mr-1" />
+                              Stop
+                            </>
+                          ) : (
+                            <>
+                              <Play className="w-3 h-3 mr-1" />
+                              Play
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          onClick={clearPreview}
+                          size="sm"
+                          variant="ghost"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Dialogue Display */}
+                    <div className="space-y-2 max-h-64 overflow-y-auto bg-muted/20 rounded-lg p-4 border">
+                      {preview.dialogue.map((utterance, index) => (
+                        <div 
+                          key={index}
+                          className={`flex gap-3 p-2 rounded transition-colors ${
+                            isPlaying && index === currentUtteranceIndex 
+                              ? 'bg-primary/10 border border-primary/20' 
+                              : index < currentUtteranceIndex && isPlaying
+                              ? 'bg-muted/40 opacity-60'
+                              : 'hover:bg-muted/30'
+                          }`}
+                        >
+                          <div className="flex-shrink-0">
+                            <Badge 
+                              variant={utterance.speaker === "Dr Ada" ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {utterance.speaker}
+                            </Badge>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm leading-relaxed">{utterance.text}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {isPlaying && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                        <span>Playing line {currentUtteranceIndex + 1} of {preview.dialogue.length}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
