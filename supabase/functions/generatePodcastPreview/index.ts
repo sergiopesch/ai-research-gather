@@ -7,29 +7,74 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// Function to send SSE event
-function sendSSEEvent(controller: ReadableStreamDefaultController, eventType: string, data: any) {
+// Simplified conversation generation with real AI
+async function generateConversation(paperTitle: string, openAIApiKey: string) {
+  const prompt = `Generate a natural, engaging podcast conversation between Dr Ada (technical expert) and Sam (curious interviewer) about the research paper titled "${paperTitle}".
+
+Make it sound like a real conversation with natural flow, questions, and insights. Generate exactly 5 exchanges (10 total utterances).
+
+Return ONLY a JSON array in this exact format:
+[
+  {"speaker": "Dr Ada", "text": "..."},
+  {"speaker": "Sam", "text": "..."},
+  {"speaker": "Dr Ada", "text": "..."},
+  {"speaker": "Sam", "text": "..."},
+  {"speaker": "Dr Ada", "text": "..."}
+]`
+
   try {
-    const message = `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`
-    controller.enqueue(new TextEncoder().encode(message))
-    console.log(`✅ Sent SSE event: ${eventType}`)
+    console.log('🤖 Calling OpenAI API...')
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-mini-2025-04-14',
+        messages: [
+          { role: 'system', content: 'You are a podcast conversation generator. Return only valid JSON arrays.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 1500,
+        temperature: 0.8,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const content = data.choices[0].message.content.trim()
+    
+    // Parse the JSON response
+    const dialogue = JSON.parse(content)
+    console.log('✅ Generated dialogue with', dialogue.length, 'utterances')
+    return dialogue
+    
   } catch (error) {
-    console.error('❌ Failed to send SSE event:', error)
+    console.error('❌ OpenAI error:', error)
+    // Fallback dialogue if API fails
+    return [
+      { speaker: "Dr Ada", text: `Welcome to The Notebook Pod! Today we're exploring "${paperTitle}".` },
+      { speaker: "Sam", text: "Thanks! What makes this research particularly interesting?" },
+      { speaker: "Dr Ada", text: "This work addresses key challenges in the field and introduces innovative approaches." },
+      { speaker: "Sam", text: "That's fascinating! Can you elaborate on the practical applications?" },
+      { speaker: "Dr Ada", text: "The applications are wide-ranging and could significantly impact the field." }
+    ]
   }
 }
 
 serve(async (req: Request): Promise<Response> => {
   console.log(`🚀 Function called: ${req.method} ${req.url}`)
-  console.log(`📅 Timestamp: ${new Date().toISOString()}`)
   
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    console.log('✅ CORS preflight handled')
     return new Response(null, { status: 200, headers: corsHeaders })
   }
   
   if (req.method !== 'POST') {
-    console.log('❌ Invalid method:', req.method)
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -37,44 +82,22 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log('🔍 Parsing request body...')
-    let body;
-    try {
-      body = await req.json()
-      console.log('📦 Request body received:', JSON.stringify(body))
-    } catch (parseError) {
-      console.error('❌ Failed to parse JSON:', parseError)
-      return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders }
-      })
-    }
+    const body = await req.json()
+    const { paper_id, episode = 1, duration = 10 } = body
 
-    // Validate required fields
-    if (!body.paper_id) {
-      console.error('❌ Missing paper_id')
+    if (!paper_id) {
       return new Response(JSON.stringify({ error: 'paper_id is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       })
     }
 
-    const { paper_id, episode = 1, duration = 10 } = body
-
-    console.log(`🎯 Processing: paper_id=${paper_id}, episode=${episode}, duration=${duration}`)
-
     // Check environment variables
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
     
-    console.log('🔑 Environment check:')
-    console.log(`  - Supabase URL: ${supabaseUrl ? '✅ SET' : '❌ MISSING'}`)
-    console.log(`  - Supabase Service Key: ${supabaseServiceKey ? '✅ SET' : '❌ MISSING'}`)
-    console.log(`  - OpenAI API Key: ${openAIApiKey ? '✅ SET' : '❌ MISSING'}`)
-    
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('❌ Missing Supabase credentials')
       return new Response(JSON.stringify({ error: 'Supabase credentials not configured' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -82,7 +105,6 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     if (!openAIApiKey) {
-      console.error('❌ Missing OpenAI API key')
       return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -90,7 +112,6 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     // Initialize Supabase client
-    console.log('🔌 Connecting to Supabase...')
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Fetch paper
@@ -114,7 +135,6 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     if (!paper) {
-      console.error('❌ Paper not found or not selected')
       return new Response(JSON.stringify({ 
         error: 'Paper not found or not in SELECTED status',
         paper_id 
@@ -125,93 +145,27 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     console.log(`✅ Found paper: "${paper.title}"`)
-
-    // Create SSE stream with immediate test content
-    console.log('🚀 Creating SSE stream...')
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          console.log('📡 SSE stream started')
-          
-          // Send immediate start event
-          sendSSEEvent(controller, 'start', { 
-            paper_id,
-            episode,
-            title: paper.title,
-            timestamp: new Date().toISOString()
-          })
-          
-          // Send immediate test dialogue
-          await new Promise(resolve => setTimeout(resolve, 500))
-          sendSSEEvent(controller, 'dialogue', {
-            speaker: "Dr Ada",
-            text: `Welcome to The Notebook Pod, Episode ${episode}! Today we're exploring "${paper.title}".`
-          })
-          
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          sendSSEEvent(controller, 'dialogue', {
-            speaker: "Sam",
-            text: "Thanks for the introduction! What makes this research particularly interesting?"
-          })
-          
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          sendSSEEvent(controller, 'dialogue', {
-            speaker: "Dr Ada",
-            text: "This work addresses key challenges in the field and introduces innovative approaches."
-          })
-          
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          sendSSEEvent(controller, 'dialogue', {
-            speaker: "Sam",
-            text: "That's fascinating! Can you elaborate on the practical applications?"
-          })
-          
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          sendSSEEvent(controller, 'dialogue', {
-            speaker: "Dr Ada",
-            text: "The applications are wide-ranging and could significantly impact the field."
-          })
-          
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          sendSSEEvent(controller, 'end', {
-            message: 'Thanks for tuning in to The Notebook Pod! Stay curious!'
-          })
-          
-          console.log('✅ SSE stream completed successfully')
-          controller.close()
-          
-        } catch (streamError) {
-          console.error('❌ Stream error:', streamError)
-          try {
-            sendSSEEvent(controller, 'error', {
-              message: 'Stream failed',
-              error: streamError.message
-            })
-          } catch {}
-          controller.close()
-        }
-      }
-    })
-
-    console.log('📡 Returning SSE response...')
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Connection': 'keep-alive',
-        'X-Accel-Buffering': 'no',
-        ...corsHeaders,
-      }
+    
+    // Generate conversation
+    const dialogue = await generateConversation(paper.title, openAIApiKey)
+    
+    // Return the dialogue for frontend to handle streaming
+    return new Response(JSON.stringify({ 
+      success: true,
+      dialogue,
+      paper_title: paper.title,
+      episode,
+      duration
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
     })
     
   } catch (error) {
     console.error('❌ Function error:', error)
-    console.error('❌ Error stack:', error.stack)
     
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
-      message: error.message,
-      stack: error.stack
+      message: error.message
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...corsHeaders }

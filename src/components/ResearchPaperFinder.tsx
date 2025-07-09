@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Play, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,22 +18,23 @@ const ResearchPaperFinder = () => {
   const { hasSelectedPaper } = usePaperActions();
   const { toast } = useToast();
 
-  const getSelectedKeywords = () => {
+  // Memoize keywords calculation for better performance
+  const selectedKeywords = useMemo(() => {
     return selectedAreas.flatMap(areaId => {
       const area = RESEARCH_AREAS.find(a => a.id === areaId);
       return area ? area.keywords : [];
     });
-  };
+  }, [selectedAreas]);
 
-  const handleAreaToggle = (areaId: string) => {
+  const handleAreaToggle = useCallback((areaId: string) => {
     setSelectedAreas(prev => 
       prev.includes(areaId) 
         ? prev.filter(id => id !== areaId) 
         : [...prev, areaId]
     );
-  };
+  }, []);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     if (selectedAreas.length === 0) {
       toast({
         title: "No research areas selected",
@@ -43,11 +44,11 @@ const ResearchPaperFinder = () => {
       return;
     }
 
-    const keywords = getSelectedKeywords();
-    await searchPapers(keywords, 6);
-  };
+    await searchPapers(selectedKeywords, 6);
+  }, [selectedAreas.length, selectedKeywords, searchPapers, toast]);
 
-  const formatDate = (dateString: string) => {
+  // Memoize formatted date
+  const formattedDate = useMemo(() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     return yesterday.toLocaleDateString('en-US', {
@@ -55,7 +56,7 @@ const ResearchPaperFinder = () => {
       day: 'numeric',
       year: 'numeric'
     });
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,7 +113,7 @@ const ResearchPaperFinder = () => {
                   Latest Research Papers
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Papers from {formatDate(new Date().toISOString())}
+                  Papers from {formattedDate}
                 </p>
               </div>
               <Badge variant="secondary" className="px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium w-fit">

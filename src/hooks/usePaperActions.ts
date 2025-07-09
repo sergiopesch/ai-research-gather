@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,21 +34,15 @@ export const usePaperActions = () => {
   }, []);
 
   const selectPaper = useCallback(async (paperId: string) => {
-    console.log('🔥 MOBILE DEBUG: selectPaper called with:', { paperId, isSelecting, hasSelected: selectedPaper === paperId });
-    
     if (isSelecting || selectedPaper === paperId) {
-      console.log('🚫 MOBILE DEBUG: Early return - already selecting or selected');
       return;
     }
     
     setIsSelecting(true);
     try {
-      console.log('🚀 MOBILE DEBUG: Invoking selectPaper function...');
       const { data, error } = await supabase.functions.invoke('selectPaper', {
         body: { paper_id: paperId }
       });
-
-      console.log('📡 MOBILE DEBUG: Function response:', { data, error });
 
       if (error) throw error;
 
@@ -59,12 +53,8 @@ export const usePaperActions = () => {
         description: "Paper has been queued for processing",
       });
 
-      console.log('✅ MOBILE DEBUG: Selection completed successfully');
       return data;
     } catch (error: any) {
-      console.error('❌ MOBILE DEBUG: Error selecting paper:', error);
-      
-      // Handle specific error cases with better messaging
       let errorMessage = "Failed to select paper";
       if (error?.message) {
         try {
@@ -83,9 +73,8 @@ export const usePaperActions = () => {
       throw error;
     } finally {
       setIsSelecting(false);
-      console.log('🏁 MOBILE DEBUG: setIsSelecting(false) called');
     }
-  }, [isSelecting, selectedPaper, toast]);
+  }, [isSelecting, selectedPaper, toast, setSelectedPaper]);
 
   const processPaper = useCallback(async (paperId: string, model?: string) => {
     if (isProcessing) return;
@@ -135,15 +124,10 @@ export const usePaperActions = () => {
 
   const clearSelectedPaper = useCallback(() => {
     setSelectedPaper(null);
-    console.log('🧹 MOBILE DEBUG: Cleared selected paper');
   }, [setSelectedPaper]);
 
-  // Debug logging when selectedPaper changes
-  useEffect(() => {
-    console.log('🎯 MOBILE DEBUG: Selected paper changed:', selectedPaper);
-  }, [selectedPaper]);
-
-  return {
+  // Memoize return object to prevent unnecessary re-renders
+  return useMemo(() => ({
     selectPaper,
     processPaper,
     isPaperSelected,
@@ -152,5 +136,5 @@ export const usePaperActions = () => {
     isProcessing,
     selectedPaper,
     hasSelectedPaper: selectedPaper !== null
-  };
+  }), [selectPaper, processPaper, isPaperSelected, clearSelectedPaper, isSelecting, isProcessing, selectedPaper]);
 };

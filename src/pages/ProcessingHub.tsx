@@ -6,6 +6,7 @@ import { usePaperActions } from '@/hooks/usePaperActions';
 import { usePodcastPreview } from '@/hooks/usePodcastPreview';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 
 const ProcessingHub = () => {
   const { selectedPaper, hasSelectedPaper, clearSelectedPaper } = usePaperActions();
@@ -21,13 +22,13 @@ const ProcessingHub = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleClearSelection = () => {
+  const handleClearSelection = useCallback(() => {
     clearSelectedPaper();
     clearPreview();
     navigate('/');
-  };
+  }, [clearSelectedPaper, clearPreview, navigate]);
 
-  const handleGenerateLivePreview = async () => {
+  const handleGenerateLivePreview = useCallback(async () => {
     if (!selectedPaper) {
       toast({
         title: "No Paper Selected",
@@ -42,11 +43,11 @@ const ProcessingHub = () => {
     } catch (error) {
       // Error handling is done in the hook
     }
-  };
+  }, [selectedPaper, generateLivePreview, toast]);
 
-  const handleStopConversation = () => {
+  const handleStopConversation = useCallback(() => {
     stopConversation();
-  };
+  }, [stopConversation]);
 
   if (!hasSelectedPaper) {
     return (

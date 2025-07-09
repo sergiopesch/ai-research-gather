@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -50,98 +50,45 @@ export const usePodcastPreview = () => {
         eventSourceRef.current = null;
       }
 
-      // Use optimized SSE with faster streaming
-      const SUPABASE_URL = "https://eapnatbiodenijfrpqcn.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU";
-      
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/generatePodcastPreview`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'apikey': SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
+      // Use proper Supabase client function invocation
+      const { data, error } = await supabase.functions.invoke('generatePodcastPreview', {
+        body: {
           paper_id: paperId,
           episode,
           duration
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body reader available');
-      }
-
-      setIsGenerating(false);
-      setIsLive(true);
-
-      toast({
-        title: "Live Conversation Started",
-        description: "Dr. Ada and Sam are having a real conversation!",
-      });
-
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          
-          if (done) {
-            console.log('✅ Live conversation completed');
-            setIsLive(false);
-            break;
-          }
-
-          // Process stream immediately for real-time effect
-          const chunk = decoder.decode(value, { stream: true });
-          buffer += chunk;
-          
-          // Process each complete line immediately
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.trim() === '') continue;
-            
-            if (line.startsWith('data: ')) {
-              try {
-                const jsonStr = line.slice(6); // Remove 'data: '
-                const data = JSON.parse(jsonStr);
-                
-                if (data.speaker && data.text) {
-                  console.log(`🗣️ INSTANT: ${data.speaker}: ${data.text}`);
-                  
-                  // Add dialogue immediately for real-time effect
-                  setDialogue(prev => [...prev, {
-                    speaker: data.speaker,
-                    text: data.text,
-                    timestamp: Date.now()
-                  }]);
-                } else if (data.message && data.message.includes('Thanks for tuning in')) {
-                  console.log('📝 Conversation ending...');
-                  setIsLive(false);
-                }
-              } catch (parseError) {
-                console.warn('Failed to parse SSE data:', parseError);
-              }
-            }
-          }
         }
-      } catch (streamError) {
-        console.error('Stream reading error:', streamError);
-        throw streamError;
-      } finally {
-        reader.releaseLock();
-        setIsLive(false);
+      });
+
+      if (error) {
+        throw new Error(`Supabase function error: ${error.message}`);
       }
+
+      // If the function returns immediate data, handle it
+      if (data && data.dialogue) {
+        setIsLive(true);
+        setIsGenerating(false);
+        
+        toast({
+          title: "Live Conversation Started",
+          description: "Dr. Ada and Sam are having a real conversation!",
+        });
+
+        // Simulate real-time streaming of the dialogue
+        for (let i = 0; i < data.dialogue.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay between messages
+          
+          setDialogue(prev => [...prev, {
+            speaker: data.dialogue[i].speaker,
+            text: data.dialogue[i].text,
+            timestamp: Date.now()
+          }]);
+        }
+        
+        setIsLive(false);
+        return;
+      }
+
+      throw new Error('No valid response from function');
 
     } catch (error: any) {
       console.error('❌ Error starting live preview:', error);
@@ -171,7 +118,8 @@ export const usePodcastPreview = () => {
     console.log('🧹 Cleared conversation');
   }, [stopConversation]);
 
-  return {
+  // Memoize return object to prevent unnecessary re-renders
+  return useMemo(() => ({
     generateLivePreview,
     stopConversation,
     clearPreview,
@@ -180,5 +128,5 @@ export const usePodcastPreview = () => {
     isLive,
     currentPaperId,
     hasDialogue: dialogue.length > 0
-  };
+  }), [generateLivePreview, stopConversation, clearPreview, isGenerating, dialogue, isLive, currentPaperId]);
 };
