@@ -2,3 +2,12 @@ project_id = "eapnatbiodenijfrpqcn"
 
 [functions.paperFinder]
 verify_jwt = false
+
+[functions.generatePodcastPreview]
+verify_jwt = false
+
+[functions.processPaper]
+verify_jwt = false
+
+[functions.selectPaper]
+verify_jwt = false
