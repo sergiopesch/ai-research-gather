@@ -13,7 +13,7 @@ interface PaperCardProps {
 }
 
 export const PaperCard = ({ paper, index }: PaperCardProps) => {
-  const { selectPaper, isSelecting } = usePaperActions();
+  const { selectPaper, isSelecting, isPaperSelected } = usePaperActions();
   const { toast } = useToast();
 
   const handleSelectPaper = async () => {
@@ -90,6 +90,14 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
   const areaInfo = getPaperAreaInfo(paper.title);
   const AreaIcon = areaInfo.icon;
+  const isAlreadySelected = isPaperSelected(paper.id);
+  
+  console.log('🎯 MOBILE DEBUG: Paper Card Render:', { 
+    paperId: paper.id, 
+    title: paper.title.substring(0, 50),
+    isSelecting,
+    isAlreadySelected 
+  });
 
   return (
     <Card className="research-card group">
@@ -161,14 +169,21 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
             
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
               <Button 
-                variant="outline" 
+                variant={isAlreadySelected ? "default" : "outline"}
                 onClick={handleSelectPaper}
-                disabled={isSelecting}
-                className="flex items-center justify-center gap-2 text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation"
+                disabled={isSelecting || isAlreadySelected}
+                className="flex items-center justify-center gap-2 text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation relative"
+                style={{ backgroundColor: isAlreadySelected ? '#10b981' : undefined }}
               >
                 <Brain className="w-4 h-4 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{isSelecting ? "Selecting..." : "Select for Processing"}</span>
-                <span className="sm:hidden">{isSelecting ? "Selecting..." : "Select"}</span>
+                <span className="hidden sm:inline">
+                  {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select for Processing"}
+                </span>
+                <span className="sm:hidden">
+                  {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select"}
+                </span>
+                {/* Debug indicator */}
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full opacity-50" title={`ID: ${paper.id}`}></span>
               </Button>
               
               <Button variant="outline" asChild className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation">
