@@ -86,6 +86,17 @@ export const usePaperActions = () => {
       if (error?.context?.response) {
         try {
           const data = await error.context.response.json();
+          if (data.error === "Paper already selected") {
+            setSelectedPaper(paperId);
+            toast({
+              title: "Paper Already Selected",
+              description: "This paper is ready for processing. Redirecting...",
+            });
+            setTimeout(() => {
+              navigate('/processing');
+            }, 1000);
+            return { success: true, already_selected: true };
+          }
           if (data.error) errorMessage = data.error;
           else if (data.message) errorMessage = data.message;
         } catch {
@@ -100,10 +111,12 @@ export const usePaperActions = () => {
           if (errorData.error === "Paper already selected") {
             setSelectedPaper(paperId);
             toast({
-              title: "Paper Ready",
-              description: "This paper is already selected and ready for processing!",
+              title: "Paper Already Selected",
+              description: "This paper is ready for processing. Redirecting...",
             });
-            setTimeout(() => { navigate('/processing'); }, 1000);
+            setTimeout(() => {
+              navigate('/processing');
+            }, 1000);
             return { success: true, already_selected: true };
           }
           errorMessage = errorData.message || errorData.error || errorMessage;
@@ -112,10 +125,12 @@ export const usePaperActions = () => {
           if (error.message.includes('409') || error.message.includes('already selected')) {
             setSelectedPaper(paperId);
             toast({
-              title: "Paper Ready",
-              description: "This paper is already selected and ready for processing!",
+              title: "Paper Already Selected",
+              description: "This paper is ready for processing. Redirecting...",
             });
-            setTimeout(() => { navigate('/processing'); }, 1000);
+            setTimeout(() => {
+              navigate('/processing');
+            }, 1000);
             return { success: true, already_selected: true };
           }
           errorMessage = error.message;
