@@ -148,14 +148,17 @@ function getContextualPrompt(speaker: string, exchangeIndex: number, paperTitle:
 }
 
 serve(async (req: Request): Promise<Response> => {
-    console.log(`🚀 Real-time Podcast Function: ${req.method} ${req.url}`)
+  console.log(`🚀 Real-time Podcast Function: ${req.method} ${req.url}`)
+  console.log(`📋 Headers:`, Object.fromEntries(req.headers.entries()))
   
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS preflight request handled')
     return new Response(null, { status: 200, headers: corsHeaders })
   }
   
   if (req.method !== 'POST') {
+    console.error('❌ Method not allowed:', req.method)
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -182,6 +185,11 @@ serve(async (req: Request): Promise<Response> => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
+    
+    console.log('🔑 Environment check:')
+    console.log('- SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing')
+    console.log('- SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? 'Set' : 'Missing')
+    console.log('- OPENAI_API_KEY:', openAIApiKey ? 'Set' : 'Missing')
     
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Missing Supabase environment variables')
