@@ -142,21 +142,21 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
               )}
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
               <Button 
                 variant="outline" 
                 onClick={handleSelectPaper}
                 disabled={isSelecting}
-                className="flex items-center gap-2 text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
+                className="flex items-center justify-center gap-2 text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation"
               >
-                <Brain className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Brain className="w-4 h-4 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">{isSelecting ? "Selecting..." : "Select for Processing"}</span>
                 <span className="sm:hidden">{isSelecting ? "Selecting..." : "Select"}</span>
               </Button>
               
-              <Button variant="outline" asChild className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4">
-                <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                  <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
+              <Button variant="outline" asChild className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation">
+                <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+                  <ExternalLink className="w-4 h-4 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Read Paper</span>
                   <span className="sm:hidden">Read</span>
                 </a>
