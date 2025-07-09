@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '@/integrations/supabase/client';
 
 export type Utterance = {
   speaker: "Dr Ada" | "Sam";
@@ -24,6 +25,7 @@ export const usePodcastPreview = () => {
   const [isLive, setIsLive] = useState(false);
   const [currentPaperId, setCurrentPaperId] = useState<string | null>(null);
   const [currentTypingSpeaker, setCurrentTypingSpeaker] = useState<"Dr Ada" | "Sam" | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const { toast } = useToast();
 
@@ -34,7 +36,7 @@ export const usePodcastPreview = () => {
     }
     setIsLive(false);
     setIsGenerating(false);
-    
+    setCurrentTypingSpeaker(null);
   }, []);
 
   const generateLivePreview = useCallback(async (
@@ -43,151 +45,124 @@ export const usePodcastPreview = () => {
     duration: number = 10
   ) => {
     if (isGenerating || isLive) {
-      
       return;
     }
-    
     setIsGenerating(true);
     setDialogue([]);
     setCurrentPaperId(paperId);
     setIsLive(false);
-
+    setError(null);
+    let receivedMessage = false;
     try {
-      
-      
-      // Close any existing connections
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-
-      // For streaming, we need to use fetch with proper headers
-      const functionUrl = `${supabase.supabaseUrl}/functions/v1/generatePodcastPreview`;
-      
+      const functionUrl = `${SUPABASE_URL}/functions/v1/generatePodcastPreview`;
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
           'Cache-Control': 'no-cache',
         },
-        body: JSON.stringify({
-          paper_id: paperId,
-          episode,
-          duration
-        })
+        body: JSON.stringify({ paper_id: paperId, episode, duration })
       });
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Response error:', response.status, errorText);
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        setError(`Server error: ${response.status} - ${errorText}`);
+        toast({
+          title: "Live Conversation Error",
+          description: `Server error: ${response.status} - ${errorText}`,
+          variant: "destructive",
+        });
+        setIsGenerating(false);
+        return;
       }
-
       const reader = response.body?.getReader();
       if (!reader) {
-        throw new Error('No response body reader available');
+        setError('No response body reader available');
+        toast({
+          title: "Live Conversation Error",
+          description: 'No response body reader available',
+          variant: "destructive",
+        });
+        setIsGenerating(false);
+        return;
       }
-
       setIsGenerating(false);
       setIsLive(true);
-
       toast({
         title: "Live Conversation Started",
         description: "Dr. Ada and Sam are having a REAL conversation!",
       });
-
       const decoder = new TextDecoder();
       let buffer = '';
-
       try {
         while (true) {
           const { done, value } = await reader.read();
-          
           if (done) {
-            
             setIsLive(false);
+            if (!receivedMessage && !error) {
+              setError('The conversation ended before any messages were received.');
+              toast({
+                title: "Live Conversation Error",
+                description: 'The conversation ended before any messages were received.',
+                variant: "destructive",
+              });
+            }
             break;
           }
-
-          // Process stream immediately for real-time effect
           const chunk = decoder.decode(value, { stream: true });
           buffer += chunk;
-          
-          // Process each complete line immediately
           const lines = buffer.split('\n');
           buffer = lines.pop() || '';
-
           for (const line of lines) {
             if (line.trim() === '') continue;
-            
             if (line.startsWith('event: ')) {
-              const eventType = line.slice(7).trim();
               continue;
             }
-            
             if (line.startsWith('data: ')) {
               try {
-                const jsonStr = line.slice(6); // Remove 'data: '
+                const jsonStr = line.slice(6);
                 const eventData = JSON.parse(jsonStr);
-                
-                
-                
-                // Handle different event types
                 switch (eventData.type || (eventData.speaker ? 'message' : 'unknown')) {
                   case 'conversation_start':
                     break;
-                    
                   case 'typing_start':
                     setCurrentTypingSpeaker(eventData.speaker);
                     break;
-                    
                   case 'typing_stop':
                     setCurrentTypingSpeaker(null);
                     break;
-                    
                   case 'message':
-                    if (eventData.speaker && eventData.text) {
-                      
-                      // Add message to dialogue
-                      setDialogue(prev => [...prev, {
-                        speaker: eventData.speaker,
-                        text: eventData.text,
-                        timestamp: eventData.timestamp || Date.now(),
-                        exchange: eventData.exchange
-                      }]);
-                      
-                      // Clear typing indicator
-                      setCurrentTypingSpeaker(null);
-                    }
+                    receivedMessage = true;
+                    setDialogue(prev => [...prev, {
+                      speaker: eventData.speaker,
+                      text: eventData.text,
+                      timestamp: eventData.timestamp || Date.now(),
+                      exchange: eventData.exchange
+                    }]);
+                    setCurrentTypingSpeaker(null);
                     break;
-                    
                   case 'conversation_end':
                     setIsLive(false);
                     setCurrentTypingSpeaker(null);
-                    
                     toast({
                       title: "Conversation Completed",
                       description: "The AI hosts have finished their discussion!",
                     });
                     break;
-                    
                   case 'error':
-                    console.error('❌ SSE Error:', eventData.message);
-                    setIsLive(false);
-                    setCurrentTypingSpeaker(null);
-                    
+                    setError(eventData.message || 'Unknown error occurred during conversation.');
                     toast({
-                      title: "Conversation Error",
-                      description: eventData.message || "An error occurred during the conversation",
+                      title: "Live Conversation Error",
+                      description: eventData.message || 'Unknown error occurred during conversation.',
                       variant: "destructive",
                     });
+                    setIsLive(false);
+                    setCurrentTypingSpeaker(null);
                     break;
-                    
                   default:
-                    // Legacy support for old format
                     if (eventData.speaker && eventData.text) {
+                      receivedMessage = true;
                       setDialogue(prev => [...prev, {
                         speaker: eventData.speaker,
                         text: eventData.text,
@@ -203,28 +178,27 @@ export const usePodcastPreview = () => {
           }
         }
       } catch (streamError) {
-        console.error('Stream reading error:', streamError);
+        setError('Stream reading error: ' + streamError.message);
+        toast({
+          title: "Live Conversation Error",
+          description: 'Stream reading error: ' + streamError.message,
+          variant: "destructive",
+        });
+        setIsLive(false);
+        setCurrentTypingSpeaker(null);
         throw streamError;
       } finally {
         reader.releaseLock();
         setIsLive(false);
         setCurrentTypingSpeaker(null);
       }
-
     } catch (error: any) {
-      console.error('❌ Error starting real-time conversation:', error);
-      
-      let errorMessage = "Failed to start real-time conversation";
-      if (error?.message) {
-        errorMessage = error.message;
-      }
-      
+      setError(error?.message || 'Failed to start real-time conversation');
       toast({
         title: "Real-time Conversation Failed",
-        description: errorMessage,
+        description: error?.message || 'Failed to start real-time conversation',
         variant: "destructive",
       });
-      
       setIsLive(false);
       setCurrentTypingSpeaker(null);
       throw error;
@@ -238,7 +212,7 @@ export const usePodcastPreview = () => {
     setDialogue([]);
     setCurrentPaperId(null);
     setCurrentTypingSpeaker(null);
-    
+    setError(null);
   }, [stopConversation]);
 
   // Memoize return object to prevent unnecessary re-renders
@@ -251,6 +225,7 @@ export const usePodcastPreview = () => {
     isLive,
     currentPaperId,
     currentTypingSpeaker,
-    hasDialogue: dialogue.length > 0
-  }), [generateLivePreview, stopConversation, clearPreview, isGenerating, dialogue, isLive, currentPaperId, currentTypingSpeaker]);
+    hasDialogue: dialogue.length > 0,
+    error,
+  }), [generateLivePreview, stopConversation, clearPreview, isGenerating, dialogue, isLive, currentPaperId, currentTypingSpeaker, error]);
 };
