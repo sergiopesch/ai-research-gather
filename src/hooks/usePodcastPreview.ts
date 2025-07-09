@@ -61,11 +61,16 @@ export const usePodcastPreview = () => {
         eventSourceRef.current = null;
       }
 
-      // Call the edge function directly for streaming response
+      // Use the correct Supabase URL from the client configuration
       const supabaseUrl = 'https://eapnatbiodenijfrpqcn.supabase.co';
       const functionUrl = `${supabaseUrl}/functions/v1/generatePodcastPreview`;
       
       console.log('🎙️ Making streaming request to:', functionUrl);
+      console.log('🔍 Request headers:', {
+        'Authorization': 'Bearer eyJ***',
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream'
+      });
       
       const response = await fetch(functionUrl, {
         method: 'POST',
