@@ -61,22 +61,7 @@ export const usePodcastPreview = () => {
         eventSourceRef.current = null;
       }
 
-      // Use Supabase functions invoke to call the edge function properly
-      const { data, error } = await supabase.functions.invoke('generatePodcastPreview', {
-        body: {
-          paper_id: paperId,
-          episode,
-          duration
-        }
-      });
-
-      // Check if there was an error invoking the function
-      if (error) {
-        console.error('❌ Function invocation error:', error);
-        throw new Error(`Function invocation failed: ${error.message}`);
-      }
-
-      // For streaming responses, we need to get the data differently
+      // Call the edge function directly for streaming response
       const response = await fetch('https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/generatePodcastPreview', {
         method: 'POST',
         headers: {
