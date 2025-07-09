@@ -61,7 +61,7 @@ export const usePodcastPreview = () => {
         eventSourceRef.current = null;
       }
 
-      // Use Supabase client to invoke the function properly
+      // Use Supabase functions invoke to call the edge function properly
       const { data, error } = await supabase.functions.invoke('generatePodcastPreview', {
         body: {
           paper_id: paperId,
@@ -70,12 +70,14 @@ export const usePodcastPreview = () => {
         }
       });
 
+      // Check if there was an error invoking the function
       if (error) {
+        console.error('❌ Function invocation error:', error);
         throw new Error(`Function invocation failed: ${error.message}`);
       }
 
-      // For streaming responses, we need to handle differently
-      const response = await fetch(`https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/generatePodcastPreview`, {
+      // For streaming responses, we need to get the data differently
+      const response = await fetch('https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/generatePodcastPreview', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU',
@@ -92,7 +94,9 @@ export const usePodcastPreview = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ Response error:', response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
 
       const reader = response.body?.getReader();

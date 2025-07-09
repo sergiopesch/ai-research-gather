@@ -163,23 +163,37 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log('📝 Parsing request body...')
     const body = await req.json()
+    console.log('📝 Request body:', body)
     const { paper_id } = body
 
     if (!paper_id) {
+      console.error('❌ No paper_id provided')
       return new Response(JSON.stringify({ error: 'paper_id is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       })
     }
 
+    console.log('📝 Looking up paper:', paper_id)
+
     // Environment variables
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
     
-    if (!supabaseUrl || !supabaseServiceKey || !openAIApiKey) {
-      return new Response(JSON.stringify({ error: 'Missing environment variables' }), {
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Missing Supabase environment variables')
+      return new Response(JSON.stringify({ error: 'Missing Supabase configuration' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      })
+    }
+
+    if (!openAIApiKey) {
+      console.error('❌ Missing OpenAI API key')
+      return new Response(JSON.stringify({ error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to Supabase secrets.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       })
