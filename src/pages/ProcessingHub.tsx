@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, Play, Loader2, X, Mic, Square, Radio } from 'lucide-react';
+import { ArrowLeft, FileText, Loader2, X, Mic, Square, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,15 +10,13 @@ import { Link, useNavigate } from 'react-router-dom';
 const ProcessingHub = () => {
   const { selectedPaper, hasSelectedPaper, clearSelectedPaper } = usePaperActions();
   const { 
-    generatePreview, 
-    playPreview, 
-    stopPreview, 
+    generateLivePreview,
+    stopConversation,
     clearPreview,
     isGenerating, 
-    preview, 
-    isPlaying, 
-    currentUtteranceIndex,
-    hasPreview 
+    dialogue, 
+    isLive,
+    hasDialogue 
   } = usePodcastPreview();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -29,7 +27,7 @@ const ProcessingHub = () => {
     navigate('/');
   };
 
-  const handleGeneratePreview = async () => {
+  const handleGenerateLivePreview = async () => {
     if (!selectedPaper) {
       toast({
         title: "No Paper Selected",
@@ -40,20 +38,14 @@ const ProcessingHub = () => {
     }
 
     try {
-      await generatePreview(selectedPaper, 1, 10);
+      await generateLivePreview(selectedPaper, 1, 10);
     } catch (error) {
       // Error handling is done in the hook
     }
   };
 
-  const handlePlayPreview = () => {
-    if (hasPreview) {
-      if (isPlaying) {
-        stopPreview();
-      } else {
-        playPreview();
-      }
-    }
+  const handleStopConversation = () => {
+    stopConversation();
   };
 
   if (!hasSelectedPaper) {
@@ -77,7 +69,7 @@ const ProcessingHub = () => {
               No Paper Selected
             </h1>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Select a research paper from the discovery page to generate podcast previews.
+              Select a research paper from the discovery page to start a live podcast conversation.
             </p>
             <Button asChild>
               <Link to="/">
@@ -103,7 +95,7 @@ const ProcessingHub = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">The Notebook Pod</h1>
-            <p className="text-muted-foreground">Generate podcast previews with AI hosts Dr. Ada and Sam</p>
+            <p className="text-muted-foreground">Live AI conversation between Dr. Ada (GPT-4O) and Sam (GPT-4O mini)</p>
           </div>
         </div>
 
@@ -117,7 +109,7 @@ const ProcessingHub = () => {
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-lg">Selected Paper</CardTitle>
-                  <p className="text-sm text-muted-foreground">Ready for podcast preview</p>
+                  <p className="text-sm text-muted-foreground">Ready for live podcast conversation</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">Selected</Badge>
@@ -142,130 +134,159 @@ const ProcessingHub = () => {
             </CardContent>
           </Card>
 
-          {/* Podcast Preview Section */}
+          {/* Live Podcast Conversation */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <Radio className="w-5 h-5" />
-                The Notebook Pod Preview
+                Live Conversation
+                {isLive && (
+                  <Badge variant="default" className="bg-red-500 text-white animate-pulse">
+                    LIVE
+                  </Badge>
+                )}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Generate a 10-second podcast preview with AI hosts Dr. Ada and Sam
+                Watch two AI models have a real conversation about this research paper
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Preview Generation */}
-              <div className="space-y-4">
-                <Button 
-                  onClick={handleGeneratePreview}
-                  disabled={isGenerating || !selectedPaper}
-                  className="w-full h-12 text-base font-semibold"
-                  size="lg"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                      Generating Preview...
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="w-5 h-5 mr-3" />
-                      Generate Podcast Preview
-                    </>
-                  )}
-                </Button>
+              {/* Control Buttons */}
+              <div className="flex items-center gap-3">
+                {!isLive && !isGenerating && (
+                  <Button 
+                    onClick={handleGenerateLivePreview}
+                    disabled={!selectedPaper}
+                    className="h-12 text-base font-semibold"
+                    size="lg"
+                  >
+                    <Mic className="w-5 h-5 mr-3" />
+                    Start Live Conversation
+                  </Button>
+                )}
 
-                {/* Preview Display */}
-                {hasPreview && preview && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-sm">Episode {preview.episode}</h4>
-                        <p className="text-xs text-muted-foreground">
-                          {preview.dialogue.length} lines • {preview.metadata.duration_seconds}s duration
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          onClick={handlePlayPreview}
-                          size="sm"
-                          variant={isPlaying ? "destructive" : "default"}
-                        >
-                          {isPlaying ? (
-                            <>
-                              <Square className="w-3 h-3 mr-1" />
-                              Stop
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-3 h-3 mr-1" />
-                              Play
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          onClick={clearPreview}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
+                {isGenerating && (
+                  <Button 
+                    disabled
+                    className="h-12 text-base font-semibold"
+                    size="lg"
+                  >
+                    <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                    Starting Conversation...
+                  </Button>
+                )}
 
-                    {/* Dialogue Display */}
-                    <div className="space-y-2 max-h-64 overflow-y-auto bg-muted/20 rounded-lg p-4 border">
-                      {preview.dialogue.map((utterance, index) => (
-                        <div 
-                          key={index}
-                          className={`flex gap-3 p-2 rounded transition-colors ${
-                            isPlaying && index === currentUtteranceIndex 
-                              ? 'bg-primary/10 border border-primary/20' 
-                              : index < currentUtteranceIndex && isPlaying
-                              ? 'bg-muted/40 opacity-60'
-                              : 'hover:bg-muted/30'
-                          }`}
-                        >
-                          <div className="flex-shrink-0">
-                            <Badge 
-                              variant={utterance.speaker === "Dr Ada" ? "default" : "secondary"}
-                              className="text-xs"
-                            >
-                              {utterance.speaker}
-                            </Badge>
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm leading-relaxed">{utterance.text}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                {isLive && (
+                  <Button 
+                    onClick={handleStopConversation}
+                    variant="destructive"
+                    className="h-12 text-base font-semibold"
+                    size="lg"
+                  >
+                    <Square className="w-5 h-5 mr-3" />
+                    Stop Conversation
+                  </Button>
+                )}
 
-                    {isPlaying && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                        <span>Playing line {currentUtteranceIndex + 1} of {preview.dialogue.length}</span>
-                      </div>
-                    )}
-                  </div>
+                {hasDialogue && !isLive && !isGenerating && (
+                  <Button 
+                    onClick={clearPreview}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <X className="w-3 h-3 mr-2" />
+                    Clear
+                  </Button>
                 )}
               </div>
 
+              {/* Live Conversation Display */}
+              {hasDialogue && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-sm">Live Episode</h4>
+                      <p className="text-xs text-muted-foreground">
+                        {dialogue.length} messages {isLive ? '• Live' : '• Completed'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Real-time Dialogue Display */}
+                  <div className="space-y-3 max-h-80 overflow-y-auto bg-muted/20 rounded-lg p-4 border">
+                    {dialogue.map((utterance, index) => (
+                      <div 
+                        key={index}
+                        className={`flex gap-3 p-3 rounded-lg transition-all duration-300 ${
+                          index === dialogue.length - 1 && isLive
+                            ? 'bg-primary/10 border border-primary/20 scale-[1.02]' 
+                            : 'bg-background/50 hover:bg-muted/40'
+                        }`}
+                      >
+                        <div className="flex-shrink-0">
+                          <Badge 
+                            variant={utterance.speaker === "Dr Ada" ? "default" : "secondary"}
+                            className="text-xs"
+                          >
+                            {utterance.speaker}
+                          </Badge>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm leading-relaxed">{utterance.text}</p>
+                          {utterance.timestamp && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(utterance.timestamp).toLocaleTimeString()}
+                            </p>
+                          )}
+                        </div>
+                        {index === dialogue.length - 1 && isLive && (
+                          <div className="flex-shrink-0">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {isLive && (
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border border-dashed">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                        <span className="text-sm text-muted-foreground">AI is thinking...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {isLive && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <span>Live conversation in progress between GPT-4O (Dr Ada) and GPT-4O mini (Sam)</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Features List */}
               <div className="space-y-3 pt-4 border-t border-border/50">
-                <h3 className="text-sm font-medium text-foreground">Preview Features:</h3>
+                <h3 className="text-sm font-medium text-foreground">Live Features:</h3>
                 <div className="grid gap-2">
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>10-second conversational preview</span>
+                    <span>Real-time conversation between two different AI models</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Dr. Ada (technical expert) and Sam (curious host)</span>
+                    <span>GPT-4O (Dr. Ada) as technical expert</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Interactive playback with visual indicators</span>
+                    <span>GPT-4O mini (Sam) as curious interviewer</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span>Live streaming with visual indicators</span>
                   </div>
                 </div>
               </div>

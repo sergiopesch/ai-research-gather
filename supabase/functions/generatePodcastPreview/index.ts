@@ -14,100 +14,176 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-type Utterance = { 
-  speaker: "Dr Ada" | "Sam", 
-  text: string 
-}
-
-// Function to call OpenAI for dialogue generation
-async function generateDialogue(
-  title: string, 
-  authors: string[], 
-  episode: number, 
-  duration: number, 
-  apiKey: string
-): Promise<Utterance[]> {
-  const authorsText = authors.length > 0 ? authors.join(", ") : "the authors"
-  
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You are co-hosts of "The Notebook Pod". Produce an alternating dialogue lasting about ${duration} seconds total.
-
-Hosts must open with a warm welcome: include podcast name, "Episode ${episode}", paper title, and authors' surnames. Tone is friendly, informed, jargon-free.
-
-Each utterance ≤ 25 tokens. End with a "Stay tuned!" cue.
-
-Hosts:
-- Dr Ada: Deep technical insight, explains complex concepts clearly
-- Sam: Deep curiosity, asks clarifying questions, represents the audience
-
-Return ONLY a JSON array of utterances in this exact format:
-[
-  {"speaker": "Dr Ada", "text": "Welcome to The Notebook Pod, Episode ${episode}..."},
-  {"speaker": "Sam", "text": "..."}
-]`
-        },
-        {
-          role: 'user',
-          content: `Generate a ${duration}-second dialogue about the paper "${title}" by ${authorsText}. Start with Dr Ada welcoming listeners, then alternate speakers naturally. Keep each line under 25 tokens.`
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 800
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`)
-  }
-
-  const data = await response.json()
-  const content = data.choices[0].message.content
-
-  try {
-    const dialogue = JSON.parse(content.trim())
-    
-    // Validate the response format
-    if (!Array.isArray(dialogue)) {
-      throw new Error('Invalid dialogue format')
-    }
-
-    // Limit utterances based on duration (assume ~2 seconds per utterance)
-    const maxUtterances = Math.min(Math.ceil(duration / 2), 20)
-    const limitedDialogue = dialogue.slice(0, maxUtterances)
-
-    // Validate each utterance
-    return limitedDialogue.map((item: any, index: number) => {
-      if (!item.speaker || !item.text) {
-        throw new Error(`Invalid utterance at index ${index}`)
-      }
-      if (!["Dr Ada", "Sam"].includes(item.speaker)) {
-        throw new Error(`Invalid speaker at index ${index}: ${item.speaker}`)
-      }
-      return {
-        speaker: item.speaker as "Dr Ada" | "Sam",
-        text: item.text
-      }
-    })
-  } catch (parseError) {
-    console.error('Failed to parse OpenAI response:', content)
-    throw new Error('Failed to parse dialogue from AI response')
-  }
-}
-
 // Function to send SSE event
 function sendSSEEvent(controller: ReadableStreamDefaultController, eventType: string, data: any) {
   const message = `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`
   controller.enqueue(new TextEncoder().encode(message))
+}
+
+// Function to call OpenAI for a single response
+async function callOpenAIForResponse(
+  apiKey: string,
+  messages: any[],
+  model: string = "gpt-4o",
+  maxRetries: number = 2
+): Promise<string> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15s timeout for faster responses
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+          max_tokens: 150 // Shorter responses for natural dialogue
+        }),
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      if (response.status === 429 && attempt < maxRetries) {
+        console.log(`Rate limited, retrying attempt ${attempt + 1}`)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+        continue
+      }
+      
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      return data.choices[0].message.content.trim()
+      
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error
+      }
+      console.log(`Attempt ${attempt + 1} failed, retrying:`, error.message)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+    }
+  }
+  
+  throw new Error('Max retries exceeded')
+}
+
+// Function to manage live conversation between two LLMs
+async function generateLiveConversation(
+  title: string,
+  authors: string[],
+  episode: number,
+  apiKey: string,
+  controller: ReadableStreamDefaultController
+) {
+  const authorsText = authors.length > 0 ? authors.join(", ") : "the authors"
+  
+  // Initialize conversation history
+  const conversationHistory: any[] = []
+  
+  // Dr Ada (GPT-4O) system prompt
+  const drAdaSystemPrompt = `You are Dr Ada, co-host of "The Notebook Pod". You're a technical expert who explains complex research clearly. 
+
+Rules:
+- Keep responses under 25 words
+- Be knowledgeable but accessible
+- Engage naturally with Sam
+- Focus on the key technical insights
+- Don't repeat information already discussed
+- End responses naturally without asking questions every time
+
+Current paper: "${title}" by ${authorsText}`
+
+  // Sam (GPT-4O mini) system prompt  
+  const samSystemPrompt = `You are Sam, co-host of "The Notebook Pod". You're deeply curious and ask great clarifying questions that help the audience understand.
+
+Rules:
+- Keep responses under 25 words
+- Ask insightful questions
+- Show genuine curiosity
+- Help bridge technical concepts for general audience
+- Don't repeat questions already asked
+- React naturally to Dr Ada's explanations
+
+Current paper: "${title}" by ${authorsText}`
+
+  // Start with Dr Ada's welcome
+  const welcomeMessage = `Welcome to The Notebook Pod, Episode ${episode}! Today we're exploring "${title}" by ${authorsText}.`
+  
+  sendSSEEvent(controller, 'dialogue', {
+    speaker: "Dr Ada",
+    text: welcomeMessage
+  })
+  
+  conversationHistory.push({ role: "assistant", content: welcomeMessage })
+  
+  // Small delay before starting the conversation
+  await new Promise(resolve => setTimeout(resolve, 2000))
+  
+  // Continue conversation for about 10 seconds (4-5 exchanges)
+  for (let turn = 0; turn < 4; turn++) {
+    try {
+      // Sam's turn (GPT-4O mini)
+      const samMessages = [
+        { role: "system", content: samSystemPrompt },
+        ...conversationHistory.map(msg => ({
+          role: msg.role === "assistant" ? "user" : "assistant",
+          content: msg.content
+        }))
+      ]
+      
+      const samResponse = await callOpenAIForResponse(apiKey, samMessages, "gpt-4o-mini")
+      
+      sendSSEEvent(controller, 'dialogue', {
+        speaker: "Sam",
+        text: samResponse
+      })
+      
+      conversationHistory.push({ role: "user", content: samResponse })
+      
+      // Small delay for natural pacing
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Dr Ada's turn (GPT-4O) - but not on the last iteration
+      if (turn < 3) {
+        const drAdaMessages = [
+          { role: "system", content: drAdaSystemPrompt },
+          ...conversationHistory
+        ]
+        
+        const drAdaResponse = await callOpenAIForResponse(apiKey, drAdaMessages, "gpt-4o")
+        
+        sendSSEEvent(controller, 'dialogue', {
+          speaker: "Dr Ada", 
+          text: drAdaResponse
+        })
+        
+        conversationHistory.push({ role: "assistant", content: drAdaResponse })
+        
+        // Small delay for natural pacing
+        await new Promise(resolve => setTimeout(resolve, 2000))
+      }
+      
+    } catch (error) {
+      console.error(`Error in conversation turn ${turn}:`, error)
+      sendSSEEvent(controller, 'error', {
+        message: 'Conversation encountered an error',
+        turn
+      })
+      break
+    }
+  }
+  
+  // End the conversation
+  sendSSEEvent(controller, 'end', {
+    message: 'Thanks for tuning in to The Notebook Pod! Stay curious!'
+  })
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -133,7 +209,7 @@ serve(async (req: Request): Promise<Response> => {
     const body = await req.json()
     const { paper_id, episode, duration } = RequestSchema.parse(body)
     
-    console.log(`=== GENERATE PODCAST PREVIEW REQUEST ===`)
+    console.log(`=== GENERATE LIVE PODCAST CONVERSATION ===`)
     console.log(`Paper ID: ${paper_id}, Episode: ${episode}, Duration: ${duration}s`)
 
     // Initialize Supabase client
@@ -147,7 +223,7 @@ serve(async (req: Request): Promise<Response> => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Fetch paper with SELECTED status (changed from PROCESSED)
+    // Fetch paper with SELECTED status
     const { data: paper, error: fetchError } = await supabase
       .from('papers')
       .select('title, source')
@@ -169,75 +245,51 @@ serve(async (req: Request): Promise<Response> => {
       })
     }
 
-    console.log(`Generating podcast preview for: "${paper.title}"`)
+    console.log(`Starting live conversation for: "${paper.title}"`)
 
     // Extract authors from title or use source as fallback
-    // This is a simple implementation - in real scenario you'd have an authors field
     const authors = paper.source ? [paper.source] : ['the researchers']
 
-    // Generate dialogue
-    const dialogue = await generateDialogue(
-      paper.title,
-      authors,
-      episode,
-      duration,
-      openAIApiKey
-    )
-
-    console.log(`Generated ${dialogue.length} utterances`)
-
-    // Check if client wants SSE streaming
-    const acceptHeader = req.headers.get('accept') || ''
-    const wantsSSE = acceptHeader.includes('text/event-stream')
-
-    if (wantsSSE) {
-      // Return SSE stream
-      const stream = new ReadableStream({
-        start(controller) {
-          // Send each utterance as SSE event
-          dialogue.forEach((utterance, index) => {
-            setTimeout(() => {
-              sendSSEEvent(controller, 'line', utterance)
-              
-              // Close stream after last utterance
-              if (index === dialogue.length - 1) {
-                setTimeout(() => {
-                  sendSSEEvent(controller, 'end', { message: 'Preview complete' })
-                  controller.close()
-                }, 100)
-              }
-            }, index * 500) // 500ms delay between utterances
+    // Always return SSE stream for live conversation
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Send conversation start event
+          sendSSEEvent(controller, 'start', { 
+            paper_id,
+            episode,
+            title: paper.title
           })
+          
+          // Generate live conversation
+          await generateLiveConversation(
+            paper.title,
+            authors,
+            episode,
+            openAIApiKey,
+            controller
+          )
+          
+          // Close stream
+          controller.close()
+        } catch (error) {
+          console.error('Stream error:', error)
+          sendSSEEvent(controller, 'error', {
+            message: error instanceof Error ? error.message : 'Unknown error'
+          })
+          controller.close()
         }
-      })
+      }
+    })
 
-      return new Response(stream, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-          ...corsHeaders,
-        }
-      })
-    } else {
-      // Return JSON response
-      return new Response(JSON.stringify({ 
-        episode,
-        paper_id,
-        dialogue,
-        metadata: {
-          title: paper.title,
-          duration_seconds: duration,
-          utterance_count: dialogue.length
-        }
-      }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      })
-    }
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        ...corsHeaders,
+      }
+    })
     
   } catch (error) {
     console.error('GeneratePodcastPreview error:', error)
