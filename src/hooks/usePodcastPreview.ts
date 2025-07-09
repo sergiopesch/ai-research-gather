@@ -6,6 +6,16 @@ export type Utterance = {
   speaker: "Dr Ada" | "Sam";
   text: string;
   timestamp?: number;
+  exchange?: number;
+  isTyping?: boolean;
+};
+
+export type ConversationEvent = {
+  type: 'conversation_start' | 'typing_start' | 'typing_stop' | 'message' | 'conversation_end' | 'error';
+  speaker?: "Dr Ada" | "Sam";
+  text?: string;
+  timestamp: number;
+  exchange?: number;
 };
 
 export const usePodcastPreview = () => {
@@ -13,6 +23,7 @@ export const usePodcastPreview = () => {
   const [dialogue, setDialogue] = useState<Utterance[]>([]);
   const [isLive, setIsLive] = useState(false);
   const [currentPaperId, setCurrentPaperId] = useState<string | null>(null);
+  const [currentTypingSpeaker, setCurrentTypingSpeaker] = useState<"Dr Ada" | "Sam" | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const { toast } = useToast();
 
@@ -119,23 +130,76 @@ export const usePodcastPreview = () => {
             if (line.startsWith('data: ')) {
               try {
                 const jsonStr = line.slice(6); // Remove 'data: '
-                const data = JSON.parse(jsonStr);
+                const eventData = JSON.parse(jsonStr);
                 
-                if (data.speaker && data.text) {
-                  console.log(`🗣️ REAL-TIME: ${data.speaker}: ${data.text}`);
-                  
-                  // Add dialogue immediately for real-time effect
-                  setDialogue(prev => [...prev, {
-                    speaker: data.speaker,
-                    text: data.text,
-                    timestamp: Date.now()
-                  }]);
-                } else if (data.message && data.message.includes('Conversation completed')) {
-                  console.log('📝 Real-time conversation ending...');
-                  setIsLive(false);
-                } else if (data.speaker && data.chunk) {
-                  // Handle real-time chunks (word-by-word streaming)
-                  console.log(`🔤 CHUNK: ${data.speaker}: ${data.chunk}`);
+                console.log(`📡 SSE Event:`, eventData);
+                
+                // Handle different event types
+                switch (eventData.type || (eventData.speaker ? 'message' : 'unknown')) {
+                  case 'conversation_start':
+                    console.log('🎬 Conversation started');
+                    break;
+                    
+                  case 'typing_start':
+                    console.log(`⌨️ ${eventData.speaker} started typing`);
+                    setCurrentTypingSpeaker(eventData.speaker);
+                    break;
+                    
+                  case 'typing_stop':
+                    console.log(`⌨️ ${eventData.speaker} stopped typing`);
+                    setCurrentTypingSpeaker(null);
+                    break;
+                    
+                  case 'message':
+                    if (eventData.speaker && eventData.text) {
+                      console.log(`💬 ${eventData.speaker}: ${eventData.text.substring(0, 50)}...`);
+                      
+                      // Add message to dialogue
+                      setDialogue(prev => [...prev, {
+                        speaker: eventData.speaker,
+                        text: eventData.text,
+                        timestamp: eventData.timestamp || Date.now(),
+                        exchange: eventData.exchange
+                      }]);
+                      
+                      // Clear typing indicator
+                      setCurrentTypingSpeaker(null);
+                    }
+                    break;
+                    
+                  case 'conversation_end':
+                    console.log('🎬 Conversation ended');
+                    setIsLive(false);
+                    setCurrentTypingSpeaker(null);
+                    
+                    toast({
+                      title: "Conversation Completed",
+                      description: "The AI hosts have finished their discussion!",
+                    });
+                    break;
+                    
+                  case 'error':
+                    console.error('❌ SSE Error:', eventData.message);
+                    setIsLive(false);
+                    setCurrentTypingSpeaker(null);
+                    
+                    toast({
+                      title: "Conversation Error",
+                      description: eventData.message || "An error occurred during the conversation",
+                      variant: "destructive",
+                    });
+                    break;
+                    
+                  default:
+                    // Legacy support for old format
+                    if (eventData.speaker && eventData.text) {
+                      setDialogue(prev => [...prev, {
+                        speaker: eventData.speaker,
+                        text: eventData.text,
+                        timestamp: Date.now()
+                      }]);
+                    }
+                    break;
                 }
               } catch (parseError) {
                 console.warn('Failed to parse SSE data:', parseError);
@@ -149,6 +213,7 @@ export const usePodcastPreview = () => {
       } finally {
         reader.releaseLock();
         setIsLive(false);
+        setCurrentTypingSpeaker(null);
       }
 
     } catch (error: any) {
@@ -166,6 +231,7 @@ export const usePodcastPreview = () => {
       });
       
       setIsLive(false);
+      setCurrentTypingSpeaker(null);
       throw error;
     } finally {
       setIsGenerating(false);
@@ -176,6 +242,7 @@ export const usePodcastPreview = () => {
     stopConversation();
     setDialogue([]);
     setCurrentPaperId(null);
+    setCurrentTypingSpeaker(null);
     console.log('🧹 Cleared conversation');
   }, [stopConversation]);
 
@@ -188,6 +255,7 @@ export const usePodcastPreview = () => {
     dialogue,
     isLive,
     currentPaperId,
+    currentTypingSpeaker,
     hasDialogue: dialogue.length > 0
-  }), [generateLivePreview, stopConversation, clearPreview, isGenerating, dialogue, isLive, currentPaperId]);
+  }), [generateLivePreview, stopConversation, clearPreview, isGenerating, dialogue, isLive, currentPaperId, currentTypingSpeaker]);
 };

@@ -7,6 +7,7 @@ import { usePodcastPreview } from '@/hooks/usePodcastPreview';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
+import { TypingAnimation } from '@/components/TypingAnimation';
 
 const ProcessingHub = () => {
   const { selectedPaper, hasSelectedPaper, clearSelectedPaper } = usePaperActions();
@@ -17,7 +18,8 @@ const ProcessingHub = () => {
     isGenerating, 
     dialogue, 
     isLive,
-    hasDialogue 
+    hasDialogue,
+    currentTypingSpeaker
   } = usePodcastPreview();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -213,26 +215,43 @@ const ProcessingHub = () => {
                     </div>
                   </div>
 
-                  {/* Real-time Dialogue Display */}
+                  {/* Real-time Dialogue Display with Typing Animation */}
                   <div className="space-y-3 max-h-80 overflow-y-auto bg-muted/20 rounded-lg p-4 border">
                     {dialogue.map((utterance, index) => (
                       <div 
                         key={index}
                         className={`flex gap-3 p-3 rounded-lg transition-all duration-300 ${
                           index === dialogue.length - 1 && isLive
-                            ? 'bg-primary/10 border border-primary/20 scale-[1.02]' 
+                            ? 'bg-primary/10 border border-primary/20 scale-[1.02] animate-fade-in' 
                             : 'bg-background/50 hover:bg-muted/40'
                         }`}
                       >
                         <div className="flex-shrink-0">
-                          <Badge 
-                            variant={utterance.speaker === "Dr Ada" ? "default" : "secondary"}
-                            className="text-xs"
-                          >
-                            {utterance.speaker}
-                          </Badge>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                            utterance.speaker === "Dr Ada" 
+                              ? "bg-primary text-primary-foreground" 
+                              : "bg-secondary text-secondary-foreground"
+                          }`}>
+                            {utterance.speaker === "Dr Ada" ? "A" : "S"}
+                          </div>
                         </div>
                         <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-medium">
+                              {utterance.speaker}
+                            </span>
+                            {utterance.exchange && (
+                              <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                                #{utterance.exchange}
+                              </Badge>
+                            )}
+                            {index === dialogue.length - 1 && isLive && (
+                              <div className="flex items-center gap-1 ml-auto">
+                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                <span className="text-xs text-green-600 font-medium">LATEST</span>
+                              </div>
+                            )}
+                          </div>
                           <p className="text-sm leading-relaxed">{utterance.text}</p>
                           {utterance.timestamp && (
                             <p className="text-xs text-muted-foreground mt-1">
@@ -240,30 +259,36 @@ const ProcessingHub = () => {
                             </p>
                           )}
                         </div>
-                        {index === dialogue.length - 1 && isLive && (
-                          <div className="flex-shrink-0">
-                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                          </div>
-                        )}
                       </div>
                     ))}
                     
-                    {isLive && (
+                    {/* Typing Animation */}
+                    <TypingAnimation 
+                      speaker={currentTypingSpeaker || "Dr Ada"} 
+                      isVisible={currentTypingSpeaker !== null} 
+                    />
+                    
+                    {/* Generic "thinking" indicator when live but not typing */}
+                    {isLive && !currentTypingSpeaker && (
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border border-dashed">
                         <div className="flex gap-1">
                           <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
                           <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                           <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
-                        <span className="text-sm text-muted-foreground">AI is thinking...</span>
+                        <span className="text-sm text-muted-foreground">AI conversation in progress...</span>
                       </div>
                     )}
                   </div>
 
                   {isLive && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 rounded-lg border border-green-200 dark:border-green-800">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span>🎙️ LIVE: Real-time AI conversation between GPT-4.1-mini models</span>
+                      <span>🎙️ LIVE: Real-time AI conversation • Two separate GPT-4.1-mini instances</span>
+                      <div className="ml-auto flex items-center gap-1">
+                        <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                        <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -275,19 +300,23 @@ const ProcessingHub = () => {
                 <div className="grid gap-2">
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Real-time conversation between two different AI models</span>
+                    <span>Real-time conversation between two independent AI agents</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>GPT-4O (Dr. Ada) as technical expert</span>
+                    <span>GPT-4.1-mini (Dr. Ada) • Research expert & technical analysis</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>GPT-4O mini (Sam) as curious interviewer</span>
+                    <span>GPT-4.1-mini (Sam) • Curious interviewer & accessibility focus</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Live streaming with visual indicators</span>
+                    <span>Live typing indicators • Natural conversation flow</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span>Contextual responses • Authentic AI-to-AI dialogue</span>
                   </div>
                 </div>
               </div>
