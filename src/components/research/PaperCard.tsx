@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
 import { usePaperActions } from '@/hooks/usePaperActions';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { validatePaperId, validateUrl, sanitizeText } from '@/utils/validation';
 import type { Paper } from '@/types/research';
 
 interface PaperCardProps {
@@ -16,27 +16,20 @@ interface PaperCardProps {
 export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const { selectPaper, isSelecting, isPaperSelected } = usePaperActions();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleSelectPaper = async () => {
-    console.log('🔥 MOBILE DEBUG: Button clicked!', { paperId: paper.id, paper });
-    
-    if (!paper.id) {
-      console.error('❌ CRITICAL: Paper ID is missing!', paper);
+    if (!validatePaperId(paper.id)) {
       toast({
         title: "Error",
-        description: "Paper ID is missing. Cannot select paper.",
+        description: "Invalid paper ID. Cannot select paper.",
         variant: "destructive",
       });
       return;
     }
     
     try {
-      console.log('🚀 MOBILE DEBUG: Calling selectPaper with ID:', paper.id);
       await selectPaper(paper.id);
-      console.log('✅ MOBILE DEBUG: selectPaper completed successfully');
     } catch (error) {
-      console.error('❌ MOBILE DEBUG: selectPaper failed:', error);
       // Error handling is done in the hook
     }
   };
@@ -93,13 +86,6 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const areaInfo = getPaperAreaInfo(paper.title);
   const AreaIcon = areaInfo.icon;
   const isAlreadySelected = isPaperSelected(paper.id);
-  
-  console.log('🎯 MOBILE DEBUG: Paper Card Render:', { 
-    paperId: paper.id, 
-    title: paper.title.substring(0, 50),
-    isSelecting,
-    isAlreadySelected 
-  });
 
   return (
     <Card className="research-card group">
@@ -108,7 +94,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
             <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-relaxed flex-1 group-hover:text-primary transition-colors">
-              {paper.title}
+              {sanitizeText(paper.title)}
             </h3>
             <div className="flex flex-wrap gap-2 sm:gap-3 flex-shrink-0">
               <Badge variant="outline" className={`${areaInfo.color} text-xs sm:text-sm`}>
@@ -130,7 +116,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
                   <span className="text-sm font-medium text-foreground">Summary</span>
                 </div>
                 <p className="text-sm sm:text-base text-foreground leading-relaxed">
-                  {paper.summary}
+                  {sanitizeText(paper.summary)}
                 </p>
                 {paper.importance && (
                   <div className="pt-2 sm:pt-3 border-t border-border/50">
@@ -184,11 +170,14 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
                 <span className="sm:hidden">
                   {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select"}
                 </span>
-                {/* Debug indicator */}
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full opacity-50" title={`ID: ${paper.id}`}></span>
               </Button>
               
-              <Button variant="outline" asChild className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation">
+              <Button 
+                variant="outline" 
+                asChild 
+                className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation"
+                disabled={!validateUrl(paper.url)}
+              >
                 <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                   <ExternalLink className="w-4 h-4 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Read Paper</span>

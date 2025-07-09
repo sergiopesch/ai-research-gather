@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { validateApiResponse } from '@/utils/validation';
 import type { Paper } from '@/types/research';
 
 const API_URL = 'https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/paperFinder';
@@ -42,8 +43,8 @@ export const usePaperSearch = () => {
 
       const data = await response.json();
       
-      if (!data.papers || !Array.isArray(data.papers)) {
-        throw new Error('Invalid response format');
+      if (!validateApiResponse(data)) {
+        throw new Error('Invalid response format from server');
       }
 
       setPapers(data.papers);

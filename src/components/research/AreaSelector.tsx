@@ -39,7 +39,7 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
                   <Checkbox 
                     id={area.id} 
                     checked={isSelected} 
-                    onChange={() => onToggleArea(area.id)}
+                    onCheckedChange={() => onToggleArea(area.id)}
                     className="data-[state=checked]:bg-primary data-[state=checked]:border-primary flex-shrink-0"
                   />
                   <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">

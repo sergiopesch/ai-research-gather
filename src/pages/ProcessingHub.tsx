@@ -98,7 +98,7 @@ const ProcessingHub = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">The Notebook Pod</h1>
-            <p className="text-muted-foreground">Live AI conversation between Dr. Ada (GPT-4O) and Sam (GPT-4O mini)</p>
+            <p className="text-muted-foreground">Live AI conversation between Dr. Ada and Sam (GPT-4.1-mini models)</p>
           </div>
         </div>
 
@@ -284,7 +284,7 @@ const ProcessingHub = () => {
                   {isLive && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 rounded-lg border border-green-200 dark:border-green-800">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span>🎙️ LIVE: Real-time AI conversation • Two separate GPT-4.1-mini instances</span>
+                      <span>🎙️ LIVE: Real-time AI conversation • Two independent GPT-4.1-mini instances</span>
                       <div className="ml-auto flex items-center gap-1">
                         <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
                         <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>

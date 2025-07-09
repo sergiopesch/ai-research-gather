@@ -25,13 +25,11 @@ export const usePaperActions = () => {
     try {
       if (paperId) {
         localStorage.setItem(SELECTED_PAPER_KEY, paperId);
-        console.log('💾 MOBILE DEBUG: Saved paper to localStorage:', paperId);
       } else {
         localStorage.removeItem(SELECTED_PAPER_KEY);
-        console.log('🗑️ MOBILE DEBUG: Removed paper from localStorage');
       }
     } catch (error) {
-      console.error('❌ MOBILE DEBUG: Failed to save to localStorage:', error);
+      console.error('Failed to save to localStorage:', error);
     }
   }, []);
 
@@ -81,7 +79,7 @@ export const usePaperActions = () => {
 
       return data;
     } catch (error: any) {
-      console.error('❌ Selection error:', error);
+      console.error('Selection error:', error);
       
       // Enhanced error parsing for better user experience
       let errorMessage = "Failed to select paper";
