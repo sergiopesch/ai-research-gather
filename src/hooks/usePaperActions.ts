@@ -1,12 +1,37 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+
+const SELECTED_PAPER_KEY = 'selectedPaper';
 
 export const usePaperActions = () => {
   const [isSelecting, setIsSelecting] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPaper, setSelectedPaper] = useState<string | null>(null);
+  const [selectedPaper, setSelectedPaperState] = useState<string | null>(() => {
+    // Initialize from localStorage
+    try {
+      return localStorage.getItem(SELECTED_PAPER_KEY);
+    } catch {
+      return null;
+    }
+  });
   const { toast } = useToast();
+
+  // Persist selectedPaper to localStorage whenever it changes
+  const setSelectedPaper = useCallback((paperId: string | null) => {
+    setSelectedPaperState(paperId);
+    try {
+      if (paperId) {
+        localStorage.setItem(SELECTED_PAPER_KEY, paperId);
+        console.log('💾 MOBILE DEBUG: Saved paper to localStorage:', paperId);
+      } else {
+        localStorage.removeItem(SELECTED_PAPER_KEY);
+        console.log('🗑️ MOBILE DEBUG: Removed paper from localStorage');
+      }
+    } catch (error) {
+      console.error('❌ MOBILE DEBUG: Failed to save to localStorage:', error);
+    }
+  }, []);
 
   const selectPaper = useCallback(async (paperId: string) => {
     console.log('🔥 MOBILE DEBUG: selectPaper called with:', { paperId, isSelecting, hasSelected: selectedPaper === paperId });
@@ -108,10 +133,21 @@ export const usePaperActions = () => {
     return selectedPaper === paperId;
   }, [selectedPaper]);
 
+  const clearSelectedPaper = useCallback(() => {
+    setSelectedPaper(null);
+    console.log('🧹 MOBILE DEBUG: Cleared selected paper');
+  }, [setSelectedPaper]);
+
+  // Debug logging when selectedPaper changes
+  useEffect(() => {
+    console.log('🎯 MOBILE DEBUG: Selected paper changed:', selectedPaper);
+  }, [selectedPaper]);
+
   return {
     selectPaper,
     processPaper,
     isPaperSelected,
+    clearSelectedPaper,
     isSelecting,
     isProcessing,
     selectedPaper,

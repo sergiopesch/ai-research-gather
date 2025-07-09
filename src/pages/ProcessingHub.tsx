@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Brain, FileText, Play, Loader2 } from 'lucide-react';
+import { ArrowLeft, Brain, FileText, Play, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ProcessingHub = () => {
-  const { selectedPaper, hasSelectedPaper, processPaper, isProcessing } = usePaperActions();
+  const { selectedPaper, hasSelectedPaper, processPaper, isProcessing, clearSelectedPaper } = usePaperActions();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [selectedModel, setSelectedModel] = useState<string>('gpt-4o');
@@ -29,6 +29,11 @@ const ProcessingHub = () => {
     } catch (error) {
       // Error handling is done in the hook
     }
+  };
+
+  const handleClearSelection = () => {
+    clearSelectedPaper();
+    navigate('/');
   };
 
   if (!hasSelectedPaper) {
@@ -90,13 +95,21 @@ const ProcessingHub = () => {
                 <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                   <FileText className="w-5 h-5 text-primary" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <CardTitle className="text-lg">Selected Paper</CardTitle>
                   <p className="text-sm text-muted-foreground">Ready for processing</p>
                 </div>
-                <Badge variant="secondary" className="ml-auto">
-                  Selected
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">Selected</Badge>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleClearSelection}
+                    className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
