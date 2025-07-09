@@ -35,9 +35,6 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
       console.log('🚀 MOBILE DEBUG: Calling selectPaper with ID:', paper.id);
       await selectPaper(paper.id);
       console.log('✅ MOBILE DEBUG: selectPaper completed successfully');
-      
-      // Navigate to processing hub after successful selection
-      navigate('/processing');
     } catch (error) {
       console.error('❌ MOBILE DEBUG: selectPaper failed:', error);
       // Error handling is done in the hook

@@ -147,18 +147,18 @@ serve(async (req: Request): Promise<Response> => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Fetch paper with PROCESSED status
+    // Fetch paper with SELECTED status (changed from PROCESSED)
     const { data: paper, error: fetchError } = await supabase
       .from('papers')
       .select('title, source')
       .eq('id', paper_id)
-      .eq('status', 'PROCESSED')
+      .eq('status', 'SELECTED')
       .single()
 
     if (fetchError || !paper) {
-      console.error('Paper not found or not processed:', fetchError)
+      console.error('Paper not found or not selected:', fetchError)
       return new Response(JSON.stringify({ 
-        error: 'Paper not found or not in PROCESSED status',
+        error: 'Paper not found or not in SELECTED status',
         paper_id 
       }), {
         status: 404,
