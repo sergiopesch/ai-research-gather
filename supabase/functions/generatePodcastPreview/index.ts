@@ -55,7 +55,7 @@ async function generateRealtimeConversation(paperTitle: string, openAIApiKey: st
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4.1-mini-2025-04-14',
+          model: 'gpt-4o-mini',
           messages: [
             { 
               role: 'system', 
@@ -71,7 +71,9 @@ async function generateRealtimeConversation(paperTitle: string, openAIApiKey: st
       })
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`)
+        const errorText = await response.text()
+        console.error(`❌ OpenAI API error: ${response.status} - ${errorText}`)
+        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
@@ -146,7 +148,7 @@ function getContextualPrompt(speaker: string, exchangeIndex: number, paperTitle:
 }
 
 serve(async (req: Request): Promise<Response> => {
-  console.log(`🚀 Real-time Podcast Function: ${req.method} ${req.url}`)
+    console.log(`🚀 Real-time Podcast Function: ${req.method} ${req.url}`)
   
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {

@@ -61,18 +61,28 @@ export const usePodcastPreview = () => {
         eventSourceRef.current = null;
       }
 
-      // Use proper Supabase function URL with streaming
-      const SUPABASE_URL = "https://eapnatbiodenijfrpqcn.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU";
-      
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/generatePodcastPreview`, {
+      // Use Supabase client to invoke the function properly
+      const { data, error } = await supabase.functions.invoke('generatePodcastPreview', {
+        body: {
+          paper_id: paperId,
+          episode,
+          duration
+        }
+      });
+
+      if (error) {
+        throw new Error(`Function invocation failed: ${error.message}`);
+      }
+
+      // For streaming responses, we need to handle differently
+      const response = await fetch(`https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/generatePodcastPreview`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU',
           'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          'apikey': SUPABASE_ANON_KEY,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcG5hdGJpb2RlbmlqZnJwcWNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NjczNjEsImV4cCI6MjA2NzU0MzM2MX0.pR-zyk4aiAzsl9xwP7VU8hLuo-3r6KXod2rk0468TZU',
         },
         body: JSON.stringify({
           paper_id: paperId,
