@@ -260,18 +260,23 @@ serve(async (req: Request): Promise<Response> => {
     // Extract authors from title or use source as fallback
     const authors = paper.source ? [paper.source] : ['the researchers']
 
-    // Always return SSE stream for live conversation
+    // Always return SSE stream for live conversation with immediate flush
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // Send conversation start event
+          console.log('🚀 Starting SSE stream for live conversation')
+          
+          // Send conversation start event immediately
           sendSSEEvent(controller, 'start', { 
             paper_id,
             episode,
             title: paper.title
           })
           
-          // Generate live conversation
+          // Small delay to ensure client is ready
+          await new Promise(resolve => setTimeout(resolve, 100))
+          
+          // Generate live conversation with immediate streaming
           await generateLiveConversation(
             paper.title,
             authors,
@@ -280,10 +285,11 @@ serve(async (req: Request): Promise<Response> => {
             controller
           )
           
+          console.log('✅ Live conversation stream completed')
           // Close stream
           controller.close()
         } catch (error) {
-          console.error('Stream error:', error)
+          console.error('❌ Stream error:', error)
           sendSSEEvent(controller, 'error', {
             message: error instanceof Error ? error.message : 'Unknown error'
           })
@@ -295,8 +301,9 @@ serve(async (req: Request): Promise<Response> => {
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no', // Disable nginx buffering
         ...corsHeaders,
       }
     })
