@@ -34,7 +34,7 @@ export const usePodcastPreview = () => {
     }
     setIsLive(false);
     setIsGenerating(false);
-    console.log('🛑 Conversation stopped');
+    
   }, []);
 
   const generateLivePreview = useCallback(async (
@@ -43,7 +43,7 @@ export const usePodcastPreview = () => {
     duration: number = 10
   ) => {
     if (isGenerating || isLive) {
-      console.log('Already generating or live conversation in progress');
+      
       return;
     }
     
@@ -53,7 +53,7 @@ export const usePodcastPreview = () => {
     setIsLive(false);
 
     try {
-      console.log('🎙️ Starting real-time AI conversation for paper:', paperId);
+      
       
       // Close any existing connections
       if (eventSourceRef.current) {
@@ -66,8 +66,6 @@ export const usePodcastPreview = () => {
       const supabaseUrl = 'https://eapnatbiodenijfrpqcn.supabase.co'; // Match the client config
       const functionUrl = `${supabaseUrl}/functions/v1/generatePodcastPreview`;
       
-      console.log('🎙️ Making streaming request to CONSISTENT URL:', functionUrl);
-      console.log('🔍 Using client configuration URL to avoid mismatch');
       
       const response = await fetch(functionUrl, {
         method: 'POST',
@@ -112,7 +110,7 @@ export const usePodcastPreview = () => {
           const { done, value } = await reader.read();
           
           if (done) {
-            console.log('✅ Real-time conversation completed');
+            
             setIsLive(false);
             break;
           }
@@ -138,27 +136,23 @@ export const usePodcastPreview = () => {
                 const jsonStr = line.slice(6); // Remove 'data: '
                 const eventData = JSON.parse(jsonStr);
                 
-                console.log(`📡 SSE Event:`, eventData);
+                
                 
                 // Handle different event types
                 switch (eventData.type || (eventData.speaker ? 'message' : 'unknown')) {
                   case 'conversation_start':
-                    console.log('🎬 Conversation started');
                     break;
                     
                   case 'typing_start':
-                    console.log(`⌨️ ${eventData.speaker} started typing`);
                     setCurrentTypingSpeaker(eventData.speaker);
                     break;
                     
                   case 'typing_stop':
-                    console.log(`⌨️ ${eventData.speaker} stopped typing`);
                     setCurrentTypingSpeaker(null);
                     break;
                     
                   case 'message':
                     if (eventData.speaker && eventData.text) {
-                      console.log(`💬 ${eventData.speaker}: ${eventData.text.substring(0, 50)}...`);
                       
                       // Add message to dialogue
                       setDialogue(prev => [...prev, {
@@ -174,7 +168,6 @@ export const usePodcastPreview = () => {
                     break;
                     
                   case 'conversation_end':
-                    console.log('🎬 Conversation ended');
                     setIsLive(false);
                     setCurrentTypingSpeaker(null);
                     
@@ -249,7 +242,7 @@ export const usePodcastPreview = () => {
     setDialogue([]);
     setCurrentPaperId(null);
     setCurrentTypingSpeaker(null);
-    console.log('🧹 Cleared conversation');
+    
   }, [stopConversation]);
 
   // Memoize return object to prevent unnecessary re-renders

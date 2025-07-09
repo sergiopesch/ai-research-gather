@@ -1,73 +1,73 @@
-# Welcome to your Lovable project
+# The Notebook Pod - AI Research Paper Discovery & Podcast Generator
 
-## Project info
+## About This Application
+
+**The Notebook Pod** is an intelligent research paper discovery platform that transforms academic papers into engaging live podcast conversations. Using advanced AI, the application creates real-time dialogues between two AI hosts - Dr. Ada (research expert) and Sam (curious interviewer) - who discuss and explain research papers in an accessible, conversational format.
+
+### Key Features
+
+🔬 **Smart Paper Discovery**: Find relevant research papers using AI-powered search across academic databases
+🎙️ **Live AI Conversations**: Watch two independent AI agents have real-time discussions about research papers
+📚 **Research Areas**: Browse papers by specific domains (AI, Biology, Physics, etc.)
+⚡ **Real-time Processing**: Stream conversations as they happen with typing indicators and live updates
+🎯 **Accessible Explanations**: Complex research made understandable through natural dialogue
+
+### How It Works
+
+1. **Discover**: Search for research papers by topic or browse curated areas
+2. **Select**: Choose papers that interest you for podcast generation
+3. **Experience**: Watch Dr. Ada and Sam have live conversations about the research
+4. **Learn**: Gain insights through engaging, accessible AI discussions
+
+### Technology Stack
+
+- **Frontend**: React + TypeScript with Vite
+- **UI Components**: shadcn/ui with Tailwind CSS
+- **Backend**: Supabase with Edge Functions
+- **AI Integration**: OpenAI GPT models for conversation generation
+- **Real-time Features**: Server-Sent Events for live streaming
+
+---
+
+## Project Info
 
 **URL**: https://lovable.dev/projects/fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5
 
-## How can I edit this code?
+## Development
 
-There are several ways of editing your application.
+### Local Setup
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requirements: Node.js & npm - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Install dependencies
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Architecture
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Frontend**: React SPA with routing and state management
+- **Database**: Supabase PostgreSQL with real-time subscriptions
+- **Edge Functions**: Paper discovery, processing, and podcast generation
+- **AI Integration**: OpenAI API for natural language processing
 
-**Use GitHub Codespaces**
+## Deployment
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Deploy instantly via [Lovable](https://lovable.dev/projects/fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5) → Share → Publish
 
-## What technologies are used for this project?
+### Custom Domain
 
-This project is built with:
+Connect your domain via Project > Settings > Domains. [Learn more](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/fbdc2b11-f7c6-49bb-8b98-cdbec6edcec5) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+*Making academic research accessible through AI-powered conversations.*
