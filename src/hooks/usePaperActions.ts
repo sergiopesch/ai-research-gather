@@ -34,9 +34,7 @@ export const usePaperActions = () => {
   }, []);
 
   const selectPaper = useCallback(async (paperId: string) => {
-    if (isSelecting || selectedPaper === paperId) {
-      return;
-    }
+    if (isSelecting || selectedPaper === paperId) return;
     
     setIsSelecting(true);
     try {
@@ -45,100 +43,43 @@ export const usePaperActions = () => {
       });
 
       if (error) {
-        // Handle specific error cases
-        if (error.message && error.message.includes('409')) {
-          // Paper already selected - this is actually good news!
+        if (error.message?.includes('409') || error.message?.includes('already selected')) {
           setSelectedPaper(paperId);
-          
           toast({
             title: "Paper Already Selected",
             description: "This paper is ready for processing. Redirecting...",
           });
-
-          // Automatically redirect to processing hub
-          setTimeout(() => {
-            navigate('/processing');
-          }, 1000);
-
+          setTimeout(() => navigate('/processing'), 1000);
           return { success: true, already_selected: true };
         }
         throw error;
       }
 
       setSelectedPaper(paperId);
-      
       toast({
         title: "Paper Selected",
         description: "Redirecting to processing hub...",
       });
-
-      // Automatically redirect to processing hub
-      setTimeout(() => {
-        navigate('/processing');
-      }, 1000);
-
+      setTimeout(() => navigate('/processing'), 1000);
       return data;
     } catch (error: any) {
       console.error('Selection error:', error);
-      let errorMessage = "Failed to select paper";
-      let errorTitle = "Selection Failed";
-      // Try to get the real error message from the Edge Function response
-      if (error?.context?.response) {
-        try {
-          const data = await error.context.response.json();
-          if (data.error === "Paper already selected") {
-            setSelectedPaper(paperId);
-            toast({
-              title: "Paper Already Selected",
-              description: "This paper is ready for processing. Redirecting...",
-            });
-            setTimeout(() => {
-              navigate('/processing');
-            }, 1000);
-            return { success: true, already_selected: true };
-          }
-          if (data.error) errorMessage = data.error;
-          else if (data.message) errorMessage = data.message;
-        } catch {
-          try {
-            const text = await error.context.response.text();
-            if (text) errorMessage = text;
-          } catch {}
-        }
-      } else if (error?.message) {
-        try {
-          const errorData = JSON.parse(error.message);
-          if (errorData.error === "Paper already selected") {
-            setSelectedPaper(paperId);
-            toast({
-              title: "Paper Already Selected",
-              description: "This paper is ready for processing. Redirecting...",
-            });
-            setTimeout(() => {
-              navigate('/processing');
-            }, 1000);
-            return { success: true, already_selected: true };
-          }
-          errorMessage = errorData.message || errorData.error || errorMessage;
-          errorTitle = errorData.error || errorTitle;
-        } catch {
-          if (error.message.includes('409') || error.message.includes('already selected')) {
-            setSelectedPaper(paperId);
-            toast({
-              title: "Paper Already Selected",
-              description: "This paper is ready for processing. Redirecting...",
-            });
-            setTimeout(() => {
-              navigate('/processing');
-            }, 1000);
-            return { success: true, already_selected: true };
-          }
-          errorMessage = error.message;
-        }
+      
+      // Handle "already selected" case from various error formats
+      const errorStr = JSON.stringify(error);
+      if (errorStr.includes('already selected') || errorStr.includes('409')) {
+        setSelectedPaper(paperId);
+        toast({
+          title: "Paper Already Selected",
+          description: "This paper is ready for processing. Redirecting...",
+        });
+        setTimeout(() => navigate('/processing'), 1000);
+        return { success: true, already_selected: true };
       }
+
       toast({
-        title: errorTitle,
-        description: errorMessage,
+        title: "Selection Failed",
+        description: error?.message || "Failed to select paper",
         variant: "destructive",
       });
       throw error;
@@ -153,7 +94,7 @@ export const usePaperActions = () => {
     setIsProcessing(true);
     try {
       const { data, error } = await supabase.functions.invoke('processPaper', {
-        body: { paper_id: paperId, model: model || 'gpt-4o' }
+        body: { paper_id: paperId, model: model || 'gpt-4.1-2025-04-14' }
       });
 
       if (error) throw error;
@@ -166,30 +107,9 @@ export const usePaperActions = () => {
       return data;
     } catch (error: any) {
       console.error('Error processing paper:', error);
-      let errorMessage = "Failed to process paper";
-      // Try to get the real error message from the Edge Function response
-      if (error?.context?.response) {
-        try {
-          const data = await error.context.response.json();
-          if (data.error) errorMessage = data.error;
-          else if (data.message) errorMessage = data.message;
-        } catch {
-          try {
-            const text = await error.context.response.text();
-            if (text) errorMessage = text;
-          } catch {}
-        }
-      } else if (error?.message) {
-        try {
-          const errorData = JSON.parse(error.message);
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch {
-          errorMessage = error.message;
-        }
-      }
       toast({
         title: "Processing Failed",
-        description: errorMessage,
+        description: error?.message || "Failed to process paper",
         variant: "destructive",
       });
       throw error;

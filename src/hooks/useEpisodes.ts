@@ -47,11 +47,12 @@ export const useEpisodes = () => {
 
   const createEpisode = useCallback(async (paperId: string, paperTitle: string, script: any) => {
     try {
+      const nextNumber = await getNextEpisodeNumber();
       const { data, error } = await supabase
         .from('episodes')
         .insert({
-          episode_number: await getNextEpisodeNumber(),
-          title: `Episode ${await getNextEpisodeNumber()}: ${paperTitle}`,
+          episode_number: nextNumber,
+          title: `Episode ${nextNumber}: ${paperTitle}`,
           paper_id: paperId,
           paper_title: paperTitle,
           script: script,
