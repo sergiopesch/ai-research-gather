@@ -1,5 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useCallback, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '@/integrations/supabase/client';
 
@@ -7,15 +6,6 @@ export type Utterance = {
   speaker: "Dr Ada" | "Sam";
   text: string;
   timestamp?: number;
-  exchange?: number;
-  isTyping?: boolean;
-};
-
-export type ConversationEvent = {
-  type: 'conversation_start' | 'typing_start' | 'typing_stop' | 'message' | 'conversation_end' | 'error';
-  speaker?: "Dr Ada" | "Sam";
-  text?: string;
-  timestamp: number;
   exchange?: number;
 };
 
@@ -26,14 +16,9 @@ export const usePodcastPreview = () => {
   const [currentPaperId, setCurrentPaperId] = useState<string | null>(null);
   const [currentTypingSpeaker, setCurrentTypingSpeaker] = useState<"Dr Ada" | "Sam" | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
   const { toast } = useToast();
 
   const stopConversation = useCallback(() => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
-    }
     setIsLive(false);
     setIsGenerating(false);
     setCurrentTypingSpeaker(null);
@@ -61,7 +46,7 @@ export const usePodcastPreview = () => {
       try {
         const functionUrl = `${SUPABASE_URL}/functions/v1/generatePodcastPreview`;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second timeout
         
         const response = await fetch(functionUrl, {
           method: 'POST',
@@ -99,9 +84,11 @@ export const usePodcastPreview = () => {
         
         setIsGenerating(false);
         setIsLive(true);
+        
+        // Show success message with estimated time
         toast({
           title: "Live Conversation Started",
-          description: "Dr. Ada and Sam are having a REAL conversation!",
+          description: "Dr. Ada and Sam are having a REAL conversation! Estimated duration: ~2-3 minutes",
         });
         
         const decoder = new TextDecoder();
@@ -114,6 +101,13 @@ export const usePodcastPreview = () => {
               setIsLive(false);
               if (!receivedMessage && !error) {
                 throw new Error('The conversation ended before any messages were received.');
+              }
+              // Show completion message
+              if (receivedMessage) {
+                toast({
+                  title: "Conversation Complete",
+                  description: "The live conversation has ended successfully!",
+                });
               }
               break;
             }
@@ -154,10 +148,7 @@ export const usePodcastPreview = () => {
                     case 'conversation_end':
                       setIsLive(false);
                       setCurrentTypingSpeaker(null);
-                      toast({
-                        title: "Conversation Completed",
-                        description: "The AI hosts have finished their discussion!",
-                      });
+                      // Don't show toast here as it's already shown above
                       break;
                     case 'error':
                       throw new Error(eventData.message || 'Server error occurred during conversation.');

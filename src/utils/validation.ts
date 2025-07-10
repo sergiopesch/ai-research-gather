@@ -1,20 +1,5 @@
 // Validation utilities for the application
 
-export const validatePaperId = (id: string | undefined): boolean => {
-  return typeof id === 'string' && id.length > 0 && /^[a-zA-Z0-9_-]+$/.test(id);
-};
-
-export const validateUrl = (url: string): boolean => {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-// Removed unused validateDate function
-
 export const sanitizeText = (text: string): string => {
   return text.trim().replace(/\s+/g, ' ');
 };

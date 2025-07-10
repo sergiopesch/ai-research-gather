@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
 import { usePaperActions } from '@/hooks/usePaperActions';
 import { useToast } from '@/hooks/use-toast';
-import { validatePaperId, validateUrl, sanitizeText } from '@/utils/validation';
+import { sanitizeText } from '@/utils/validation';
 import type { Paper } from '@/types/research';
 
 interface PaperCardProps {
@@ -18,7 +18,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const { toast } = useToast();
 
   const handleSelectPaper = async () => {
-    if (!validatePaperId(paper.id)) {
+    if (!paper.id || paper.id.trim() === '') {
       toast({
         title: "Error",
         description: "Invalid paper ID. Cannot select paper.",
@@ -176,7 +176,6 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
                 variant="outline" 
                 asChild 
                 className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation"
-                disabled={!validateUrl(paper.url)}
               >
                 <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                   <ExternalLink className="w-4 h-4 sm:w-4 sm:h-4" />
