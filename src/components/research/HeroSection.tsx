@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import { Mic2 } from 'lucide-react';
 
 export const HeroSection = () => {
   return (
@@ -8,14 +8,14 @@ export const HeroSection = () => {
         <div className="text-center text-white">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4 sm:mb-6">
             <div className="p-2 sm:p-3 bg-white/10 rounded-xl sm:rounded-2xl backdrop-blur-sm">
-              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8" />
+              <Mic2 className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-              Research Paper Finder
+              The Notebook Pod Studio
             </h1>
           </div>
           <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed px-4">
-            Discover the latest breakthroughs in AI, Robotics and Computer Vision
+            Your AI-powered podcast creation studio for research papers
           </p>
         </div>
       </div>

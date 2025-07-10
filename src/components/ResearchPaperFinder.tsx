@@ -97,10 +97,10 @@ const ResearchPaperFinder = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
-                  Latest Research Papers
+                  Research Paper Library
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Papers from {formattedDate}
+                  Select papers to create podcast episodes
                 </p>
               </div>
               <Badge variant="secondary" className="px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium w-fit">

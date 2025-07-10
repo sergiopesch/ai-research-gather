@@ -1,12 +1,14 @@
-import { ArrowLeft, FileText, Loader2, X, Download, FileDown, Mic2 } from 'lucide-react';
+import { ArrowLeft, FileText, Loader2, X, Download, FileDown, Mic2, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { usePaperActions } from '@/hooks/usePaperActions';
 import { useScriptGeneration } from '@/hooks/useScriptGeneration';
+import { useEpisodes } from '@/hooks/useEpisodes';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
+import { EpisodeLibrary } from '@/components/studio/EpisodeLibrary';
 
 const ProcessingHub = () => {
   const { selectedPaper, hasSelectedPaper, clearSelectedPaper } = usePaperActions();
@@ -20,6 +22,7 @@ const ProcessingHub = () => {
     error,
     hasScript
   } = useScriptGeneration();
+  const { createEpisode } = useEpisodes();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -46,6 +49,20 @@ const ProcessingHub = () => {
     }
   }, [selectedPaper, generateScript, toast]);
 
+  const handleSaveEpisode = useCallback(async () => {
+    if (!script || !selectedPaper) return;
+    
+    try {
+      await createEpisode(selectedPaper, script.title, script);
+      toast({
+        title: "Episode Saved",
+        description: "Episode has been added to your studio library",
+      });
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  }, [script, selectedPaper, createEpisode, toast]);
+
   if (!hasSelectedPaper) {
     return (
       <div className="min-h-screen bg-background">
@@ -54,26 +71,30 @@ const ProcessingHub = () => {
             <Button variant="ghost" size="sm" asChild>
               <Link to="/">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Papers
+                Back to Studio
               </Link>
             </Button>
           </div>
 
-          <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
-              <Mic2 className="w-8 h-8 text-muted-foreground" />
+          <div className="grid gap-6">
+            <div className="text-center py-16">
+              <div className="w-16 h-16 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
+                <Headphones className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground mb-3">
+                Studio Ready
+              </h1>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Select a research paper to create your next podcast episode.
+              </p>
+              <Button asChild>
+                <Link to="/">
+                  Browse Research Papers
+                </Link>
+              </Button>
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-3">
-              No Paper Selected
-            </h1>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Select a research paper from the discovery page to generate a podcast script.
-            </p>
-            <Button asChild>
-              <Link to="/">
-                Discover Papers
-              </Link>
-            </Button>
+            
+            <EpisodeLibrary />
           </div>
         </div>
       </div>
@@ -85,19 +106,22 @@ const ProcessingHub = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Papers
-            </Link>
-          </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Studio
+              </Link>
+            </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">The Notebook Pod</h1>
-            <p className="text-muted-foreground">AI-generated podcast scripts for ElevenLabs</p>
+            <h1 className="text-2xl font-bold text-foreground">The Notebook Pod Studio</h1>
+            <p className="text-muted-foreground">Professional podcast episode creation workstation</p>
           </div>
         </div>
 
         <div className="grid gap-6">
+          {/* Episode Library */}
+          <EpisodeLibrary />
+          
           {/* Selected Paper Card */}
           <Card>
             <CardHeader>
@@ -145,7 +169,7 @@ const ProcessingHub = () => {
                 )}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Generate a complete podcast conversation script between Dr. Ada and Sam for ElevenLabs
+                Create your next podcast episode with Dr. Ada and Sam
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -184,12 +208,22 @@ const ProcessingHub = () => {
                 {hasScript && !isGenerating && (
                   <>
                     <Button 
-                      onClick={() => downloadElevenLabsScript(script!)}
-                      className="h-12 text-base font-semibold"
+                      onClick={handleSaveEpisode}
+                      className="h-12 text-base font-semibold bg-green-600 hover:bg-green-700"
                       size="lg"
                     >
-                      <Download className="w-5 h-5 mr-3" />
-                      Download for ElevenLabs
+                      <Headphones className="w-5 h-5 mr-3" />
+                      Save to Studio
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => downloadElevenLabsScript(script!)}
+                      variant="outline"
+                      size="lg"
+                      className="h-12"
+                    >
+                      <Download className="w-5 h-5 mr-2" />
+                      Download ElevenLabs
                     </Button>
                     
                     <Button 
@@ -204,7 +238,7 @@ const ProcessingHub = () => {
                     
                     <Button 
                       onClick={clearScript}
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                     >
                       <X className="w-3 h-3 mr-2" />

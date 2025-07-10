@@ -165,7 +165,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
               >
                 <Brain className="w-4 h-4 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">
-                  {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select for Processing"}
+                  {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select for Episode"}
                 </span>
                 <span className="sm:hidden">
                   {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select"}

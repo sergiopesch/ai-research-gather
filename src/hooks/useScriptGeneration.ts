@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '@/integrations/supabase/client';
 
 export type ScriptSegment = {
@@ -49,8 +50,8 @@ export const useScriptGeneration = () => {
       setScript(data);
       
       toast({
-        title: "Script Generated Successfully",
-        description: `Created ${data.segments.length} conversation segments`,
+        title: "Episode Script Generated",
+        description: `Created ${data.segments.length} conversation segments for your studio`,
       });
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to generate podcast script';

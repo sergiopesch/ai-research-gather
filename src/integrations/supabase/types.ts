@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      episodes: {
+        Row: {
+          created_at: string
+          episode_number: number
+          id: string
+          paper_id: string
+          paper_title: string
+          script: Json
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          episode_number: number
+          id?: string
+          paper_id: string
+          paper_title: string
+          script: Json
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          episode_number?: number
+          id?: string
+          paper_id?: string
+          paper_title?: string
+          script?: Json
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       paper_assets: {
         Row: {
           created_at: string
@@ -93,7 +129,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_next_episode_number: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
     }
     Enums: {
       paper_status: "NEW" | "SELECTED" | "PROCESSED"
