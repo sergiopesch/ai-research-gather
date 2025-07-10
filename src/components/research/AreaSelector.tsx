@@ -37,15 +37,26 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
                     : 'border-border hover:border-primary/60 hover:shadow-medium hover:bg-primary/5'
                 }`}
                 onClick={() => onToggleArea(area.id)}
+                role="checkbox"
+                aria-checked={isSelected}
+                aria-labelledby={`area-label-${area.id}`}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onToggleArea(area.id);
+                  }
+                }}
               >
                 <div className="flex items-center space-x-3 sm:space-x-4">
                   <Checkbox 
                     id={area.id} 
                     checked={isSelected} 
                     onCheckedChange={() => onToggleArea(area.id)}
-                    className={`data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground flex-shrink-0 w-5 h-5 border-2 ${
+                    className={`data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground flex-shrink-0 ${
                       isSelected ? 'border-primary' : 'border-muted-foreground hover:border-primary'
                     }`}
+                    aria-describedby={`area-desc-${area.id}`}
                   />
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className={`p-2.5 rounded-xl flex-shrink-0 transition-all duration-200 border ${
@@ -55,13 +66,22 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
                     }`}>
                       <Icon className={`w-5 h-5 transition-colors ${
                         isSelected ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
-                      }`} />
+                      }`} aria-hidden="true" />
                     </div>
-                    <Label htmlFor={area.id} className={`font-semibold cursor-pointer text-base truncate transition-colors ${
-                      isSelected ? 'text-primary' : 'text-foreground group-hover:text-primary'
-                    }`}>
-                      {area.label}
-                    </Label>
+                    <div className="flex-1">
+                      <Label 
+                        htmlFor={area.id} 
+                        id={`area-label-${area.id}`}
+                        className={`font-semibold cursor-pointer text-base truncate transition-colors block ${
+                          isSelected ? 'text-primary' : 'text-foreground group-hover:text-primary'
+                        }`}
+                      >
+                        {area.label}
+                      </Label>
+                      <p id={`area-desc-${area.id}`} className="text-sm text-muted-foreground mt-1">
+                        {area.keywords.slice(0, 3).join(', ')}...
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
