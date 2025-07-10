@@ -2,140 +2,141 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Professional design system inspired by modern SaaS platforms */
 
 @layer base {
   :root {
-    /* Comet-inspired modern design system */
-    --background: 248 248 248;
-    --foreground: 23 23 23;
+    /* Premium color palette */
+    --background: 250 250 250;
+    --foreground: 15 15 15;
 
     --card: 255 255 255;
-    --card-foreground: 23 23 23;
+    --card-foreground: 15 15 15;
 
     --popover: 255 255 255;
-    --popover-foreground: 23 23 23;
+    --popover-foreground: 15 15 15;
 
-    /* Modern dark primary inspired by Comet's CTA */
-    --primary: 23 23 23;
+    /* Rich primary colors */
+    --primary: 15 15 15;
     --primary-foreground: 255 255 255;
 
-    /* Soft secondary tones */
-    --secondary: 245 245 245;
-    --secondary-foreground: 82 82 82;
+    /* Sophisticated secondary palette */
+    --secondary: 247 247 247;
+    --secondary-foreground: 68 68 68;
 
-    /* Elegant muted colors */
-    --muted: 250 250 250;
-    --muted-foreground: 115 115 115;
+    /* Refined muted colors */
+    --muted: 252 252 252;
+    --muted-foreground: 102 102 102;
 
-    /* Subtle accent */
+    /* Modern accent */
     --accent: 248 248 248;
-    --accent-foreground: 23 23 23;
+    --accent-foreground: 15 15 15;
 
-    /* Refined destructive */
+    /* Professional destructive */
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
-    /* Minimal borders */
-    --border: 238 238 238;
-    --input: 238 238 238;
-    --ring: 23 23 23;
+    /* Subtle borders */
+    --border: 234 234 234;
+    --input: 234 234 234;
+    --ring: 15 15 15;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
-    /* Research area colors - modern and refined */
+    /* Research area brand colors */
     --ai-primary: 59 130 246;
     --ai-bg: 248 250 252;
     --ai-border: 219 234 254;
 
-    --robotics-primary: 16 185 129;
-    --robotics-bg: 247 254 231;
+    --robotics-primary: 34 197 94;
+    --robotics-bg: 240 253 244;
     --robotics-border: 187 247 208;
 
-    --cv-primary: 139 92 246;
+    --cv-primary: 147 51 234;
     --cv-bg: 250 245 255;
     --cv-border: 221 214 254;
 
-    /* Elegant gradients inspired by Comet */
-    --gradient-hero: linear-gradient(135deg, hsl(248 248 248) 0%, hsl(240 240 240) 100%);
+    /* Premium gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(250 250 250) 0%, hsl(245 245 245) 100%);
     --gradient-card: linear-gradient(135deg, hsl(255 255 255) 0%, hsl(252 252 252) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(23 23 23) 0%, hsl(64 64 64) 100%);
-    --gradient-organic: radial-gradient(ellipse at top left, hsl(248 250 252 / 0.8) 0%, transparent 50%);
+    --gradient-primary: linear-gradient(135deg, hsl(15 15 15) 0%, hsl(68 68 68) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(59 130 246 / 0.1) 0%, hsl(147 51 234 / 0.1) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(255 255 255 / 0.1) 0%, hsl(255 255 255 / 0.05) 100%);
 
-    /* Sophisticated shadows */
-    --shadow-subtle: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
-    --shadow-soft: 0 2px 8px 0 hsl(0 0% 0% / 0.06);
-    --shadow-medium: 0 8px 24px -4px hsl(0 0% 0% / 0.08);
-    --shadow-large: 0 16px 40px -8px hsl(0 0% 0% / 0.1);
-    --shadow-organic: 0 20px 60px -12px hsl(0 0% 0% / 0.12);
+    /* Professional shadows */
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.04);
+    --shadow-sm: 0 2px 4px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 12px 0 hsl(0 0% 0% / 0.08);
+    --shadow-lg: 0 8px 24px 0 hsl(0 0% 0% / 0.12);
+    --shadow-xl: 0 16px 40px 0 hsl(0 0% 0% / 0.16);
+    --shadow-brand: 0 8px 32px 0 hsl(59 130 246 / 0.15);
 
-    /* Enhanced focus for accessibility */
-    --focus-ring: 0 0 0 2px hsl(23 23 23 / 0.2);
+    /* Enhanced focus */
+    --focus-ring: 0 0 0 3px hsl(15 15 15 / 0.1);
 
-    --sidebar-background: 248 248 248;
-    --sidebar-foreground: 82 82 82;
-    --sidebar-primary: 23 23 23;
+    --sidebar-background: 250 250 250;
+    --sidebar-foreground: 68 68 68;
+    --sidebar-primary: 15 15 15;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 245 245 245;
-    --sidebar-accent-foreground: 82 82 82;
-    --sidebar-border: 238 238 238;
-    --sidebar-ring: 23 23 23;
+    --sidebar-accent: 247 247 247;
+    --sidebar-accent-foreground: 68 68 68;
+    --sidebar-border: 234 234 234;
+    --sidebar-ring: 15 15 15;
   }
 
   .dark {
-    /* Comet-inspired dark theme */
-    --background: 23 23 23;
-    --foreground: 248 248 248;
+    /* Premium dark theme */
+    --background: 15 15 15;
+    --foreground: 250 250 250;
 
-    --card: 38 38 38;
-    --card-foreground: 248 248 248;
+    --card: 32 32 32;
+    --card-foreground: 250 250 250;
 
-    --popover: 38 38 38;
-    --popover-foreground: 248 248 248;
+    --popover: 32 32 32;
+    --popover-foreground: 250 250 250;
 
-    /* Modern light primary for dark mode */
-    --primary: 248 248 248;
-    --primary-foreground: 23 23 23;
+    /* Elegant light primary for dark mode */
+    --primary: 250 250 250;
+    --primary-foreground: 15 15 15;
 
     /* Enhanced dark mode secondary */
-    --secondary: 64 64 64;
-    --secondary-foreground: 212 212 212;
+    --secondary: 48 48 48;
+    --secondary-foreground: 202 202 202;
 
-    /* Better dark mode muted colors */
-    --muted: 54 54 54;
-    --muted-foreground: 163 163 163;
+    /* Professional dark muted colors */
+    --muted: 40 40 40;
+    --muted-foreground: 153 153 153;
 
     /* Dark mode accent */
-    --accent: 54 54 54;
-    --accent-foreground: 248 248 248;
+    --accent: 40 40 40;
+    --accent-foreground: 250 250 250;
 
     /* Refined destructive for dark */
     --destructive: 248 113 113;
-    --destructive-foreground: 23 23 23;
+    --destructive-foreground: 15 15 15;
 
-    --border: 82 82 82;
-    --input: 82 82 82;
-    --ring: 248 248 248;
+    --border: 68 68 68;
+    --input: 68 68 68;
+    --ring: 250 250 250;
 
     /* Dark mode gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(23 23 23) 0%, hsl(38 38 38) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(38 38 38) 0%, hsl(54 54 54) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(248 248 248) 0%, hsl(212 212 212) 100%);
-    --gradient-organic: radial-gradient(ellipse at top left, hsl(64 64 64 / 0.3) 0%, transparent 50%);
+    --gradient-hero: linear-gradient(135deg, hsl(15 15 15) 0%, hsl(32 32 32) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(32 32 32) 0%, hsl(48 48 48) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(250 250 250) 0%, hsl(202 202 202) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(59 130 246 / 0.2) 0%, hsl(147 51 234 / 0.2) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(255 255 255 / 0.05) 0%, hsl(255 255 255 / 0.02) 100%);
 
     /* Enhanced focus ring for dark mode */
-    --focus-ring: 0 0 0 2px hsl(248 248 248 / 0.3);
+    --focus-ring: 0 0 0 3px hsl(250 250 250 / 0.2);
 
-    --sidebar-background: 23 23 23;
-    --sidebar-foreground: 163 163 163;
-    --sidebar-primary: 248 248 248;
-    --sidebar-primary-foreground: 23 23 23;
-    --sidebar-accent: 54 54 54;
-    --sidebar-accent-foreground: 212 212 212;
-    --sidebar-border: 82 82 82;
-    --sidebar-ring: 248 248 248;
+    --sidebar-background: 15 15 15;
+    --sidebar-foreground: 153 153 153;
+    --sidebar-primary: 250 250 250;
+    --sidebar-primary-foreground: 15 15 15;
+    --sidebar-accent: 40 40 40;
+    --sidebar-accent-foreground: 202 202 202;
+    --sidebar-border: 68 68 68;
+    --sidebar-ring: 250 250 250;
   }
 }
 
@@ -146,23 +147,26 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   html {
     scroll-behavior: smooth;
+    font-size: 16px;
   }
 
-  /* Enhanced focus styles for accessibility */
+  /* Enhanced focus styles */
   *:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
+    outline: none;
     box-shadow: var(--focus-ring);
   }
 
-  /* Improved text selection */
+  /* Professional text selection */
   ::selection {
-    background-color: hsl(var(--primary) / 0.2);
+    background-color: hsl(var(--primary) / 0.15);
     color: hsl(var(--foreground));
   }
 
@@ -176,6 +180,17 @@ All colors MUST be HSL.
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+
+  /* Typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    line-height: 1.6;
   }
 }
 
@@ -192,131 +207,182 @@ All colors MUST be HSL.
     background: var(--gradient-primary);
   }
 
-  .bg-gradient-organic {
-    background: var(--gradient-organic);
+  .bg-gradient-premium {
+    background: var(--gradient-premium);
+  }
+
+  .bg-gradient-glass {
+    background: var(--gradient-glass);
   }
 
   .bg-gradient-ai {
-    background: linear-gradient(135deg, hsl(var(--ai-primary)) 0%, hsl(var(--ai-bg)) 100%);
+    background: linear-gradient(135deg, hsl(var(--ai-primary) / 0.1) 0%, hsl(var(--ai-bg)) 100%);
   }
 
   .bg-gradient-robotics {
-    background: linear-gradient(135deg, hsl(var(--robotics-primary)) 0%, hsl(var(--robotics-bg)) 100%);
+    background: linear-gradient(135deg, hsl(var(--robotics-primary) / 0.1) 0%, hsl(var(--robotics-bg)) 100%);
   }
 
   .bg-gradient-cv {
-    background: linear-gradient(135deg, hsl(var(--cv-primary)) 0%, hsl(var(--cv-bg)) 100%);
+    background: linear-gradient(135deg, hsl(var(--cv-primary) / 0.1) 0%, hsl(var(--cv-bg)) 100%);
   }
 
-  .shadow-subtle {
-    box-shadow: var(--shadow-subtle);
+  .shadow-xs {
+    box-shadow: var(--shadow-xs);
   }
 
-  .shadow-soft {
-    box-shadow: var(--shadow-soft);
+  .shadow-sm {
+    box-shadow: var(--shadow-sm);
   }
 
-  .shadow-medium {
-    box-shadow: var(--shadow-medium);
+  .shadow-md {
+    box-shadow: var(--shadow-md);
   }
 
-  .shadow-large {
-    box-shadow: var(--shadow-large);
+  .shadow-lg {
+    box-shadow: var(--shadow-lg);
   }
 
-  .shadow-organic {
-    box-shadow: var(--shadow-organic);
+  .shadow-xl {
+    box-shadow: var(--shadow-xl);
   }
 
-  /* Organic shapes inspired by Comet */
+  .shadow-brand {
+    box-shadow: var(--shadow-brand);
+  }
+
+  /* Modern organic shapes */
   .organic-shape {
-    border-radius: 50% 60% 70% 40%;
-    filter: blur(80px);
-    opacity: 0.6;
-  }
-
-  .organic-shape-sm {
-    border-radius: 60% 40% 50% 70%;
-    filter: blur(40px);
+    border-radius: 60% 40% 65% 35%;
+    filter: blur(60px);
     opacity: 0.4;
   }
 
-  /* Modern glass effect */
-  .glass-modern {
-    backdrop-filter: blur(20px) saturate(180%);
-    background: hsl(255 255 255 / 0.7);
-    border: 1px solid hsl(255 255 255 / 0.3);
+  .organic-shape-sm {
+    border-radius: 45% 55% 50% 70%;
+    filter: blur(30px);
+    opacity: 0.3;
   }
 
-  .dark .glass-modern {
-    background: hsl(38 38 38 / 0.7);
-    border: 1px solid hsl(82 82 82 / 0.3);
+  /* Premium glass effect */
+  .glass-effect {
+    backdrop-filter: blur(24px) saturate(180%);
+    background: var(--gradient-glass);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
 
-  /* Elegant text gradients */
-  .text-gradient-modern {
+  /* Modern text gradients */
+  .text-gradient {
     background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--muted-foreground)) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Modern hover effects */
-  .hover-lift-modern {
+  .text-gradient-brand {
+    background: linear-gradient(135deg, hsl(var(--ai-primary)) 0%, hsl(var(--cv-primary)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Premium hover effects */
+  .hover-lift {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .hover-lift-modern:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-organic);
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
   }
 
-  /* Comet-inspired border styles */
-  .border-organic {
-    border-radius: 1.5rem;
-    border: 1px solid hsl(var(--border));
+  .hover-scale {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .border-modern {
-    border-radius: 1rem;
-    border: 1px solid hsl(var(--border) / 0.5);
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  /* Professional border styles */
+  .border-premium {
+    border-radius: 0.75rem;
+    border: 1px solid hsl(var(--border) / 0.6);
+  }
+
+  .border-soft {
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border) / 0.3);
   }
 }
 
 @layer components {
-  .modern-card {
-    @apply bg-card border-organic shadow-soft hover-lift-modern;
+  .premium-card {
+    @apply bg-card border-premium shadow-sm hover-lift;
   }
 
-  .modern-button {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft transition-all duration-300 border-modern;
+  .premium-button {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-all duration-300 border-premium font-medium;
   }
 
-  .modern-button-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 border-modern shadow-subtle transition-all duration-300;
+  .premium-button-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 border-premium shadow-xs transition-all duration-300 font-medium;
   }
 
-  .comet-section {
-    @apply relative overflow-hidden;
+  .premium-button-outline {
+    @apply border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-xs transition-all duration-300 font-medium;
   }
 
-  .comet-hero {
-    @apply relative bg-gradient-hero py-24 lg:py-32 overflow-hidden;
+  .premium-section {
+    @apply relative overflow-hidden py-16 lg:py-24;
+  }
+
+  .premium-hero {
+    @apply relative bg-gradient-hero py-20 lg:py-32 overflow-hidden;
   }
 
   .area-card {
-    @apply modern-card p-6 cursor-pointer transition-all duration-300;
+    @apply premium-card p-6 cursor-pointer transition-all duration-300;
   }
 
   .area-card:hover {
-    @apply shadow-medium bg-accent/50;
+    @apply shadow-md bg-accent/30;
   }
 
   .area-card.selected {
-    @apply border-primary bg-primary/5 shadow-large;
+    @apply border-primary bg-gradient-premium shadow-brand;
+  }
+
+  .research-card {
+    @apply premium-card p-8 space-y-6;
+  }
+
+  .research-card:hover {
+    @apply shadow-lg bg-gradient-card;
   }
 
   .organic-bg {
-    @apply absolute inset-0 pointer-events-none;
+    @apply absolute inset-0 pointer-events-none overflow-hidden;
+  }
+
+  /* Typography classes */
+  .text-display {
+    @apply text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight;
+  }
+
+  .text-heading {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight;
+  }
+
+  .text-subheading {
+    @apply text-lg sm:text-xl font-medium;
+  }
+
+  .text-body {
+    @apply text-base leading-relaxed;
+  }
+
+  .text-caption {
+    @apply text-sm text-muted-foreground;
   }
 }

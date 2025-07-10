@@ -66,45 +66,56 @@ const ResearchPaperFinder = () => {
           onToggleArea={handleAreaToggle} 
         />
 
-        {/* Modern Search Button */}
-        <div className="comet-section pb-16">
+        {/* Premium Search Button */}
+        <div className="premium-section pb-16">
           <div className="max-w-6xl mx-auto px-6 sm:px-8 text-center">
             <button 
               onClick={handleSearch} 
               disabled={loading || selectedAreas.length === 0} 
-              className={`group inline-flex items-center gap-4 px-12 py-5 rounded-full text-xl font-medium transition-all duration-300 ${
+              className={`group premium-button px-12 py-5 rounded-full text-lg hover-scale inline-flex items-center gap-4 ${
                 loading || selectedAreas.length === 0
-                  ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
-                  : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 shadow-soft hover:shadow-large'
+                  ? 'opacity-60 cursor-not-allowed'
+                  : 'shadow-brand hover:shadow-xl'
               }`}
             >
               {loading ? (
                 <>
                   <Loader2 className="w-6 h-6 animate-spin" />
-                  <span>Finding papers...</span>
+                  <span>Discovering papers...</span>
                 </>
               ) : (
                 <>
-                  <div className="p-1 bg-primary-foreground/10 rounded-full">
+                  <div className="p-2 bg-primary-foreground/10 rounded-full group-hover:bg-primary-foreground/20 transition-colors">
                     <Play className="w-5 h-5" />
                   </div>
-                  <span>Find Research Papers</span>
+                  <span>Discover Research Papers</span>
                 </>
               )}
             </button>
+            
+            {selectedAreas.length === 0 && (
+              <p className="text-caption mt-4">
+                Select at least one research area to begin
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Results */}
+        {/* Enhanced Results Section */}
         {papers.length > 0 && (
-          <div className="comet-section py-16">
+          <div className="premium-section">
             <div className="max-w-6xl mx-auto px-6 sm:px-8">
               <div className="text-center mb-16">
-                <h2 className="text-3xl sm:text-4xl font-light text-foreground mb-4">
-                  Research Papers
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-glass border border-border/30 mb-6">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-foreground">Research Discovered</span>
+                </div>
+                
+                <h2 className="text-heading mb-6">
+                  Latest Research Papers
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Transform these papers into engaging podcast episodes
+                <p className="text-body text-muted-foreground max-w-2xl mx-auto">
+                  Transform these cutting-edge research papers into engaging podcast episodes with AI-powered insights
                 </p>
               </div>
 

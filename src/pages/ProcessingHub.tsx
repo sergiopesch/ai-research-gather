@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, Loader2, X, Download, FileDown, Mic2, Headphones } from 'lucide-react';
+import { ArrowLeft, FileText, Loader2, X, Download, FileDown, Mic2, Headphones, Lightbulb, Zap, CheckCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -66,28 +66,39 @@ const ProcessingHub = () => {
   if (!hasSelectedPaper) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="comet-hero">
-          <div className="max-w-4xl mx-auto px-6 sm:px-8 text-center">
-            <div className="flex items-center gap-4 mb-8">
-              <Button variant="ghost" size="sm" asChild className="modern-button-secondary">
-                <Link to="/">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Studio
-                </Link>
-              </Button>
-            </div>
-
-            <div className="py-16">
-              <div className="w-20 h-20 mx-auto mb-8 bg-gradient-card rounded-3xl flex items-center justify-center shadow-soft">
-                <Headphones className="w-10 h-10 text-primary" />
+        <div className="premium-hero min-h-[60vh]">
+          <div className="organic-bg">
+            <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-premium organic-shape"></div>
+            <div className="absolute bottom-20 right-20 w-48 h-48 bg-gradient-ai organic-shape-sm"></div>
+          </div>
+          
+          <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-16">
+            <Link 
+              to="/" 
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-12 group"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span>Back to Research</span>
+            </Link>
+            
+            <div className="max-w-4xl text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-glass border border-border/30 mb-6">
+                <Lightbulb className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">Production Studio</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl font-light text-foreground mb-6">
-                Studio Ready
+              
+              <h1 className="text-display mb-6">
+                Select Research to
+                <span className="block text-gradient-brand">
+                  Create Episodes
+                </span>
               </h1>
-              <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
-                Select a research paper to create your next podcast episode.
+              
+              <p className="text-subheading text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+                Choose a research paper from the discovery page to begin transforming it into an engaging podcast episode.
               </p>
-              <Button asChild className="modern-button px-8 py-4 rounded-full">
+              
+              <Button asChild className="premium-button px-8 py-4 rounded-full text-lg hover-scale">
                 <Link to="/">
                   Browse Research Papers
                 </Link>
@@ -96,9 +107,9 @@ const ProcessingHub = () => {
           </div>
         </div>
         
-        {/* Episode Library moved to bottom */}
-        <div className="comet-section py-16">
-          <div className="max-w-6xl mx-auto px-6 sm:px-8">
+        {/* Episode Library */}
+        <div className="premium-section">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <EpisodeLibrary />
           </div>
         </div>
@@ -108,239 +119,263 @@ const ProcessingHub = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="comet-section py-8">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8">
-          <div className="flex items-center gap-4 mb-8">
-            <Button variant="ghost" size="sm" asChild className="modern-button-secondary">
-              <Link to="/">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Studio
-              </Link>
-            </Button>
+      {/* Premium Header */}
+      <div className="premium-section py-12 border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8">
+          <div className="flex items-center gap-6 mb-8">
+            <Link 
+              to="/" 
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span>Back to Research</span>
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-premium rounded-xl shadow-brand">
+              <Mic2 className="w-8 h-8 text-primary" />
+            </div>
             <div>
-              <h1 className="text-3xl font-light text-foreground">Podcast Studio</h1>
-              <p className="text-muted-foreground">Episode creation workspace</p>
+              <h1 className="text-heading">Production Studio</h1>
+              <p className="text-body text-muted-foreground">Transform research into podcast episodes</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 sm:px-8 space-y-12">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 py-16 space-y-16">
         {/* Selected Paper Card */}
-        <div className="modern-card p-8">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-gradient-card rounded-2xl flex items-center justify-center shadow-soft">
-              <FileText className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-light text-foreground">Selected Paper</h2>
-              <p className="text-muted-foreground">Ready for script generation</p>
+        <div className="premium-card p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-ai rounded-xl shadow-md">
+                <FileText className="w-6 h-6 text-ai-primary" />
+              </div>
+              <div>
+                <h2 className="text-subheading text-foreground">Selected Research Paper</h2>
+                <p className="text-caption">Ready for podcast script generation</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
-              <Badge className="bg-green-50 text-green-700 border-green-200 px-3 py-1 rounded-full">Selected</Badge>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                <CheckCircle className="w-3.5 h-3.5" />
+                <span className="text-sm font-medium">Selected</span>
+              </div>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={handleClearSelection}
-                className="modern-button-secondary h-10 w-10 p-0"
+                className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
-          <div className="bg-gradient-card p-6 rounded-2xl border border-border/50">
-            <p className="text-sm text-muted-foreground mb-2">Paper ID:</p>
-            <p className="font-mono text-sm bg-background px-3 py-2 rounded-lg border">
+          
+          <div className="bg-gradient-card p-6 rounded-xl border border-border/50">
+            <p className="text-caption mb-3">Paper Identifier:</p>
+            <div className="p-3 bg-muted rounded-lg border font-mono text-sm">
               {selectedPaper}
-            </p>
+            </div>
           </div>
         </div>
 
         {/* Script Generation */}
-        <div className="modern-card p-8">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-gradient-card rounded-2xl flex items-center justify-center shadow-soft">
-              <Mic2 className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-light text-foreground">Podcast Script Generation</h2>
-              <p className="text-muted-foreground">
-                Create podcast episodes with Dr. Rowan and Alex
-              </p>
+        <div className="premium-card p-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-robotics rounded-xl shadow-md">
+                <Zap className="w-6 h-6 text-robotics-primary" />
+              </div>
+              <div>
+                <h2 className="text-subheading text-foreground">AI Script Generation</h2>
+                <p className="text-caption">Professional podcast scripts with Dr. Rowan and Alex</p>
+              </div>
             </div>
             {isGenerating && (
-              <Badge className="bg-blue-50 text-blue-700 border-blue-200 px-3 py-1 rounded-full animate-pulse">
-                GENERATING
-              </Badge>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 animate-pulse">
+                <Clock className="w-3.5 h-3.5" />
+                <span className="text-sm font-medium">Generating</span>
+              </div>
             )}
           </div>
           
-          <div className="space-y-8">
-            {/* Error Display */}
-            {error && (
-              <div className="p-6 bg-red-50 border border-red-200 rounded-2xl">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
+          {/* Error Display */}
+          {error && (
+            <div className="p-6 bg-destructive/5 border border-destructive/20 rounded-xl">
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
+
+          {/* Control Buttons */}
+          <div className="flex flex-wrap items-center gap-4">
+            {!hasScript && !isGenerating && (
+              <button 
+                onClick={handleGenerateScript}
+                disabled={!selectedPaper}
+                className="premium-button px-8 py-4 rounded-full text-lg hover-scale inline-flex items-center gap-3"
+              >
+                <Mic2 className="w-6 h-6" />
+                Generate Podcast Script
+              </button>
             )}
 
-            {/* Control Buttons */}
-            <div className="flex flex-wrap items-center gap-4">
-              {!hasScript && !isGenerating && (
+            {isGenerating && (
+              <button 
+                disabled
+                className="bg-muted text-muted-foreground px-8 py-4 rounded-full text-lg inline-flex items-center gap-3 cursor-not-allowed"
+              >
+                <Loader2 className="w-6 h-6 animate-spin" />
+                Generating Script...
+              </button>
+            )}
+
+            {hasScript && !isGenerating && (
+              <div className="flex flex-wrap items-center gap-4">
                 <button 
-                  onClick={handleGenerateScript}
-                  disabled={!selectedPaper}
-                  className="modern-button px-8 py-4 rounded-full text-lg font-medium inline-flex items-center gap-3"
+                  onClick={handleSaveEpisode}
+                  className="bg-green-600 text-white hover:bg-green-700 px-8 py-4 rounded-full text-lg inline-flex items-center gap-3 hover-scale shadow-lg"
                 >
-                  <Mic2 className="w-6 h-6" />
-                  Generate Podcast Script
+                  <Headphones className="w-6 h-6" />
+                  Save to Studio
                 </button>
-              )}
-
-              {isGenerating && (
+                
                 <button 
-                  disabled
-                  className="bg-muted text-muted-foreground px-8 py-4 rounded-full text-lg font-medium inline-flex items-center gap-3"
+                  onClick={() => downloadElevenLabsScript(script!)}
+                  className="premium-button-outline px-6 py-4 rounded-full inline-flex items-center gap-2 hover-scale"
                 >
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                  Generating Script...
+                  <Download className="w-5 h-5" />
+                  Download ElevenLabs
                 </button>
-              )}
+                
+                <button 
+                  onClick={() => downloadTextScript(script!)}
+                  className="premium-button-outline px-6 py-4 rounded-full inline-flex items-center gap-2 hover-scale"
+                >
+                  <FileDown className="w-5 h-5" />
+                  Download Text
+                </button>
+                
+                <Button 
+                  onClick={clearScript}
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <X className="w-3 h-3 mr-2" />
+                  Clear
+                </Button>
+              </div>
+            )}
+          </div>
 
-              {hasScript && !isGenerating && (
-                <>
-                  <button 
-                    onClick={handleSaveEpisode}
-                    className="bg-green-600 text-white hover:bg-green-700 px-8 py-4 rounded-full text-lg font-medium inline-flex items-center gap-3 transition-all duration-300 hover:scale-105"
-                  >
-                    <Headphones className="w-6 h-6" />
-                    Save to Studio
-                  </button>
-                  
-                  <button 
-                    onClick={() => downloadElevenLabsScript(script!)}
-                    className="modern-button-secondary px-6 py-4 rounded-full inline-flex items-center gap-2"
-                  >
-                    <Download className="w-5 h-5" />
-                    Download ElevenLabs
-                  </button>
-                  
-                  <button 
-                    onClick={() => downloadTextScript(script!)}
-                    className="modern-button-secondary px-6 py-4 rounded-full inline-flex items-center gap-2"
-                  >
-                    <FileDown className="w-5 h-5" />
-                    Download Text
-                  </button>
-                  
-                  <Button 
-                    onClick={clearScript}
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="w-3 h-3 mr-2" />
-                    Clear
-                  </Button>
-                </>
-              )}
-            </div>
-
-            {/* Script Preview */}
-            {hasScript && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium text-foreground">Generated Script</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {script!.segments.length} segments • {script!.totalDuration} estimated duration
-                    </p>
-                  </div>
+          {/* Script Preview */}
+          {hasScript && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between p-6 bg-gradient-card rounded-xl border border-border/50">
+                <div>
+                  <h3 className="text-subheading text-foreground">Generated Script Preview</h3>
+                  <p className="text-caption">
+                    {script!.segments.length} segments • {script!.totalDuration} estimated duration
+                  </p>
                 </div>
+              </div>
 
-                {/* Script Segments Display */}
-                <div className="space-y-4 max-h-96 overflow-y-auto bg-gradient-card rounded-2xl p-6 border border-border/50">
-                  {script!.segments.map((segment, index) => (
-                    <div 
-                      key={index}
-                      className="flex gap-4 p-4 rounded-xl bg-background/50 hover:bg-background/80 transition-colors"
-                    >
-                      <div className="flex-shrink-0">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${
-                          segment.speaker === "DR ROWAN" 
-                            ? "bg-primary text-primary-foreground" 
-                            : "bg-secondary text-secondary-foreground"
-                        }`}>
-                          {segment.speaker === "DR ROWAN" ? "R" : "A"}
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-sm font-medium">
-                            {segment.speaker}
-                          </span>
-                          <Badge variant="outline" className="text-xs px-2 py-1">
-                            Segment {index + 1}
-                          </Badge>
-                          {segment.duration && (
-                            <Badge variant="outline" className="text-xs px-2 py-1">
-                              ~{Math.floor(segment.duration / 60)}:{(segment.duration % 60).toString().padStart(2, '0')}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm leading-relaxed text-foreground">{segment.text}</p>
+              {/* Script Segments Display */}
+              <div className="space-y-4 max-h-96 overflow-y-auto bg-gradient-card rounded-xl p-6 border border-border/50">
+                {script!.segments.map((segment, index) => (
+                  <div 
+                    key={index}
+                    className="flex gap-4 p-4 rounded-xl bg-background/50 hover:bg-background/80 transition-colors border border-border/30"
+                  >
+                    <div className="flex-shrink-0">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                        segment.speaker === "DR ROWAN" 
+                          ? "bg-gradient-ai text-ai-primary border-2 border-ai-border" 
+                          : "bg-gradient-robotics text-robotics-primary border-2 border-robotics-border"
+                      }`}>
+                        {segment.speaker === "DR ROWAN" ? "R" : "A"}
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                {/* ElevenLabs Instructions */}
-                <div className="p-6 bg-blue-50 rounded-2xl border border-blue-200">
-                  <h4 className="font-medium text-sm mb-3 text-blue-900">
-                    📘 ElevenLabs Import Instructions
-                  </h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Download the ElevenLabs JSON file above</li>
-                    <li>• Dr. Rowan uses voice: <strong>Aria</strong> (9BWtsMINqrJLrRacOk9x)</li>
-                    <li>• Alex uses voice: <strong>Liam</strong> (TX3LPaxmHKxFdv7VOQHJ)</li>
-                    <li>• Import the JSON into ElevenLabs Projects or use the API</li>
-                    <li>• Adjust voice settings (stability: 0.5, similarity: 0.75) as needed</li>
-                  </ul>
-                </div>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-semibold text-foreground">
+                          {segment.speaker}
+                        </span>
+                        <div className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">
+                          Segment {index + 1}
+                        </div>
+                        {segment.duration && (
+                          <div className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">
+                            ~{Math.floor(segment.duration / 60)}:{(segment.duration % 60).toString().padStart(2, '0')}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm leading-relaxed text-foreground">{segment.text}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
 
-            {/* Features List */}
-            <div className="space-y-4 pt-6 border-t border-border/50">
-              <h3 className="text-lg font-medium text-foreground">Script Features:</h3>
-              <div className="grid gap-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>Conversation between Dr. Rowan (expert) and Alex (host)</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>ElevenLabs JSON format with voice settings</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>Structured segments with timing</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>Natural conversation flow</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>Optimized for text-to-speech</span>
-                </div>
+              {/* ElevenLabs Instructions */}
+              <div className="p-6 bg-gradient-ai rounded-xl border border-ai-border">
+                <h4 className="font-semibold text-sm mb-3 text-ai-primary flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4" />
+                  ElevenLabs Integration Guide
+                </h4>
+                <ul className="text-sm text-foreground space-y-2">
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-ai-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Download the ElevenLabs JSON file using the button above</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-ai-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Dr. Rowan uses voice: <strong>Aria</strong> (9BWtsMINqrJLrRacOk9x)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-ai-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Alex uses voice: <strong>Liam</strong> (TX3LPaxmHKxFdv7VOQHJ)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-ai-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Import the JSON into ElevenLabs Projects or use their API</span>
+                  </li>
+                </ul>
               </div>
+            </div>
+          )}
+
+          {/* Features List */}
+          <div className="space-y-4 pt-6 border-t border-border/30">
+            <h3 className="text-subheading text-foreground">Script Features</h3>
+            <div className="grid gap-3">
+              {[
+                "Natural conversation between Dr. Rowan (expert) and Alex (host)",
+                "ElevenLabs JSON format with optimized voice settings",
+                "Structured segments with estimated timing",
+                "Engaging dialogue flow for podcast format",
+                "Optimized for text-to-speech synthesis"
+              ].map((feature, index) => (
+                <div key={index} className="flex items-center gap-3 text-sm">
+                  <div className="w-2 h-2 bg-gradient-brand rounded-full"></div>
+                  <span className="text-foreground">{feature}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Episode Library - moved to bottom */}
-        <EpisodeLibrary />
+        {/* Episode Library */}
+        <div className="space-y-8">
+          <div className="text-center">
+            <h2 className="text-heading mb-4">Episode Library</h2>
+            <p className="text-body text-muted-foreground">
+              Manage your created podcast episodes
+            </p>
+          </div>
+          <EpisodeLibrary />
+        </div>
       </div>
     </div>
   );
