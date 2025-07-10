@@ -11,14 +11,14 @@ interface AreaSelectorProps {
 
 export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps) => {
   return (
-    <div className="glass rounded-xl shadow-large border-0 mb-12 sm:mb-16">
+    <div className="bg-card border-2 border-border rounded-xl shadow-large mb-12 sm:mb-16">
       <div className="p-6 sm:p-8 lg:p-10">
         <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <div className="p-2 sm:p-3 bg-gradient-primary rounded-xl shadow-soft">
-            <Filter className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <div className="p-3 bg-primary rounded-xl shadow-soft border-2 border-primary">
+            <Filter className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h3 className="text-lg sm:text-xl font-bold">Research Areas</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-foreground">Research Areas</h3>
             <p className="text-sm text-muted-foreground">Select areas to find papers</p>
           </div>
         </div>
@@ -31,10 +31,10 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
             return (
               <div 
                 key={area.id} 
-                className={`brand-card p-4 sm:p-5 cursor-pointer group transition-all duration-300 ${
+                className={`brand-card p-4 sm:p-5 cursor-pointer group transition-all duration-300 border-2 ${
                   isSelected 
-                    ? 'border-primary shadow-glow bg-gradient-primary/5' 
-                    : 'hover:border-primary/50 hover:shadow-medium'
+                    ? 'border-primary bg-primary/10 shadow-glow ring-2 ring-primary/20' 
+                    : 'border-border hover:border-primary/60 hover:shadow-medium hover:bg-primary/5'
                 }`}
                 onClick={() => onToggleArea(area.id)}
               >
@@ -43,19 +43,23 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
                     id={area.id} 
                     checked={isSelected} 
                     onCheckedChange={() => onToggleArea(area.id)}
-                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary flex-shrink-0 w-5 h-5"
+                    className={`data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground flex-shrink-0 w-5 h-5 border-2 ${
+                      isSelected ? 'border-primary' : 'border-muted-foreground hover:border-primary'
+                    }`}
                   />
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className={`p-2.5 rounded-xl flex-shrink-0 transition-all duration-200 ${
+                    <div className={`p-2.5 rounded-xl flex-shrink-0 transition-all duration-200 border ${
                       isSelected 
-                        ? 'bg-primary/20 shadow-soft' 
-                        : 'bg-muted group-hover:bg-primary/10'
+                        ? 'bg-primary/20 border-primary/30 shadow-soft' 
+                        : 'bg-muted border-border group-hover:bg-primary/10 group-hover:border-primary/30'
                     }`}>
                       <Icon className={`w-5 h-5 transition-colors ${
                         isSelected ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
                       }`} />
                     </div>
-                    <Label htmlFor={area.id} className="font-semibold cursor-pointer text-base truncate group-hover:text-primary transition-colors">
+                    <Label htmlFor={area.id} className={`font-semibold cursor-pointer text-base truncate transition-colors ${
+                      isSelected ? 'text-primary' : 'text-foreground group-hover:text-primary'
+                    }`}>
                       {area.label}
                     </Label>
                   </div>

@@ -72,7 +72,11 @@ const ResearchPaperFinder = () => {
           <Button 
             onClick={handleSearch} 
             disabled={loading || selectedAreas.length === 0} 
-            className="brand-button w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 h-auto text-lg sm:text-xl font-semibold rounded-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+            className={`w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 h-auto text-lg sm:text-xl font-bold rounded-xl shadow-large border-2 transition-all duration-200 ${
+              loading || selectedAreas.length === 0
+                ? 'bg-muted text-muted-foreground border-border cursor-not-allowed opacity-50'
+                : 'bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:shadow-glow hover:scale-105 active:scale-100'
+            }`}
             size="lg"
           >
             {loading ? (
