@@ -3,7 +3,7 @@ project_id = "eapnatbiodenijfrpqcn"
 [functions.paperFinder]
 verify_jwt = false
 
-[functions.generatePodcastPreview]
+[functions.generatePodcastScript]
 verify_jwt = false
 
 [functions.processPaper]

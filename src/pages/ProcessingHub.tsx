@@ -1,36 +1,35 @@
-import { ArrowLeft, FileText, Loader2, X, Mic, Square, Radio } from 'lucide-react';
+import { ArrowLeft, FileText, Loader2, X, Download, FileDown, Mic2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { usePaperActions } from '@/hooks/usePaperActions';
-import { usePodcastPreview } from '@/hooks/usePodcastPreview';
+import { useScriptGeneration } from '@/hooks/useScriptGeneration';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
-import { TypingAnimation } from '@/components/TypingAnimation';
 
 const ProcessingHub = () => {
   const { selectedPaper, hasSelectedPaper, clearSelectedPaper } = usePaperActions();
   const { 
-    generateLivePreview,
-    stopConversation,
-    clearPreview,
+    generateScript,
+    downloadElevenLabsScript,
+    downloadTextScript,
+    clearScript,
     isGenerating, 
-    dialogue, 
-    isLive,
-    hasDialogue,
-    currentTypingSpeaker
-  } = usePodcastPreview();
+    script, 
+    error,
+    hasScript
+  } = useScriptGeneration();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleClearSelection = useCallback(() => {
     clearSelectedPaper();
-    clearPreview();
+    clearScript();
     navigate('/');
-  }, [clearSelectedPaper, clearPreview, navigate]);
+  }, [clearSelectedPaper, clearScript, navigate]);
 
-  const handleGenerateLivePreview = useCallback(async () => {
+  const handleGenerateScript = useCallback(async () => {
     if (!selectedPaper) {
       toast({
         title: "No Paper Selected",
@@ -41,15 +40,11 @@ const ProcessingHub = () => {
     }
 
     try {
-      await generateLivePreview(selectedPaper, 1, 10);
+      await generateScript(selectedPaper);
     } catch (error) {
       // Error handling is done in the hook
     }
-  }, [selectedPaper, generateLivePreview, toast]);
-
-  const handleStopConversation = useCallback(() => {
-    stopConversation();
-  }, [stopConversation]);
+  }, [selectedPaper, generateScript, toast]);
 
   if (!hasSelectedPaper) {
     return (
@@ -66,13 +61,13 @@ const ProcessingHub = () => {
 
           <div className="text-center py-16">
             <div className="w-16 h-16 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
-              <Radio className="w-8 h-8 text-muted-foreground" />
+              <Mic2 className="w-8 h-8 text-muted-foreground" />
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-3">
               No Paper Selected
             </h1>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Select a research paper from the discovery page to start a live podcast conversation.
+              Select a research paper from the discovery page to generate a podcast script.
             </p>
             <Button asChild>
               <Link to="/">
@@ -98,7 +93,7 @@ const ProcessingHub = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">The Notebook Pod</h1>
-            <p className="text-muted-foreground">Live AI conversation between Dr. Ada and Sam (GPT-4.1 models)</p>
+            <p className="text-muted-foreground">AI-generated podcast scripts for ElevenLabs</p>
           </div>
         </div>
 
@@ -112,7 +107,7 @@ const ProcessingHub = () => {
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-lg">Selected Paper</CardTitle>
-                  <p className="text-sm text-muted-foreground">Ready for live podcast conversation</p>
+                  <p className="text-sm text-muted-foreground">Ready for script generation</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">Selected</Badge>
@@ -137,34 +132,41 @@ const ProcessingHub = () => {
             </CardContent>
           </Card>
 
-          {/* Live Podcast Conversation */}
+          {/* Script Generation */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
-                <Radio className="w-5 h-5" />
-                Live Conversation
-                {isLive && (
-                  <Badge variant="default" className="bg-red-500 text-white animate-pulse">
-                    LIVE
+                <Mic2 className="w-5 h-5" />
+                Podcast Script Generation
+                {isGenerating && (
+                  <Badge variant="default" className="bg-blue-500 text-white animate-pulse">
+                    GENERATING
                   </Badge>
                 )}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Watch two AI models have a real conversation about this research paper
+                Generate a complete podcast conversation script between Dr. Ada and Sam for ElevenLabs
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Error Display */}
+              {error && (
+                <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
+
               {/* Control Buttons */}
               <div className="flex items-center gap-3">
-                {!isLive && !isGenerating && (
+                {!hasScript && !isGenerating && (
                   <Button 
-                    onClick={handleGenerateLivePreview}
+                    onClick={handleGenerateScript}
                     disabled={!selectedPaper}
                     className="h-12 text-base font-semibold"
                     size="lg"
                   >
-                    <Mic className="w-5 h-5 mr-3" />
-                    Start Live Conversation
+                    <Mic2 className="w-5 h-5 mr-3" />
+                    Generate Podcast Script
                   </Button>
                 )}
 
@@ -175,151 +177,130 @@ const ProcessingHub = () => {
                     size="lg"
                   >
                     <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                    Starting Conversation...
+                    Generating Script...
                   </Button>
                 )}
 
-                {isLive && (
-                  <Button 
-                    onClick={handleStopConversation}
-                    variant="destructive"
-                    className="h-12 text-base font-semibold"
-                    size="lg"
-                  >
-                    <Square className="w-5 h-5 mr-3" />
-                    Stop Conversation
-                  </Button>
-                )}
-
-                {hasDialogue && !isLive && !isGenerating && (
-                  <Button 
-                    onClick={clearPreview}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <X className="w-3 h-3 mr-2" />
-                    Clear
-                  </Button>
+                {hasScript && !isGenerating && (
+                  <>
+                    <Button 
+                      onClick={() => downloadElevenLabsScript(script!)}
+                      className="h-12 text-base font-semibold"
+                      size="lg"
+                    >
+                      <Download className="w-5 h-5 mr-3" />
+                      Download for ElevenLabs
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => downloadTextScript(script!)}
+                      variant="outline"
+                      size="lg"
+                      className="h-12"
+                    >
+                      <FileDown className="w-5 h-5 mr-2" />
+                      Download Text
+                    </Button>
+                    
+                    <Button 
+                      onClick={clearScript}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <X className="w-3 h-3 mr-2" />
+                      Clear
+                    </Button>
+                  </>
                 )}
               </div>
 
-              {/* Live Conversation Display */}
-              {hasDialogue && (
+              {/* Script Preview */}
+              {hasScript && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium text-sm">Live Episode</h4>
+                      <h4 className="font-medium text-sm">Generated Script</h4>
                       <p className="text-xs text-muted-foreground">
-                        {dialogue.length} messages {isLive ? '• Live' : '• Completed'}
+                        {script!.segments.length} segments • {script!.totalDuration} estimated duration
                       </p>
                     </div>
                   </div>
 
-                  {/* Real-time Dialogue Display with Typing Animation */}
+                  {/* Script Segments Display */}
                   <div className="space-y-3 max-h-80 overflow-y-auto bg-muted/20 rounded-lg p-4 border">
-                    {dialogue.map((utterance, index) => (
+                    {script!.segments.map((segment, index) => (
                       <div 
                         key={index}
-                        className={`flex gap-3 p-3 rounded-lg transition-all duration-300 ${
-                          index === dialogue.length - 1 && isLive
-                            ? 'bg-primary/10 border border-primary/20 scale-[1.02] animate-fade-in' 
-                            : 'bg-background/50 hover:bg-muted/40'
-                        }`}
+                        className="flex gap-3 p-3 rounded-lg bg-background/50 hover:bg-muted/40 transition-colors"
                       >
                         <div className="flex-shrink-0">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-                            utterance.speaker === "Dr Ada" 
+                            segment.speaker === "Dr Ada" 
                               ? "bg-primary text-primary-foreground" 
                               : "bg-secondary text-secondary-foreground"
                           }`}>
-                            {utterance.speaker === "Dr Ada" ? "A" : "S"}
+                            {segment.speaker === "Dr Ada" ? "A" : "S"}
                           </div>
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-medium">
-                              {utterance.speaker}
+                              {segment.speaker}
                             </span>
-                            {utterance.exchange && (
+                            <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                              Segment {index + 1}
+                            </Badge>
+                            {segment.duration && (
                               <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                                #{utterance.exchange}
+                                ~{Math.floor(segment.duration / 60)}:{(segment.duration % 60).toString().padStart(2, '0')}
                               </Badge>
                             )}
-                            {index === dialogue.length - 1 && isLive && (
-                              <div className="flex items-center gap-1 ml-auto">
-                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                                <span className="text-xs text-green-600 font-medium">LATEST</span>
-                              </div>
-                            )}
                           </div>
-                          <p className="text-sm leading-relaxed">{utterance.text}</p>
-                          {utterance.timestamp && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(utterance.timestamp).toLocaleTimeString()}
-                            </p>
-                          )}
+                          <p className="text-sm leading-relaxed">{segment.text}</p>
                         </div>
                       </div>
                     ))}
-                    
-                    {/* Typing Animation */}
-                    <TypingAnimation 
-                      speaker={currentTypingSpeaker || "Dr Ada"} 
-                      isVisible={currentTypingSpeaker !== null} 
-                    />
-                    
-                    {/* Generic "thinking" indicator when live but not typing */}
-                    {isLive && !currentTypingSpeaker && (
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border border-dashed">
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        </div>
-                        <span className="text-sm text-muted-foreground">AI conversation in progress...</span>
-                      </div>
-                    )}
                   </div>
 
-                  {isLive && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span>🎙️ LIVE: Real-time AI conversation • Two independent GPT-4.1 instances</span>
-                      <div className="ml-auto flex items-center gap-1">
-                        <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
-                        <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                      </div>
-                      <div className="text-xs bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">
-                        {dialogue.length} messages
-                      </div>
-                    </div>
-                  )}
+                  {/* ElevenLabs Instructions */}
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h5 className="font-medium text-sm mb-2 text-blue-900 dark:text-blue-100">
+                      📘 ElevenLabs Import Instructions
+                    </h5>
+                    <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
+                      <li>• Download the ElevenLabs JSON file above</li>
+                      <li>• Dr. Ada uses voice: <strong>Aria</strong> (9BWtsMINqrJLrRacOk9x)</li>
+                      <li>• Sam uses voice: <strong>Liam</strong> (TX3LPaxmHKxFdv7VOQHJ)</li>
+                      <li>• Import the JSON into ElevenLabs Projects or use the API</li>
+                      <li>• Adjust voice settings (stability: 0.5, similarity: 0.75) as needed</li>
+                    </ul>
+                  </div>
                 </div>
               )}
 
               {/* Features List */}
               <div className="space-y-3 pt-4 border-t border-border/50">
-                <h3 className="text-sm font-medium text-foreground">Live Features:</h3>
+                <h3 className="text-sm font-medium text-foreground">Script Features:</h3>
                 <div className="grid gap-2">
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Real-time conversation between two independent AI agents</span>
+                    <span>Complete conversation between Dr. Ada (research expert) and Sam (interviewer)</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>GPT-4.1 (Dr. Ada) • Research expert & technical analysis</span>
+                    <span>ElevenLabs-compatible JSON format with voice IDs and settings</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>GPT-4.1 (Sam) • Curious interviewer & accessibility focus</span>
+                    <span>Structured segments with estimated durations</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Live typing indicators • Natural conversation flow</span>
+                    <span>Natural conversation flow with introductions and conclusions</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Contextual responses • Authentic AI-to-AI dialogue</span>
+                    <span>Optimized for text-to-speech synthesis</span>
                   </div>
                 </div>
               </div>
