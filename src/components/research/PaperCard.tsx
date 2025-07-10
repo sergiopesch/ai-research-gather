@@ -135,7 +135,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
             disabled={isSelecting || isAlreadySelected}
             className={`comet-button flex-1 sm:flex-none inline-flex items-center gap-2 ${
               isAlreadySelected 
-                ? 'bg-green-600 text-white hover:bg-green-700' 
+                ? 'bg-foreground text-background hover:bg-foreground/90' 
                 : ''
             }`}
           >

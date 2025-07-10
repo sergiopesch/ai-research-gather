@@ -32,8 +32,8 @@
     --accent: 242 242 242;
     --accent-foreground: 0 0 0;
 
-    /* Minimal red for destructive */
-    --destructive: 220 20 60;
+    /* Minimal red for destructive - keep minimal color for critical actions */
+    --destructive: 0 0 0;
     --destructive-foreground: 255 255 255;
 
     /* Barely visible borders */
@@ -43,16 +43,16 @@
 
     --radius: 0.75rem;
 
-    /* Remove colored research areas - use only greys */
-    --ai-primary: 60 60 60;
+    /* Research areas - pure greyscale */
+    --ai-primary: 0 0 0;
     --ai-bg: 249 249 249;
     --ai-border: 229 229 229;
 
-    --robotics-primary: 60 60 60;
+    --robotics-primary: 0 0 0;
     --robotics-bg: 249 249 249;
     --robotics-border: 229 229 229;
 
-    --cv-primary: 60 60 60;
+    --cv-primary: 0 0 0;
     --cv-bg: 249 249 249;
     --cv-border: 229 229 229;
 
@@ -105,8 +105,8 @@
     --accent: 28 28 28;
     --accent-foreground: 255 255 255;
 
-    --destructive: 220 20 60;
-    --destructive-foreground: 255 255 255;
+    --destructive: 255 255 255;
+    --destructive-foreground: 0 0 0;
 
     --border: 39 39 39;
     --input: 39 39 39;
@@ -129,16 +129,16 @@
     --sidebar-border: 39 39 39;
     --sidebar-ring: 255 255 255;
 
-    /* Remove colored research areas in dark mode too */
-    --ai-primary: 200 200 200;
+    /* Pure greyscale research areas in dark mode */
+    --ai-primary: 255 255 255;
     --ai-bg: 18 18 18;
     --ai-border: 39 39 39;
 
-    --robotics-primary: 200 200 200;
+    --robotics-primary: 255 255 255;
     --robotics-bg: 18 18 18;
     --robotics-border: 39 39 39;
 
-    --cv-primary: 200 200 200;
+    --cv-primary: 255 255 255;
     --cv-bg: 18 18 18;
     --cv-border: 39 39 39;
   }
