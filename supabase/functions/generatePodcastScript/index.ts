@@ -60,28 +60,39 @@ async function generateConversationSegments(paperTitle: string, openAIApiKey: st
   const segments = []
   const conversationFlow = [
     {
-      speaker: "Dr Ada",
-      prompt: `You are Dr. Ada, a brilliant research scientist hosting The Notebook Pod. Create an engaging 2-3 minute introduction to the research paper "${paperTitle}". Explain what makes this research exciting and why listeners should care. Be enthusiastic but clear, and set up the conversation for your co-host Sam to ask follow-up questions. Keep it conversational and under 200 words.`
+      speaker: "Dr Rowan",
+      prompt: `Create a 90-second hook for "${paperTitle}". Start with a vivid image or anecdote, then explain why this research matters. Use concrete metaphors and everyday numbers. Keep it under 120 words and end with a natural hand-off question to Alex.`,
+      systemPrompt: `You are Dr Rowan, senior researcher, witty but humble. Your super-power: explaining complex ideas with crisp analogies and mini-stories. Translate every technical claim into everyday scenarios. Use "we", "us", "our" - inclusive language. Keep sentences short, active voice. When you reference numbers, give friendly comparisons. Use labelled turns: "DR ROWAN: <content>" and end with a mic-pass question.`
     },
     {
-      speaker: "Sam", 
-      prompt: `You are Sam, a curious podcast interviewer. Dr. Ada just introduced the paper "${paperTitle}". Ask 2-3 thoughtful follow-up questions about the methodology, practical applications, or implications that would help listeners understand the research better. Be genuinely curious and represent the audience's perspective. Keep it under 150 words.`
+      speaker: "Alex Hughes", 
+      prompt: `Respond to Dr Rowan's hook about "${paperTitle}". Ask the questions someone new to the topic would really ask. Reflect aloud, check understanding, admit curiosity. Keep it under 100 words and bounce back to Rowan.`,
+      systemPrompt: `You are Alex Hughes, intellectually curious, representing everyday listeners. Ask real questions beginners would ask. Quote words Dr Rowan used and probe them. Use clarifying questions ("Wait, so is that like...?"). Admit confusion openly, celebrate "aha" moments. Keep jokes tasteful and brief. Use labelled turns: "ALEX: <content>" and end with a bounce-back.`
     },
     {
-      speaker: "Dr Ada",
-      prompt: `You are Dr. Ada. Sam just asked some great questions about "${paperTitle}". Provide detailed but accessible answers about the research methodology, technical innovations, and what makes this work stand out in the field. Share your expert insights while keeping it engaging for a general audience. 250-300 words.`
+      speaker: "Dr Rowan",
+      prompt: `Explain the problem and method from "${paperTitle}". Break it into back-and-forth chunks, use concrete metaphors, define any jargon in plain English. Anticipate questions and pre-empt confusion. Keep under 120 words, hand off to Alex naturally.`,
+      systemPrompt: `You are Dr Rowan, senior researcher, witty but humble. Your super-power: explaining complex ideas with crisp analogies and mini-stories. Translate every technical claim into everyday scenarios. Use "we", "us", "our" - inclusive language. Keep sentences short, active voice. When you reference numbers, give friendly comparisons. Use labelled turns: "DR ROWAN: <content>" and end with a mic-pass question.`
     },
     {
-      speaker: "Sam",
-      prompt: `You are Sam. Continue the conversation about "${paperTitle}" by asking about real-world applications, potential limitations, and future directions. What should listeners know about how this research might impact their lives or the broader field? Keep the questions engaging and accessible. Under 100 words.`
+      speaker: "Alex Hughes",
+      prompt: `Recap Dr Rowan's explanation in one sentence ("So basically...?"). Ask follow-up questions about the method, probe for clarity. Keep under 80 words and bounce back.`,
+      systemPrompt: `You are Alex Hughes, intellectually curious, representing everyday listeners. Ask real questions beginners would ask. Quote words Dr Rowan used and probe them. Use clarifying questions ("Wait, so is that like...?"). Admit confusion openly, celebrate "aha" moments. Keep jokes tasteful and brief. Use labelled turns: "ALEX: <content>" and end with a bounce-back.`
     },
     {
-      speaker: "Dr Ada", 
-      prompt: `You are Dr. Ada. Discuss the practical implications and future directions of "${paperTitle}". What are the next steps for this research? How might it influence the field? Share your perspective on the broader significance while remaining accessible to general audiences. 200-250 words.`
+      speaker: "Dr Rowan", 
+      prompt: `Explain the results and why they matter from "${paperTitle}". Use tangible examples, mention at least one limitation or open question. Connect to daily life. Under 120 words, natural hand-off.`,
+      systemPrompt: `You are Dr Rowan, senior researcher, witty but humble. Your super-power: explaining complex ideas with crisp analogies and mini-stories. Translate every technical claim into everyday scenarios. Use "we", "us", "our" - inclusive language. Keep sentences short, active voice. When you reference numbers, give friendly comparisons. Use labelled turns: "DR ROWAN: <content>" and end with a mic-pass question.`
     },
     {
-      speaker: "Sam",
-      prompt: `You are Sam. Wrap up the conversation about "${paperTitle}" with closing thoughts and thanks to Dr. Ada. Summarize key takeaways for listeners and tease future episodes. Keep it warm, appreciative, and under 100 words.`
+      speaker: "Alex Hughes",
+      prompt: `Rapid-fire Q&A about "${paperTitle}". Ask about real-world impact, bust a myth, or connect to pop culture. Keep energy high, under 80 words.`,
+      systemPrompt: `You are Alex Hughes, intellectually curious, representing everyday listeners. Ask real questions beginners would ask. Quote words Dr Rowan used and probe them. Use clarifying questions ("Wait, so is that like...?"). Admit confusion openly, celebrate "aha" moments. Keep jokes tasteful and brief. Use labelled turns: "ALEX: <content>" and end with a bounce-back.`
+    },
+    {
+      speaker: "Dr Rowan",
+      prompt: `Provide take-home summary in 3 bullet points for "${paperTitle}". End with one actionable suggestion for listeners. Warm wrap-up under 100 words.`,
+      systemPrompt: `You are Dr Rowan, senior researcher, witty but humble. Your super-power: explaining complex ideas with crisp analogies and mini-stories. Translate every technical claim into everyday scenarios. Use "we", "us", "our" - inclusive language. Keep sentences short, active voice. When you reference numbers, give friendly comparisons. Use labelled turns: "DR ROWAN: <content>" and end with a mic-pass question.`
     }
   ]
 
@@ -93,9 +104,7 @@ async function generateConversationSegments(paperTitle: string, openAIApiKey: st
       const text = await callOpenAI(openAIApiKey, [
         {
           role: 'system',
-          content: segment.speaker === "Dr Ada" 
-            ? "You are Dr Ada, a brilliant research scientist. Speak naturally about research with enthusiasm and technical insight. Keep responses conversational and engaging."
-            : "You are Sam, a curious podcast interviewer. Ask engaging questions and help make technical concepts accessible. Show genuine interest and represent the audience."
+          content: segment.systemPrompt
         },
         { role: 'user', content: segment.prompt }
       ])
