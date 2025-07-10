@@ -68,8 +68,8 @@ const ProcessingHub = () => {
       <div className="min-h-screen bg-background">
         <div className="premium-hero min-h-[60vh]">
           <div className="organic-bg">
-            <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-premium organic-shape"></div>
-            <div className="absolute bottom-20 right-20 w-48 h-48 bg-gradient-ai organic-shape-sm"></div>
+            <div className="absolute top-20 left-20 w-64 h-64 bg-muted/20 rounded-full"></div>
+            <div className="absolute bottom-20 right-20 w-48 h-48 bg-muted/20 rounded-full"></div>
           </div>
           
           <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-16">
@@ -82,14 +82,14 @@ const ProcessingHub = () => {
             </Link>
             
             <div className="max-w-4xl text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-glass border border-border/30 mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border/30 mb-6">
                 <Lightbulb className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-foreground">Production Studio</span>
               </div>
               
               <h1 className="text-display mb-6">
                 Select Research to
-                <span className="block text-gradient-brand">
+                <span className="block text-foreground">
                   Create Episodes
                 </span>
               </h1>
@@ -98,7 +98,7 @@ const ProcessingHub = () => {
                 Choose a research paper from the discovery page to begin transforming it into an engaging podcast episode.
               </p>
               
-              <Button asChild className="premium-button px-8 py-4 rounded-full text-lg hover-scale">
+              <Button asChild className="comet-button">
                 <Link to="/">
                   Browse Research Papers
                 </Link>
@@ -133,7 +133,7 @@ const ProcessingHub = () => {
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-premium rounded-xl shadow-brand">
+            <div className="p-3 bg-muted rounded-xl shadow-soft">
               <Mic2 className="w-8 h-8 text-primary" />
             </div>
             <div>
@@ -149,7 +149,7 @@ const ProcessingHub = () => {
         <div className="premium-card p-8 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-ai rounded-xl shadow-md">
+              <div className="p-3 bg-muted rounded-xl shadow-soft">
                 <FileText className="w-6 h-6 text-ai-primary" />
               </div>
               <div>
@@ -158,7 +158,7 @@ const ProcessingHub = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-foreground border border-border">
                 <CheckCircle className="w-3.5 h-3.5" />
                 <span className="text-sm font-medium">Selected</span>
               </div>
@@ -173,7 +173,7 @@ const ProcessingHub = () => {
             </div>
           </div>
           
-          <div className="bg-gradient-card p-6 rounded-xl border border-border/50">
+          <div className="bg-muted p-6 rounded-xl border border-border/50">
             <p className="text-caption mb-3">Paper Identifier:</p>
             <div className="p-3 bg-muted rounded-lg border font-mono text-sm">
               {selectedPaper}
@@ -185,7 +185,7 @@ const ProcessingHub = () => {
         <div className="premium-card p-8 space-y-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-robotics rounded-xl shadow-md">
+              <div className="p-3 bg-muted rounded-xl shadow-soft">
                 <Zap className="w-6 h-6 text-robotics-primary" />
               </div>
               <div>
@@ -214,7 +214,7 @@ const ProcessingHub = () => {
               <button 
                 onClick={handleGenerateScript}
                 disabled={!selectedPaper}
-                className="premium-button px-8 py-4 rounded-full text-lg hover-scale inline-flex items-center gap-3"
+                className="comet-button inline-flex items-center gap-3"
               >
                 <Mic2 className="w-6 h-6" />
                 Generate Podcast Script
@@ -235,7 +235,7 @@ const ProcessingHub = () => {
               <div className="flex flex-wrap items-center gap-4">
                 <button 
                   onClick={handleSaveEpisode}
-                  className="bg-green-600 text-white hover:bg-green-700 px-8 py-4 rounded-full text-lg inline-flex items-center gap-3 hover-scale shadow-lg"
+                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-4 rounded-full text-lg inline-flex items-center gap-3 hover-scale shadow-lg"
                 >
                   <Headphones className="w-6 h-6" />
                   Save to Studio
@@ -243,7 +243,7 @@ const ProcessingHub = () => {
                 
                 <button 
                   onClick={() => downloadElevenLabsScript(script!)}
-                  className="premium-button-outline px-6 py-4 rounded-full inline-flex items-center gap-2 hover-scale"
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-6 py-4 rounded-full inline-flex items-center gap-2 hover-scale border border-border"
                 >
                   <Download className="w-5 h-5" />
                   Download ElevenLabs
@@ -251,7 +251,7 @@ const ProcessingHub = () => {
                 
                 <button 
                   onClick={() => downloadTextScript(script!)}
-                  className="premium-button-outline px-6 py-4 rounded-full inline-flex items-center gap-2 hover-scale"
+                  className="comet-button-secondary inline-flex items-center gap-2"
                 >
                   <FileDown className="w-5 h-5" />
                   Download Text
@@ -273,7 +273,7 @@ const ProcessingHub = () => {
           {/* Script Preview */}
           {hasScript && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-6 bg-gradient-card rounded-xl border border-border/50">
+              <div className="flex items-center justify-between p-6 bg-muted rounded-xl border border-border/50">
                 <div>
                   <h3 className="text-subheading text-foreground">Generated Script Preview</h3>
                   <p className="text-caption">
@@ -283,7 +283,7 @@ const ProcessingHub = () => {
               </div>
 
               {/* Script Segments Display */}
-              <div className="space-y-4 max-h-96 overflow-y-auto bg-gradient-card rounded-xl p-6 border border-border/50">
+              <div className="space-y-4 max-h-96 overflow-y-auto bg-muted rounded-xl p-6 border border-border/50">
                 {script!.segments.map((segment, index) => (
                   <div 
                     key={index}
@@ -292,8 +292,8 @@ const ProcessingHub = () => {
                     <div className="flex-shrink-0">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
                         segment.speaker === "DR ROWAN" 
-                          ? "bg-gradient-ai text-ai-primary border-2 border-ai-border" 
-                          : "bg-gradient-robotics text-robotics-primary border-2 border-robotics-border"
+                          ? "bg-muted text-foreground border-2 border-border" 
+                          : "bg-secondary text-secondary-foreground border-2 border-border"
                       }`}>
                         {segment.speaker === "DR ROWAN" ? "R" : "A"}
                       </div>
@@ -319,26 +319,26 @@ const ProcessingHub = () => {
               </div>
 
               {/* ElevenLabs Instructions */}
-              <div className="p-6 bg-gradient-ai rounded-xl border border-ai-border">
-                <h4 className="font-semibold text-sm mb-3 text-ai-primary flex items-center gap-2">
+              <div className="p-6 bg-muted rounded-xl border border-border">
+                <h4 className="font-semibold text-sm mb-3 text-foreground flex items-center gap-2">
                   <Lightbulb className="w-4 h-4" />
                   ElevenLabs Integration Guide
                 </h4>
                 <ul className="text-sm text-foreground space-y-2">
                   <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-ai-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></div>
                     <span>Download the ElevenLabs JSON file using the button above</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-ai-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></div>
                     <span>Dr. Rowan uses voice: <strong>Aria</strong> (9BWtsMINqrJLrRacOk9x)</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-ai-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></div>
                     <span>Alex uses voice: <strong>Liam</strong> (TX3LPaxmHKxFdv7VOQHJ)</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-ai-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></div>
                     <span>Import the JSON into ElevenLabs Projects or use their API</span>
                   </li>
                 </ul>
@@ -358,7 +358,7 @@ const ProcessingHub = () => {
                 "Optimized for text-to-speech synthesis"
               ].map((feature, index) => (
                 <div key={index} className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 bg-gradient-brand rounded-full"></div>
+                  <div className="w-2 h-2 bg-foreground rounded-full"></div>
                   <span className="text-foreground">{feature}</span>
                 </div>
               ))}

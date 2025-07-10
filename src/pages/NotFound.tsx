@@ -18,18 +18,18 @@ const NotFound = () => {
       <div className="premium-card max-w-lg w-full text-center p-12">
         {/* Enhanced 404 illustration */}
         <div className="relative mb-8">
-          <div className="p-6 bg-gradient-premium rounded-2xl w-fit mx-auto mb-6 shadow-brand">
+          <div className="p-6 bg-muted rounded-2xl w-fit mx-auto mb-6 shadow-soft">
             <AlertTriangle className="w-16 h-16 text-primary" />
           </div>
           <div className="absolute -top-2 -right-2">
-            <div className="p-2 bg-gradient-ai rounded-full shadow-md animate-pulse">
-              <div className="w-3 h-3 bg-ai-primary rounded-full"></div>
+            <div className="p-2 bg-muted rounded-full shadow-soft">
+              <div className="w-3 h-3 bg-foreground rounded-full"></div>
             </div>
           </div>
         </div>
         
         {/* Enhanced content */}
-        <h1 className="text-6xl font-bold text-foreground mb-4 text-gradient">404</h1>
+        <h1 className="text-6xl font-bold text-foreground mb-4">404</h1>
         <h2 className="text-heading mb-4">Page Not Found</h2>
         <p className="text-body text-muted-foreground mb-8 leading-relaxed">
           The page you're looking for doesn't exist or has been moved to a different location.
@@ -37,13 +37,13 @@ const NotFound = () => {
         
         {/* Enhanced action buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild className="premium-button px-6 py-3 rounded-full hover-scale">
+          <Button asChild className="comet-button">
             <Link to="/">
               <Home className="w-4 h-4 mr-2" />
               Back to Home
             </Link>
           </Button>
-          <Button asChild variant="outline" className="premium-button-outline px-6 py-3 rounded-full hover-scale">
+          <Button asChild variant="outline" className="comet-button-secondary">
             <Link to="/processing">
               <ArrowLeft className="w-4 h-4 mr-2" />
               View Studio

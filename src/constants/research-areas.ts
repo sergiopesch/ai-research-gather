@@ -12,8 +12,8 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'reinforcement learning', 'supervised learning', 'unsupervised learning', 'classification',
       'regression', 'clustering', 'generative', 'discriminative', 'attention', 'embedding'
     ],
-    color: 'area-badge-ai',
-    gradient: 'bg-gradient-ai'
+    color: 'text-foreground',
+    gradient: 'bg-muted'
   },
   {
     id: 'robotics',
@@ -24,8 +24,8 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'motion planning', 'humanoid', 'drone', 'uav', 'mobile robot', 'path planning',
       'localization', 'mapping', 'control', 'actuator', 'sensor fusion', 'kinematics'
     ],
-    color: 'area-badge-robotics',
-    gradient: 'bg-gradient-robotics'
+    color: 'text-foreground',
+    gradient: 'bg-muted'
   },
   {
     id: 'cv',
@@ -36,7 +36,7 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'detection', 'recognition', 'cnn', 'yolo', 'object detection', 'image classification',
       'face recognition', 'optical', 'pixel', 'convolution', 'feature extraction', 'tracking'
     ],
-    color: 'area-badge-cv',
-    gradient: 'bg-gradient-cv'
+    color: 'text-foreground',
+    gradient: 'bg-muted'
   }
 ];
