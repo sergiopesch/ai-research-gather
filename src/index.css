@@ -305,7 +305,7 @@ All colors MUST be HSL.
   }
 
   .area-card {
-    @apply modern-card p-6 cursor-pointer group transition-all duration-300;
+    @apply modern-card p-6 cursor-pointer transition-all duration-300;
   }
 
   .area-card:hover {
