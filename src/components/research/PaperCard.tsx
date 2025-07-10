@@ -1,5 +1,4 @@
-import { Calendar, FileText, ExternalLink, Users, Brain } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, FileText, ExternalLink, Users, Brain, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
@@ -66,15 +65,6 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
     };
   };
 
-  const getSourceColor = (source: string) => {
-    const colors: Record<string, string> = {
-      'arXiv': 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800',
-      'Semantic Scholar': 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/50 dark:text-green-300 dark:border-green-800',
-      'IEEE Xplore': 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800'
-    };
-    return colors[source] || 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950/50 dark:text-gray-300 dark:border-gray-800';
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'long',
@@ -88,103 +78,93 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const isAlreadySelected = isPaperSelected(paper.id);
 
   return (
-    <div className="brand-card hover-lift group overflow-hidden">
-      <div className="p-6 sm:p-8">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-foreground leading-relaxed flex-1 group-hover:text-primary transition-colors">
+    <div className="modern-card p-8 group">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+          <div className="flex-1">
+            <h3 className="text-2xl font-light text-foreground leading-relaxed mb-4 group-hover:text-primary transition-colors">
               {sanitizeText(paper.title)}
             </h3>
-            <div className="flex flex-wrap gap-3 flex-shrink-0">
-              <Badge className={`${areaInfo.color} font-semibold`}>
-                <AreaIcon className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">{areaInfo.label}</span>
-                <span className="sm:hidden">{areaInfo.label.split(' ')[0]}</span>
+            <div className="flex items-center gap-3">
+              <Badge className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                areaInfo.label === 'Artificial Intelligence' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                areaInfo.label === 'Robotics' ? 'bg-green-50 text-green-700 border-green-200' :
+                'bg-purple-50 text-purple-700 border-purple-200'
+              }`}>
+                <AreaIcon className="w-4 h-4" />
+                {areaInfo.label}
               </Badge>
-              <Badge variant="secondary" className="font-medium">
-                {paper.source}
-              </Badge>
+              <span className="text-sm text-muted-foreground">{paper.source}</span>
             </div>
           </div>
+        </div>
 
-          {/* Summary */}
-          {paper.summary && (
-            <div className="bg-gradient-subtle p-6 rounded-xl border border-border/50 shadow-soft">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-primary" />
-                  <span className="font-semibold text-foreground">Summary</span>
-                </div>
-                <p className="text-base text-foreground leading-relaxed">
-                  {sanitizeText(paper.summary)}
-                </p>
-                {paper.importance && (
-                  <div className="pt-3 border-t border-border/30">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      <span className="font-semibold text-primary">Impact:</span> {paper.importance}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+        {/* Summary */}
+        {paper.summary && (
+          <div className="bg-gradient-card p-6 rounded-2xl border border-border/50">
+            <p className="text-base text-foreground leading-relaxed mb-4">
+              {sanitizeText(paper.summary)}
+            </p>
+            {paper.importance && (
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Impact:</span> {paper.importance}
+              </p>
+            )}
+          </div>
+        )}
 
-          {/* Footer */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between pt-3 sm:pt-4 border-t border-border/50 gap-4">
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
+        {/* Footer */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between pt-4 border-t border-border/50 gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                {formatDate(paper.published_date)}
+              </span>
+              {paper.doi && (
                 <span className="flex items-center gap-2">
-                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  {formatDate(paper.published_date)}
+                  <FileText className="w-4 h-4" />
+                  <span className="truncate max-w-xs">{paper.doi}</span>
                 </span>
-                {paper.doi && (
-                  <span className="flex items-center gap-2">
-                    <FileText className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                    <span className="truncate">{paper.doi}</span>
-                  </span>
-                )}
-              </div>
-              {paper.authors && paper.authors.length > 0 && (
-                <div className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
-                  <Users className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-medium">Authors:</span> 
-                    <span className="ml-1">{paper.authors.slice(0, 3).join(', ')}{paper.authors.length > 3 ? '...' : ''}</span>
-                  </div>
-                </div>
               )}
             </div>
+            {paper.authors && paper.authors.length > 0 && (
+              <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                <Users className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>
+                  {paper.authors.slice(0, 3).join(', ')}{paper.authors.length > 3 ? '...' : ''}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={handleSelectPaper}
+              disabled={isSelecting || isAlreadySelected}
+              className={`modern-button px-6 py-3 rounded-full font-medium transition-all duration-300 inline-flex items-center gap-2 ${
+                isAlreadySelected 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'hover:scale-105'
+              }`}
+            >
+              <Brain className="w-5 h-5" />
+              <span>
+                {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Create Episode"}
+              </span>
+              {!isSelecting && !isAlreadySelected && <ArrowRight className="w-4 h-4" />}
+            </button>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                onClick={handleSelectPaper}
-                disabled={isSelecting || isAlreadySelected}
-                className={`brand-button flex items-center justify-center gap-3 text-base font-semibold px-6 py-3 h-12 rounded-xl transition-all duration-200 ${
-                  isAlreadySelected ? 'bg-green-600 hover:bg-green-700' : ''
-                }`}
-              >
-                <Brain className="w-5 h-5" />
-                <span className="hidden sm:inline">
-                  {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Create Episode"}
-                </span>
-                <span className="sm:hidden">
-                  {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select"}
-                </span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                asChild 
-                className="brand-button-secondary flex items-center justify-center gap-3 text-base font-semibold px-6 py-3 h-12 rounded-xl group-hover:border-primary group-hover:text-primary"
-              >
-                <a href={paper.url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-5 h-5" />
-                  <span className="hidden sm:inline">Read Full Paper</span>
-                  <span className="sm:hidden">Read</span>
-                </a>
-              </Button>
-            </div>
+            <a 
+              href={paper.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="modern-button-secondary px-6 py-3 rounded-full font-medium transition-all duration-300 inline-flex items-center gap-2 hover:scale-105"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>Read Paper</span>
+            </a>
           </div>
         </div>
       </div>

@@ -2,30 +2,38 @@ import { Mic2 } from 'lucide-react';
 
 export const HeroSection = () => {
   return (
-    <div className="relative overflow-hidden bg-gradient-hero">
-      {/* Subtle grid pattern */}
-      <div className="absolute inset-0 opacity-20" style={{
-        backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255,255,255,0.15) 2px, transparent 0),
-                         radial-gradient(circle at 75px 75px, rgba(255,255,255,0.1) 2px, transparent 0)`,
-        backgroundSize: '100px 100px'
-      }}></div>
+    <div className="comet-hero">
+      {/* Organic background shapes inspired by Comet */}
+      <div className="organic-bg">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-primary/5 to-primary/10 organic-shape"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-tl from-accent/10 to-muted/20 organic-shape-sm"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-organic organic-shape"></div>
+      </div>
       
-      {/* Gradient orbs */}
-      <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
-        <div className="text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white mb-6">
-            The Notebook Pod
-            <span className="block text-gradient-primary bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-              Studio
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 text-center">
+        <div className="max-w-4xl mx-auto">
+          {/* Elegant subtitle */}
+          <p className="text-base text-muted-foreground font-medium mb-8 tracking-wide">
+            A new studio from The Notebook Pod
+          </p>
+          
+          {/* Main headline inspired by Comet's typography */}
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tight text-foreground mb-12 leading-[0.9]">
+            Create at the speed of
+            <span className="block font-light italic text-gradient-modern">
+              thought
             </span>
           </h1>
           
-          <p className="text-xl sm:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
-            Transform research papers into podcast episodes
-          </p>
+          {/* Clean CTA inspired by Comet's button */}
+          <div className="flex justify-center">
+            <button className="group inline-flex items-center gap-3 bg-primary text-primary-foreground px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 hover:bg-primary/90 hover:scale-105 shadow-soft hover:shadow-medium">
+              <div className="p-1 bg-primary-foreground/10 rounded-full">
+                <Mic2 className="w-5 h-5" />
+              </div>
+              Get Started
+            </button>
+          </div>
         </div>
       </div>
     </div>

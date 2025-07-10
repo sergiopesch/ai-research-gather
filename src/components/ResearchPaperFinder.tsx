@@ -60,69 +60,59 @@ const ResearchPaperFinder = () => {
     <div className="min-h-screen bg-background">
       <HeroSection />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-12 relative z-10">
+      <div className="relative -mt-16 z-10">
         <AreaSelector 
           selectedAreas={selectedAreas} 
           onToggleArea={handleAreaToggle} 
         />
 
-
-        {/* Search Button */}
-        <div className="flex justify-center mb-12 sm:mb-16">
-          <Button 
-            onClick={handleSearch} 
-            disabled={loading || selectedAreas.length === 0} 
-            className={`w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 h-auto text-xl sm:text-2xl font-bold rounded-xl transition-all duration-200 border-2 shadow-lg ${
-              loading || selectedAreas.length === 0
-                ? 'bg-gray-300 text-gray-600 border-gray-400 cursor-not-allowed opacity-60'
-                : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700 hover:shadow-xl hover:scale-105 active:scale-100'
-            }`}
-            size="lg"
-            style={{ 
-              backgroundColor: loading || selectedAreas.length === 0 ? '#d1d5db' : '#2563eb',
-              color: loading || selectedAreas.length === 0 ? '#6b7280' : '#ffffff',
-              borderColor: loading || selectedAreas.length === 0 ? '#9ca3af' : '#2563eb'
-            }}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-6 h-6 sm:w-7 sm:h-7 mr-3 sm:mr-4 animate-spin" />
-                <span className="hidden sm:inline font-bold">Finding papers...</span>
-                <span className="sm:hidden font-bold">Loading...</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-6 h-6 sm:w-7 sm:h-7 mr-3 sm:mr-4" />
-                <span className="hidden sm:inline font-bold">Find Research Papers</span>
-                <span className="sm:hidden font-bold">Find Papers</span>
-              </>
-            )}
-          </Button>
+        {/* Modern Search Button */}
+        <div className="comet-section pb-16">
+          <div className="max-w-6xl mx-auto px-6 sm:px-8 text-center">
+            <button 
+              onClick={handleSearch} 
+              disabled={loading || selectedAreas.length === 0} 
+              className={`group inline-flex items-center gap-4 px-12 py-5 rounded-full text-xl font-medium transition-all duration-300 ${
+                loading || selectedAreas.length === 0
+                  ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 shadow-soft hover:shadow-large'
+              }`}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <span>Finding papers...</span>
+                </>
+              ) : (
+                <>
+                  <div className="p-1 bg-primary-foreground/10 rounded-full">
+                    <Play className="w-5 h-5" />
+                  </div>
+                  <span>Find Research Papers</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Results */}
         {papers.length > 0 && (
-          <div className="space-y-8 sm:space-y-12 pb-16 sm:pb-20">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-              <div className="space-y-2">
-                <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <div className="comet-section py-16">
+            <div className="max-w-6xl mx-auto px-6 sm:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl sm:text-4xl font-light text-foreground mb-4">
                   Research Papers
                 </h2>
-                <p className="text-base sm:text-lg text-muted-foreground">
-                  Select papers to create podcast episodes
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Transform these papers into engaging podcast episodes
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary" className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-subtle">
-                  {papers.length} papers found
-                </Badge>
-              </div>
-            </div>
 
-            <div className="grid gap-6 sm:gap-8">
-              {papers.map((paper, index) => (
-                <PaperCard key={`${paper.doi || paper.url}-${index}`} paper={paper} index={index} />
-              ))}
+              <div className="space-y-8">
+                {papers.map((paper, index) => (
+                  <PaperCard key={`${paper.doi || paper.url}-${index}`} paper={paper} index={index} />
+                ))}
+              </div>
             </div>
           </div>
         )}
