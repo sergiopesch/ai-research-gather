@@ -11,14 +11,14 @@ interface AreaSelectorProps {
 
 export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps) => {
   return (
-    <div className="bg-card border-2 border-border rounded-xl shadow-large mb-12 sm:mb-16 p-6 sm:p-8 lg:p-10">
+    <div className="bg-white border-2 border-gray-300 rounded-xl shadow-lg mb-12 sm:mb-16 p-6 sm:p-8 lg:p-10">
       <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-        <div className="p-3 bg-primary rounded-xl shadow-soft border-2 border-primary">
-          <Filter className="w-6 h-6 text-primary-foreground" />
+        <div className="p-3 bg-blue-600 rounded-xl shadow-md border-2 border-blue-600">
+          <Filter className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h3 className="text-lg sm:text-xl font-bold text-foreground">Research Areas</h3>
-          <p className="text-sm text-muted-foreground">Select areas to find papers</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Research Areas</h3>
+          <p className="text-base text-gray-700 font-medium">Select areas to find papers</p>
         </div>
       </div>
       
@@ -30,10 +30,10 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
           return (
             <div 
               key={area.id} 
-              className={`bg-card border-2 rounded-lg shadow-soft hover-lift p-4 sm:p-5 cursor-pointer group transition-all duration-300 ${
+              className={`relative bg-white border-2 rounded-lg shadow-md p-6 cursor-pointer group transition-all duration-300 ${
                 isSelected 
-                  ? 'border-primary bg-primary/5 shadow-glow ring-2 ring-primary/20' 
-                  : 'border-border hover:border-primary/60 hover:shadow-medium hover:bg-primary/5'
+                  ? 'border-blue-600 bg-blue-50 shadow-lg ring-2 ring-blue-200' 
+                  : 'border-gray-300 hover:border-blue-400 hover:shadow-lg hover:bg-blue-25'
               }`}
               onClick={() => onToggleArea(area.id)}
               role="checkbox"
@@ -47,35 +47,36 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
                 }
               }}
             >
-              <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="flex items-center space-x-4">
                 <Checkbox 
                   id={area.id} 
                   checked={isSelected} 
                   onCheckedChange={() => onToggleArea(area.id)}
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 w-5 h-5"
                   aria-describedby={`area-desc-${area.id}`}
                 />
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`p-2.5 rounded-xl flex-shrink-0 transition-all duration-200 border-2 ${
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className={`p-3 rounded-xl flex-shrink-0 transition-all duration-200 border-2 ${
                     isSelected 
-                      ? 'bg-primary/20 border-primary shadow-soft' 
-                      : 'bg-muted border-muted-foreground group-hover:bg-primary/10 group-hover:border-primary'
+                      ? 'bg-blue-100 border-blue-600 shadow-sm' 
+                      : 'bg-gray-100 border-gray-400 group-hover:bg-blue-50 group-hover:border-blue-500'
                   }`}>
-                    <Icon className={`w-5 h-5 transition-colors ${
-                      isSelected ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'
+                    <Icon className={`w-6 h-6 transition-colors ${
+                      isSelected ? 'text-blue-700' : 'text-gray-700 group-hover:text-blue-600'
                     }`} aria-hidden="true" />
                   </div>
                   <div className="flex-1">
                     <Label 
                       htmlFor={area.id} 
                       id={`area-label-${area.id}`}
-                      className={`font-semibold cursor-pointer text-base transition-colors block ${
-                        isSelected ? 'text-primary' : 'text-foreground group-hover:text-primary'
+                      className={`font-bold cursor-pointer text-lg transition-colors block ${
+                        isSelected ? 'text-blue-800' : 'text-gray-900 group-hover:text-blue-700'
                       }`}
+                      style={{ color: isSelected ? '#1e40af' : '#111827' }}
                     >
                       {area.label}
                     </Label>
-                    <p id={`area-desc-${area.id}`} className="text-sm text-muted-foreground mt-1">
+                    <p id={`area-desc-${area.id}`} className="text-sm text-gray-600 mt-1 font-medium">
                       {area.keywords.slice(0, 3).join(', ')}...
                     </p>
                   </div>
