@@ -66,36 +66,34 @@ const ResearchPaperFinder = () => {
           onToggleArea={handleAreaToggle} 
         />
 
-        {/* Premium Search Button */}
-        <div className="premium-section pb-16">
-          <div className="max-w-6xl mx-auto px-6 sm:px-8 text-center">
+        {/* Clean search section */}
+        <div className="comet-section pb-16">
+          <div className="comet-container text-center">
             <button 
               onClick={handleSearch} 
               disabled={loading || selectedAreas.length === 0} 
-              className={`group premium-button px-12 py-5 rounded-full text-lg hover-scale inline-flex items-center gap-4 ${
+              className={`comet-button text-lg px-12 py-5 ${
                 loading || selectedAreas.length === 0
-                  ? 'opacity-60 cursor-not-allowed'
-                  : 'shadow-brand hover:shadow-xl'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover-minimal'
               }`}
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                  <span>Discovering papers...</span>
+                  <Loader2 className="w-5 h-5 animate-spin mr-3" />
+                  <span>Searching...</span>
                 </>
               ) : (
                 <>
-                  <div className="p-2 bg-primary-foreground/10 rounded-full group-hover:bg-primary-foreground/20 transition-colors">
-                    <Play className="w-5 h-5" />
-                  </div>
-                  <span>Discover Research Papers</span>
+                  <Play className="w-5 h-5 mr-3" />
+                  <span>Find Papers</span>
                 </>
               )}
             </button>
             
             {selectedAreas.length === 0 && (
               <p className="text-caption mt-4">
-                Select at least one research area to begin
+                Select research areas above to begin
               </p>
             )}
           </div>
