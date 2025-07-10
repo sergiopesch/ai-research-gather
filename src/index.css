@@ -260,6 +260,11 @@
   .space-y-lg > * + * { margin-top: 2rem; }
   .space-y-xl > * + * { margin-top: 3rem; }
   .space-y-2xl > * + * { margin-top: 4rem; }
+
+  /* Also add standard Tailwind spacing for compatibility */
+  .space-y-4 > * + * { margin-top: 1rem; }
+  .space-y-6 > * + * { margin-top: 1.5rem; }
+  .space-y-8 > * + * { margin-top: 2rem; }
 }
 
 @layer components {

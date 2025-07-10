@@ -9,7 +9,7 @@ export const HeroSection = () => {
       </div>
       
       <div className="relative comet-container text-center">
-        <div className="max-w-4xl mx-auto space-y-xl">
+        <div className="max-w-4xl mx-auto space-y-8">
           {/* Clean subtitle */}
           <p className="text-caption font-medium tracking-wide">
             Research Discovery Tool

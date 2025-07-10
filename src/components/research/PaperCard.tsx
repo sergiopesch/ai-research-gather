@@ -79,7 +79,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
   return (
     <div className="paper-card hover-minimal">
-      <div className="space-y-md">
+      <div className="space-y-6">
         {/* Clean header */}
         <div className="flex items-start justify-between gap-6">
           <h3 className="text-heading text-foreground leading-tight group-hover:text-primary transition-colors flex-1">
@@ -110,7 +110,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
         {/* Clean summary */}
         {paper.summary && (
-          <div className="bg-muted/30 p-6 rounded-xl space-y-sm">
+          <div className="bg-muted/30 p-6 rounded-xl space-y-3">
             <p className="text-body text-foreground leading-relaxed">
               {sanitizeText(paper.summary)}
             </p>

@@ -12,8 +12,8 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
     <div className="comet-section">
       <div className="comet-container">
         {/* Minimal section header */}
-        <div className="text-center space-y-lg mb-16">
-          <h2 className="text-heading">
+        <div className="text-center mb-16">
+          <h2 className="text-heading mb-4">
             Research Areas
           </h2>
           <p className="text-body max-w-2xl mx-auto">
@@ -43,7 +43,7 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
                   }
                 }}
               >
-                <div className="space-y-md">
+                <div className="space-y-4">
                   {/* Card header with clean layout */}
                   <div className="flex items-center justify-between">
                     <div className={`p-4 rounded-xl transition-all duration-300 ${
@@ -63,7 +63,7 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
                   </div>
                   
                   {/* Content with perfect hierarchy */}
-                  <div className="space-y-sm">
+                  <div className="space-y-3">
                     <Label 
                       htmlFor={area.id} 
                       id={`area-label-${area.id}`}

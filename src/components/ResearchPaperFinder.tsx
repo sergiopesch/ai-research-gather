@@ -99,21 +99,21 @@ const ResearchPaperFinder = () => {
           </div>
         </div>
 
-        {/* Enhanced Results Section */}
+        {/* Results section with proper styling */}
         {papers.length > 0 && (
-          <div className="premium-section">
-            <div className="max-w-6xl mx-auto px-6 sm:px-8">
+          <div className="comet-section">
+            <div className="comet-container">
               <div className="text-center mb-16">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-glass border border-border/30 mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border/30 mb-6">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-foreground">Research Discovered</span>
+                  <span className="text-sm font-medium text-foreground">Papers Found</span>
                 </div>
                 
-                <h2 className="text-heading mb-6">
-                  Latest Research Papers
+                <h2 className="text-heading mb-4">
+                  Research Papers
                 </h2>
-                <p className="text-body text-muted-foreground max-w-2xl mx-auto">
-                  Transform these cutting-edge research papers into engaging podcast episodes with AI-powered insights
+                <p className="text-body max-w-2xl mx-auto">
+                  Generate podcast scripts from these research papers
                 </p>
               </div>
 
