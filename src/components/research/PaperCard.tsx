@@ -96,11 +96,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
         
         {/* Minimal metadata */}
         <div className="flex items-center gap-4 flex-wrap">
-          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-            areaInfo.label === 'Artificial Intelligence' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-            areaInfo.label === 'Robotics' ? 'bg-green-50 text-green-700 border border-green-200' :
-            'bg-purple-50 text-purple-700 border border-purple-200'
-          }`}>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-muted text-muted-foreground border border-border">
             <AreaIcon className="w-3.5 h-3.5" />
             {areaInfo.label}
           </div>
@@ -110,7 +106,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
         {/* Clean summary */}
         {paper.summary && (
-          <div className="bg-muted/30 p-6 rounded-xl space-y-3">
+          <div className="bg-muted p-4 rounded-lg space-y-3">
             <p className="text-body text-foreground leading-relaxed">
               {sanitizeText(paper.summary)}
             </p>

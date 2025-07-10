@@ -6,128 +6,141 @@
 
 @layer base {
   :root {
-    /* Clean monochromatic palette inspired by Comet */
-    --background: 252 252 252;
-    --foreground: 23 23 23;
+    /* Apple-inspired monochromatic palette */
+    --background: 255 255 255;
+    --foreground: 0 0 0;
 
     --card: 255 255 255;
-    --card-foreground: 23 23 23;
+    --card-foreground: 0 0 0;
 
     --popover: 255 255 255;
-    --popover-foreground: 23 23 23;
+    --popover-foreground: 0 0 0;
 
-    /* Refined primary using pure black/white contrast */
-    --primary: 23 23 23;
+    /* Pure black primary */
+    --primary: 0 0 0;
     --primary-foreground: 255 255 255;
 
-    /* Subtle grays for hierarchy */
-    --secondary: 248 248 248;
-    --secondary-foreground: 64 64 64;
+    /* Apple-style greys */
+    --secondary: 246 246 246;
+    --secondary-foreground: 60 60 60;
 
-    /* Ultra-minimal muted tones */
-    --muted: 250 250 250;
-    --muted-foreground: 115 115 115;
+    /* Light grey tones */
+    --muted: 249 249 249;
+    --muted-foreground: 120 120 120;
 
-    /* Clean accent */
-    --accent: 245 245 245;
-    --accent-foreground: 23 23 23;
+    /* Subtle accent */
+    --accent: 242 242 242;
+    --accent-foreground: 0 0 0;
 
-    /* Minimal destructive */
-    --destructive: 239 68 68;
+    /* Minimal red for destructive */
+    --destructive: 220 20 60;
     --destructive-foreground: 255 255 255;
 
-    /* Invisible borders for clean look */
-    --border: 240 240 240;
-    --input: 240 240 240;
-    --ring: 23 23 23;
+    /* Barely visible borders */
+    --border: 229 229 229;
+    --input: 229 229 229;
+    --ring: 0 0 0;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
-    /* Research areas with muted, professional colors */
-    --ai-primary: 99 102 241;
-    --ai-bg: 250 250 255;
-    --ai-border: 224 231 255;
+    /* Remove colored research areas - use only greys */
+    --ai-primary: 60 60 60;
+    --ai-bg: 249 249 249;
+    --ai-border: 229 229 229;
 
-    --robotics-primary: 34 197 94;
-    --robotics-bg: 247 254 231;
-    --robotics-border: 220 252 231;
+    --robotics-primary: 60 60 60;
+    --robotics-bg: 249 249 249;
+    --robotics-border: 229 229 229;
 
-    --cv-primary: 168 85 247;
-    --cv-bg: 250 245 255;
-    --cv-border: 233 213 255;
+    --cv-primary: 60 60 60;
+    --cv-bg: 249 249 249;
+    --cv-border: 229 229 229;
 
-    /* Organic gradients with maximum subtlety */
-    --gradient-hero: linear-gradient(135deg, hsl(252 252 252) 0%, hsl(248 248 248) 100%);
-    --gradient-organic-1: radial-gradient(ellipse 800px 600px at 50% 0%, hsl(99 102 241 / 0.02) 0%, transparent 50%);
-    --gradient-organic-2: radial-gradient(ellipse 600px 400px at 100% 100%, hsl(34 197 94 / 0.02) 0%, transparent 50%);
-    --gradient-organic-3: radial-gradient(ellipse 400px 300px at 0% 50%, hsl(168 85 247 / 0.02) 0%, transparent 50%);
+    /* Pure gradients */
+    --gradient-hero: linear-gradient(180deg, hsl(255 255 255) 0%, hsl(249 249 249) 100%);
+    --gradient-organic-1: radial-gradient(ellipse 800px 600px at 50% 0%, hsl(0 0% 0% / 0.01) 0%, transparent 50%);
+    --gradient-organic-2: radial-gradient(ellipse 600px 400px at 100% 100%, hsl(0 0% 0% / 0.01) 0%, transparent 50%);
+    --gradient-organic-3: radial-gradient(ellipse 400px 300px at 0% 50%, hsl(0 0% 0% / 0.01) 0%, transparent 50%);
 
-    /* Sophisticated shadows with perfect subtlety */
-    --shadow-minimal: 0 1px 2px 0 hsl(0 0% 0% / 0.03);
-    --shadow-soft: 0 4px 6px -1px hsl(0 0% 0% / 0.04);
-    --shadow-medium: 0 10px 15px -3px hsl(0 0% 0% / 0.06);
-    --shadow-large: 0 20px 25px -5px hsl(0 0% 0% / 0.08);
+    /* Apple-style shadows */
+    --shadow-minimal: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-soft: 0 2px 8px 0 hsl(0 0% 0% / 0.08);
+    --shadow-medium: 0 4px 16px 0 hsl(0 0% 0% / 0.12);
+    --shadow-large: 0 8px 32px 0 hsl(0 0% 0% / 0.16);
 
-    /* Perfect focus ring */
-    --focus-ring: 0 0 0 2px hsl(23 23 23 / 0.1);
+    /* Clean focus ring */
+    --focus-ring: 0 0 0 2px hsl(0 0% 0% / 0.2);
 
-    --sidebar-background: 252 252 252;
-    --sidebar-foreground: 115 115 115;
-    --sidebar-primary: 23 23 23;
+    --sidebar-background: 255 255 255;
+    --sidebar-foreground: 120 120 120;
+    --sidebar-primary: 0 0 0;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 248 248 248;
-    --sidebar-accent-foreground: 64 64 64;
-    --sidebar-border: 240 240 240;
-    --sidebar-ring: 23 23 23;
+    --sidebar-accent: 246 246 246;
+    --sidebar-accent-foreground: 60 60 60;
+    --sidebar-border: 229 229 229;
+    --sidebar-ring: 0 0 0;
   }
 
   .dark {
-    /* Elegant dark theme */
-    --background: 23 23 23;
-    --foreground: 252 252 252;
+    /* Apple dark theme */
+    --background: 0 0 0;
+    --foreground: 255 255 255;
 
-    --card: 32 32 32;
-    --card-foreground: 252 252 252;
+    --card: 18 18 18;
+    --card-foreground: 255 255 255;
 
-    --popover: 32 32 32;
-    --popover-foreground: 252 252 252;
+    --popover: 18 18 18;
+    --popover-foreground: 255 255 255;
 
-    /* Clean light primary for dark mode */
-    --primary: 252 252 252;
-    --primary-foreground: 23 23 23;
+    /* Pure white primary for dark mode */
+    --primary: 255 255 255;
+    --primary-foreground: 0 0 0;
 
-    --secondary: 40 40 40;
-    --secondary-foreground: 212 212 212;
+    --secondary: 28 28 28;
+    --secondary-foreground: 200 200 200;
 
-    --muted: 32 32 32;
-    --muted-foreground: 163 163 163;
+    --muted: 18 18 18;
+    --muted-foreground: 140 140 140;
 
-    --accent: 32 32 32;
-    --accent-foreground: 252 252 252;
+    --accent: 28 28 28;
+    --accent-foreground: 255 255 255;
 
-    --destructive: 248 113 113;
-    --destructive-foreground: 23 23 23;
+    --destructive: 220 20 60;
+    --destructive-foreground: 255 255 255;
 
-    --border: 40 40 40;
-    --input: 40 40 40;
-    --ring: 252 252 252;
+    --border: 39 39 39;
+    --input: 39 39 39;
+    --ring: 255 255 255;
 
     /* Dark mode gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(23 23 23) 0%, hsl(32 32 32) 100%);
-    --gradient-organic-1: radial-gradient(ellipse 800px 600px at 50% 0%, hsl(99 102 241 / 0.05) 0%, transparent 50%);
-    --gradient-organic-2: radial-gradient(ellipse 600px 400px at 100% 100%, hsl(34 197 94 / 0.05) 0%, transparent 50%);
-    --gradient-organic-3: radial-gradient(ellipse 400px 300px at 0% 50%, hsl(168 85 247 / 0.05) 0%, transparent 50%);
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 0%) 0%, hsl(0 0% 7%) 100%);
+    --gradient-organic-1: radial-gradient(ellipse 800px 600px at 50% 0%, hsl(0 0% 100% / 0.02) 0%, transparent 50%);
+    --gradient-organic-2: radial-gradient(ellipse 600px 400px at 100% 100%, hsl(0 0% 100% / 0.02) 0%, transparent 50%);
+    --gradient-organic-3: radial-gradient(ellipse 400px 300px at 0% 50%, hsl(0 0% 100% / 0.02) 0%, transparent 50%);
 
-    --focus-ring: 0 0 0 2px hsl(252 252 252 / 0.2);
+    --focus-ring: 0 0 0 2px hsl(255 255 255 / 0.3);
 
-    --sidebar-background: 23 23 23;
-    --sidebar-foreground: 163 163 163;
-    --sidebar-primary: 252 252 252;
-    --sidebar-primary-foreground: 23 23 23;
-    --sidebar-accent: 32 32 32;
-    --sidebar-accent-foreground: 212 212 212;
-    --sidebar-border: 40 40 40;
-    --sidebar-ring: 252 252 252;
+    --sidebar-background: 0 0 0;
+    --sidebar-foreground: 140 140 140;
+    --sidebar-primary: 255 255 255;
+    --sidebar-primary-foreground: 0 0 0;
+    --sidebar-accent: 28 28 28;
+    --sidebar-accent-foreground: 200 200 200;
+    --sidebar-border: 39 39 39;
+    --sidebar-ring: 255 255 255;
+
+    /* Remove colored research areas in dark mode too */
+    --ai-primary: 200 200 200;
+    --ai-bg: 18 18 18;
+    --ai-border: 39 39 39;
+
+    --robotics-primary: 200 200 200;
+    --robotics-bg: 18 18 18;
+    --robotics-border: 39 39 39;
+
+    --cv-primary: 200 200 200;
+    --cv-bg: 18 18 18;
+    --cv-border: 39 39 39;
   }
 }
 
@@ -138,13 +151,12 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    font-variation-settings: 'opsz' 32;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "SF Pro Display", system-ui, sans-serif;
+    font-weight: 400;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.011em;
+    letter-spacing: -0.005em;
   }
 
   html {
@@ -164,17 +176,17 @@
     color: hsl(var(--foreground));
   }
 
-  /* Typography scale following Comet's hierarchy */
+  /* Apple-style typography hierarchy */
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 500;
-    line-height: 1.2;
-    letter-spacing: -0.025em;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
     color: hsl(var(--foreground));
   }
 
-  h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
-  h2 { font-size: clamp(2rem, 4vw, 3rem); }
-  h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+  h1 { font-size: clamp(2.25rem, 4vw, 3.5rem); }
+  h2 { font-size: clamp(1.875rem, 3vw, 2.5rem); }
+  h3 { font-size: clamp(1.5rem, 2.5vw, 2rem); }
 
   p {
     line-height: 1.6;
@@ -268,66 +280,66 @@
 }
 
 @layer components {
-  /* Clean cards inspired by Comet */
+  /* Apple-style cards */
   .comet-card {
-    @apply bg-card border border-border/50 rounded-2xl shadow-minimal hover-minimal;
+    @apply bg-card border border-border rounded-xl transition-all duration-200;
   }
 
   .comet-card:hover {
     @apply shadow-soft;
   }
 
-  /* Minimal buttons */
+  /* Apple-style buttons */
   .comet-button {
-    @apply bg-primary text-primary-foreground px-6 py-3 rounded-full font-medium transition-all duration-200 hover:bg-primary/90 shadow-minimal;
+    @apply bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-primary/90;
   }
 
   .comet-button:hover {
-    @apply shadow-soft scale-[1.02];
+    @apply scale-[0.98];
   }
 
   .comet-button-secondary {
-    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-full font-medium transition-all duration-200 hover:bg-secondary/80 shadow-minimal;
+    @apply bg-secondary text-secondary-foreground px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-secondary/80;
   }
 
-  /* Perfect sections with generous spacing */
+  /* Clean sections */
   .comet-section {
-    @apply py-16 lg:py-24 relative;
+    @apply py-12 lg:py-20 relative;
   }
 
   .comet-hero {
-    @apply py-20 lg:py-32 relative bg-organic overflow-hidden;
+    @apply py-16 lg:py-24 relative bg-organic overflow-hidden;
   }
 
   /* Research area cards */
   .research-area-card {
-    @apply comet-card p-8 cursor-pointer transition-all duration-300;
+    @apply comet-card p-6 cursor-pointer transition-all duration-200;
   }
 
   .research-area-card:hover {
-    @apply bg-accent/30 border-primary/20;
+    @apply bg-accent border-border;
   }
 
   .research-area-card.selected {
-    @apply border-primary bg-primary/[0.02] shadow-medium;
+    @apply border-primary bg-primary/5;
   }
 
-  /* Paper cards with perfect hierarchy */
+  /* Paper cards */
   .paper-card {
-    @apply comet-card p-8 space-y-6;
+    @apply comet-card p-6 space-y-4;
   }
 
   .paper-card:hover {
-    @apply bg-accent/20;
+    @apply bg-accent/50;
   }
 
-  /* Typography utilities */
+  /* Apple typography */
   .text-display {
-    @apply text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight leading-[0.9];
+    @apply text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-none;
   }
 
   .text-heading {
-    @apply text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight;
+    @apply text-2xl sm:text-3xl font-semibold tracking-tight;
   }
 
   .text-subheading {
@@ -335,19 +347,19 @@
   }
 
   .text-body {
-    @apply text-base leading-relaxed;
+    @apply text-base leading-normal;
   }
 
   .text-caption {
     @apply text-sm text-muted-foreground;
   }
 
-  /* Perfect container with consistent max-width */
+  /* Container */
   .comet-container {
-    @apply max-w-7xl mx-auto px-6 sm:px-8;
+    @apply max-w-6xl mx-auto px-4 sm:px-6;
   }
 
-  /* Organic background elements */
+  /* Background elements */
   .organic-bg {
     @apply absolute inset-0 pointer-events-none overflow-hidden;
   }
