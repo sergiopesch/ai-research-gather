@@ -43,7 +43,11 @@ export const usePaperActions = () => {
       });
 
       if (error) {
-        if (error.message?.includes('409') || error.message?.includes('already selected')) {
+        // Check for 409 conflict error (paper already selected)
+        const errorContext = error.context || {};
+        const errorStatus = errorContext.status || error.status;
+        
+        if (errorStatus === 409 || error.message?.includes('already selected')) {
           setSelectedPaper(paperId);
           toast({
             title: "Paper Already Selected",
@@ -65,12 +69,14 @@ export const usePaperActions = () => {
     } catch (error: any) {
       console.error('Selection error:', error);
       
-      // Handle "already selected" case from various error formats
-      const errorStr = JSON.stringify(error);
-      if (errorStr.includes('already selected') || errorStr.includes('409')) {
+      // Check for 409 conflict error in multiple possible places
+      const errorStatus = error?.context?.status || error?.status;
+      const errorMessage = error?.message || '';
+      
+      if (errorStatus === 409 || errorMessage.includes('already selected') || errorMessage.includes('409')) {
         setSelectedPaper(paperId);
         toast({
-          title: "Paper Already Selected",
+          title: "Paper Already Selected", 
           description: "This paper is ready for processing. Redirecting...",
         });
         setTimeout(() => navigate('/processing'), 1000);
