@@ -3,7 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '@/integrations/supabase/client';
 
 export type ScriptSegment = {
-  speaker: "Dr Ada" | "Sam";
+  speaker: "DR ROWAN" | "ALEX";
   text: string;
   voiceId?: string;
   duration?: number;
@@ -72,7 +72,7 @@ export const useScriptGeneration = () => {
       segments: script.segments.map((segment, index) => ({
         id: `segment_${index + 1}`,
         speaker: segment.speaker,
-        voice_id: segment.speaker === "Dr Ada" ? "9BWtsMINqrJLrRacOk9x" : "TX3LPaxmHKxFdv7VOQHJ", // Aria for Dr Ada, Liam for Sam
+        voice_id: segment.speaker === "DR ROWAN" ? "9BWtsMINqrJLrRacOk9x" : "TX3LPaxmHKxFdv7VOQHJ", // Aria for Dr Rowan, Liam for Alex
         text: segment.text,
         settings: {
           stability: 0.5,

@@ -19,7 +19,7 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
           </div>
           <div>
             <h3 className="text-lg sm:text-xl font-bold">Research Areas</h3>
-            <p className="text-sm text-muted-foreground">Select areas to discover papers</p>
+            <p className="text-sm text-muted-foreground">Select areas to find papers</p>
           </div>
         </div>
         

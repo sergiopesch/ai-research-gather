@@ -114,7 +114,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Brain className="w-5 h-5 text-primary" />
-                  <span className="font-semibold text-foreground">AI Summary</span>
+                  <span className="font-semibold text-foreground">Summary</span>
                 </div>
                 <p className="text-base text-foreground leading-relaxed">
                   {sanitizeText(paper.summary)}
@@ -122,7 +122,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
                 {paper.importance && (
                   <div className="pt-3 border-t border-border/30">
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      <span className="font-semibold text-primary">Research Impact:</span> {paper.importance}
+                      <span className="font-semibold text-primary">Impact:</span> {paper.importance}
                     </p>
                   </div>
                 )}

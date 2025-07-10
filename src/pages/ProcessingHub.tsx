@@ -114,8 +114,8 @@ const ProcessingHub = () => {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">The Notebook Pod Studio</h1>
-            <p className="text-muted-foreground">Professional podcast episode creation workstation</p>
+            <h1 className="text-2xl font-bold text-foreground">Podcast Studio</h1>
+            <p className="text-muted-foreground">Episode creation workspace</p>
           </div>
         </div>
 
@@ -167,7 +167,7 @@ const ProcessingHub = () => {
                 )}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Create your next podcast episode with Dr. Ada and Sam
+                Create podcast episodes with Dr. Rowan and Alex
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -265,20 +265,20 @@ const ProcessingHub = () => {
                         key={index}
                         className="flex gap-3 p-3 rounded-lg bg-background/50 hover:bg-muted/40 transition-colors"
                       >
-                        <div className="flex-shrink-0">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-                            segment.speaker === "Dr Ada" 
-                              ? "bg-primary text-primary-foreground" 
-                              : "bg-secondary text-secondary-foreground"
-                          }`}>
-                            {segment.speaker === "Dr Ada" ? "A" : "S"}
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-medium">
-                              {segment.speaker}
-                            </span>
+                         <div className="flex-shrink-0">
+                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                             segment.speaker === "DR ROWAN" 
+                               ? "bg-primary text-primary-foreground" 
+                               : "bg-secondary text-secondary-foreground"
+                           }`}>
+                             {segment.speaker === "DR ROWAN" ? "R" : "A"}
+                           </div>
+                         </div>
+                         <div className="flex-1">
+                           <div className="flex items-center gap-2 mb-1">
+                             <span className="text-sm font-medium">
+                               {segment.speaker}
+                             </span>
                             <Badge variant="outline" className="text-xs px-1.5 py-0.5">
                               Segment {index + 1}
                             </Badge>
@@ -299,13 +299,13 @@ const ProcessingHub = () => {
                     <h5 className="font-medium text-sm mb-2 text-blue-900 dark:text-blue-100">
                       📘 ElevenLabs Import Instructions
                     </h5>
-                    <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
-                      <li>• Download the ElevenLabs JSON file above</li>
-                      <li>• Dr. Ada uses voice: <strong>Aria</strong> (9BWtsMINqrJLrRacOk9x)</li>
-                      <li>• Sam uses voice: <strong>Liam</strong> (TX3LPaxmHKxFdv7VOQHJ)</li>
-                      <li>• Import the JSON into ElevenLabs Projects or use the API</li>
-                      <li>• Adjust voice settings (stability: 0.5, similarity: 0.75) as needed</li>
-                    </ul>
+                     <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
+                       <li>• Download the ElevenLabs JSON file above</li>
+                       <li>• Dr. Rowan uses voice: <strong>Aria</strong> (9BWtsMINqrJLrRacOk9x)</li>
+                       <li>• Alex uses voice: <strong>Liam</strong> (TX3LPaxmHKxFdv7VOQHJ)</li>
+                       <li>• Import the JSON into ElevenLabs Projects or use the API</li>
+                       <li>• Adjust voice settings (stability: 0.5, similarity: 0.75) as needed</li>
+                     </ul>
                   </div>
                 </div>
               )}
@@ -314,26 +314,26 @@ const ProcessingHub = () => {
               <div className="space-y-3 pt-4 border-t border-border/50">
                 <h3 className="text-sm font-medium text-foreground">Script Features:</h3>
                 <div className="grid gap-2">
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Complete conversation between Dr. Ada (research expert) and Sam (interviewer)</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>ElevenLabs-compatible JSON format with voice IDs and settings</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Structured segments with estimated durations</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Natural conversation flow with introductions and conclusions</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>Optimized for text-to-speech synthesis</span>
-                  </div>
+                   <div className="flex items-center gap-3 text-sm">
+                     <div className="w-2 h-2 bg-primary rounded-full"></div>
+                     <span>Conversation between Dr. Rowan (expert) and Alex (host)</span>
+                   </div>
+                   <div className="flex items-center gap-3 text-sm">
+                     <div className="w-2 h-2 bg-primary rounded-full"></div>
+                     <span>ElevenLabs JSON format with voice settings</span>
+                   </div>
+                   <div className="flex items-center gap-3 text-sm">
+                     <div className="w-2 h-2 bg-primary rounded-full"></div>
+                     <span>Structured segments with timing</span>
+                   </div>
+                   <div className="flex items-center gap-3 text-sm">
+                     <div className="w-2 h-2 bg-primary rounded-full"></div>
+                     <span>Natural conversation flow</span>
+                   </div>
+                   <div className="flex items-center gap-3 text-sm">
+                     <div className="w-2 h-2 bg-primary rounded-full"></div>
+                     <span>Optimized for text-to-speech</span>
+                   </div>
                 </div>
               </div>
             </CardContent>
