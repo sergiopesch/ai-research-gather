@@ -30,7 +30,7 @@ export const AreaSelector = ({ selectedAreas, onToggleArea }: AreaSelectorProps)
             return (
               <div 
                 key={area.id} 
-                className={`research-area-card ${isSelected ? 'selected' : ''}`}
+                className={`research-area-card group ${isSelected ? 'selected' : ''}`}
                 onClick={() => onToggleArea(area.id)}
                 role="checkbox"
                 aria-checked={isSelected}

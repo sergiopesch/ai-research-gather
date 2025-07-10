@@ -296,7 +296,7 @@
 
   /* Research area cards */
   .research-area-card {
-    @apply comet-card p-8 cursor-pointer group transition-all duration-300;
+    @apply comet-card p-8 cursor-pointer transition-all duration-300;
   }
 
   .research-area-card:hover {
