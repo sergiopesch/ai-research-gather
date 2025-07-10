@@ -56,11 +56,11 @@
     --cv-bg: 249 249 249;
     --cv-border: 229 229 229;
 
-    /* Pure gradients */
-    --gradient-hero: linear-gradient(180deg, hsl(255 255 255) 0%, hsl(249 249 249) 100%);
-    --gradient-organic-1: radial-gradient(ellipse 800px 600px at 50% 0%, hsl(0 0% 0% / 0.01) 0%, transparent 50%);
-    --gradient-organic-2: radial-gradient(ellipse 600px 400px at 100% 100%, hsl(0 0% 0% / 0.01) 0%, transparent 50%);
-    --gradient-organic-3: radial-gradient(ellipse 400px 300px at 0% 50%, hsl(0 0% 0% / 0.01) 0%, transparent 50%);
+    /* Pure white gradients */
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 100%) 100%);
+    --gradient-organic-1: transparent;
+    --gradient-organic-2: transparent;
+    --gradient-organic-3: transparent;
 
     /* Apple-style shadows */
     --shadow-minimal: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
@@ -112,11 +112,11 @@
     --input: 39 39 39;
     --ring: 255 255 255;
 
-    /* Dark mode gradients */
-    --gradient-hero: linear-gradient(180deg, hsl(0 0% 0%) 0%, hsl(0 0% 7%) 100%);
-    --gradient-organic-1: radial-gradient(ellipse 800px 600px at 50% 0%, hsl(0 0% 100% / 0.02) 0%, transparent 50%);
-    --gradient-organic-2: radial-gradient(ellipse 600px 400px at 100% 100%, hsl(0 0% 100% / 0.02) 0%, transparent 50%);
-    --gradient-organic-3: radial-gradient(ellipse 400px 300px at 0% 50%, hsl(0 0% 100% / 0.02) 0%, transparent 50%);
+    /* Pure white gradients for dark mode */
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 100%);
+    --gradient-organic-1: transparent;
+    --gradient-organic-2: transparent;
+    --gradient-organic-3: transparent;
 
     --focus-ring: 0 0 0 2px hsl(255 255 255 / 0.3);
 

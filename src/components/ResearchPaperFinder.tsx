@@ -57,7 +57,7 @@ const ResearchPaperFinder = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <HeroSection />
 
       <div className="relative -mt-16 z-10">
