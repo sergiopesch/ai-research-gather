@@ -93,9 +93,10 @@ const ProcessingHub = () => {
                 </Link>
               </Button>
             </div>
-            
-            <EpisodeLibrary />
           </div>
+          
+          {/* Episode Library - moved to bottom */}
+          <EpisodeLibrary />
         </div>
       </div>
     );
@@ -118,10 +119,7 @@ const ProcessingHub = () => {
           </div>
         </div>
 
-        <div className="grid gap-6">
-          {/* Episode Library */}
-          <EpisodeLibrary />
-          
+        <div className="grid gap-8">
           {/* Selected Paper Card */}
           <Card>
             <CardHeader>
@@ -340,6 +338,9 @@ const ProcessingHub = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Episode Library - moved to bottom */}
+          <EpisodeLibrary />
         </div>
       </div>
     </div>

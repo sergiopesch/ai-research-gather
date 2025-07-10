@@ -88,21 +88,21 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const isAlreadySelected = isPaperSelected(paper.id);
 
   return (
-    <Card className="research-card group">
-      <CardContent className="p-4 sm:p-6 lg:p-8">
-        <div className="space-y-4 sm:space-y-6">
+    <div className="brand-card hover-lift group overflow-hidden">
+      <div className="p-6 sm:p-8">
+        <div className="space-y-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
-            <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-relaxed flex-1 group-hover:text-primary transition-colors">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground leading-relaxed flex-1 group-hover:text-primary transition-colors">
               {sanitizeText(paper.title)}
             </h3>
-            <div className="flex flex-wrap gap-2 sm:gap-3 flex-shrink-0">
-              <Badge variant="outline" className={`${areaInfo.color} text-xs sm:text-sm`}>
-                <AreaIcon className="w-3 h-3 mr-1 sm:mr-1.5" />
+            <div className="flex flex-wrap gap-3 flex-shrink-0">
+              <Badge className={`${areaInfo.color} font-semibold`}>
+                <AreaIcon className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{areaInfo.label}</span>
                 <span className="sm:hidden">{areaInfo.label.split(' ')[0]}</span>
               </Badge>
-              <Badge variant="outline" className={`${getSourceColor(paper.source)} text-xs sm:text-sm`}>
+              <Badge variant="secondary" className="font-medium">
                 {paper.source}
               </Badge>
             </div>
@@ -110,18 +110,19 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
           {/* Summary */}
           {paper.summary && (
-            <div className="space-y-3 sm:space-y-4 p-4 sm:p-6 bg-muted/30 rounded-lg sm:rounded-xl border border-border/50">
-              <div className="space-y-2 sm:space-y-3">
+            <div className="bg-gradient-subtle p-6 rounded-xl border border-border/50 shadow-soft">
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-foreground">Summary</span>
+                  <Brain className="w-5 h-5 text-primary" />
+                  <span className="font-semibold text-foreground">AI Summary</span>
                 </div>
-                <p className="text-sm sm:text-base text-foreground leading-relaxed">
+                <p className="text-base text-foreground leading-relaxed">
                   {sanitizeText(paper.summary)}
                 </p>
                 {paper.importance && (
-                  <div className="pt-2 sm:pt-3 border-t border-border/50">
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                      <span className="font-medium">Impact:</span> {paper.importance}
+                  <div className="pt-3 border-t border-border/30">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      <span className="font-semibold text-primary">Research Impact:</span> {paper.importance}
                     </p>
                   </div>
                 )}
@@ -155,17 +156,17 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
               )}
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button 
-                variant={isAlreadySelected ? "default" : "outline"}
                 onClick={handleSelectPaper}
                 disabled={isSelecting || isAlreadySelected}
-                className="flex items-center justify-center gap-2 text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation relative"
-                style={{ backgroundColor: isAlreadySelected ? '#10b981' : undefined }}
+                className={`brand-button flex items-center justify-center gap-3 text-base font-semibold px-6 py-3 h-12 rounded-xl transition-all duration-200 ${
+                  isAlreadySelected ? 'bg-green-600 hover:bg-green-700' : ''
+                }`}
               >
-                <Brain className="w-4 h-4 sm:w-4 sm:h-4" />
+                <Brain className="w-5 h-5" />
                 <span className="hidden sm:inline">
-                  {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select for Episode"}
+                  {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Create Episode"}
                 </span>
                 <span className="sm:hidden">
                   {isSelecting ? "Selecting..." : isAlreadySelected ? "Selected!" : "Select"}
@@ -175,18 +176,18 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
               <Button 
                 variant="outline" 
                 asChild 
-                className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-sm sm:text-sm h-11 sm:h-9 px-4 sm:px-4 min-h-[44px] sm:min-h-0 touch-manipulation"
+                className="brand-button-secondary flex items-center justify-center gap-3 text-base font-semibold px-6 py-3 h-12 rounded-xl group-hover:border-primary group-hover:text-primary"
               >
-                <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                  <ExternalLink className="w-4 h-4 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Read Paper</span>
+                <a href={paper.url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-5 h-5" />
+                  <span className="hidden sm:inline">Read Full Paper</span>
                   <span className="sm:hidden">Read</span>
                 </a>
               </Button>
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

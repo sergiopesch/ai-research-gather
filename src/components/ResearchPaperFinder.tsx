@@ -68,23 +68,23 @@ const ResearchPaperFinder = () => {
 
 
         {/* Search Button */}
-        <div className="flex justify-center mb-8 sm:mb-12">
+        <div className="flex justify-center mb-12 sm:mb-16">
           <Button 
             onClick={handleSearch} 
             disabled={loading || selectedAreas.length === 0} 
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 h-auto text-base sm:text-lg font-semibold bg-primary hover:bg-primary/90 shadow-medium transition-all duration-200 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+            className="brand-button w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 h-auto text-lg sm:text-xl font-semibold rounded-xl hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
             size="lg"
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 animate-spin" />
-                <span className="hidden sm:inline">Generating summary...</span>
+                <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 mr-3 sm:mr-4 animate-spin" />
+                <span className="hidden sm:inline">Discovering papers...</span>
                 <span className="sm:hidden">Loading...</span>
               </>
             ) : (
               <>
-                <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
-                <span className="hidden sm:inline">Discover Today's Papers</span>
+                <Play className="w-5 h-5 sm:w-6 sm:h-6 mr-3 sm:mr-4" />
+                <span className="hidden sm:inline">Discover Research Papers</span>
                 <span className="sm:hidden">Discover Papers</span>
               </>
             )}
@@ -93,22 +93,24 @@ const ResearchPaperFinder = () => {
 
         {/* Results */}
         {papers.length > 0 && (
-          <div className="space-y-6 sm:space-y-8 pb-12 sm:pb-16">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
-                  Research Paper Library
+          <div className="space-y-8 sm:space-y-12 pb-16 sm:pb-20">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+                  Research Papers
                 </h2>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Select papers to create podcast episodes
+                <p className="text-base sm:text-lg text-muted-foreground">
+                  Select papers to create professional podcast episodes
                 </p>
               </div>
-              <Badge variant="secondary" className="px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium w-fit">
-                {papers.length} papers found
-              </Badge>
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-subtle">
+                  {papers.length} papers found
+                </Badge>
+              </div>
             </div>
 
-            <div className="grid gap-4 sm:gap-6">
+            <div className="grid gap-6 sm:gap-8">
               {papers.map((paper, index) => (
                 <PaperCard key={`${paper.doi || paper.url}-${index}`} paper={paper} index={index} />
               ))}

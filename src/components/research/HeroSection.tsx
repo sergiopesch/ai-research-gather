@@ -1,22 +1,53 @@
-import { Mic2 } from 'lucide-react';
+import { Mic2, Sparkles } from 'lucide-react';
 
 export const HeroSection = () => {
   return (
     <div className="relative overflow-hidden bg-gradient-hero">
-      <div className="absolute inset-0 opacity-30" style={{backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`}}></div>
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20">
-        <div className="text-center text-white">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4 sm:mb-6">
-            <div className="p-2 sm:p-3 bg-white/10 rounded-xl sm:rounded-2xl backdrop-blur-sm">
-              <Mic2 className="w-6 h-6 sm:w-8 sm:h-8" />
+      {/* Subtle grid pattern */}
+      <div className="absolute inset-0 opacity-20" style={{
+        backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255,255,255,0.15) 2px, transparent 0),
+                         radial-gradient(circle at 75px 75px, rgba(255,255,255,0.1) 2px, transparent 0)`,
+        backgroundSize: '100px 100px'
+      }}></div>
+      
+      {/* Gradient orbs */}
+      <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/20">
+              <Sparkles className="w-4 h-4 text-blue-300" />
+              <span className="text-sm font-medium text-white/90">Powered by AI</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-              The Notebook Pod Studio
-            </h1>
           </div>
-          <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed px-4">
-            Your AI-powered podcast creation studio for research papers
+          
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white mb-6">
+            The Notebook Pod
+            <span className="block text-gradient-primary bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+              Studio
+            </span>
+          </h1>
+          
+          <p className="text-xl sm:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed mb-8">
+            Transform research papers into engaging podcast episodes with AI-powered script generation
           </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-white/70">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span>Professional Scripts</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span>ElevenLabs Ready</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+              <span>Instant Generation</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
