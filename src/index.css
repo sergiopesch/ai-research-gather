@@ -151,12 +151,12 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "SF Pro Display", system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
     font-weight: 400;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.005em;
+    letter-spacing: 0;
   }
 
   html {
@@ -176,21 +176,22 @@
     color: hsl(var(--foreground));
   }
 
-  /* Apple-style typography hierarchy */
+  /* Clean system typography */
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0;
     color: hsl(var(--foreground));
   }
 
-  h1 { font-size: clamp(2.25rem, 4vw, 3.5rem); }
-  h2 { font-size: clamp(1.875rem, 3vw, 2.5rem); }
-  h3 { font-size: clamp(1.5rem, 2.5vw, 2rem); }
+  h1 { font-size: clamp(2rem, 4vw, 3rem); }
+  h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+  h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
 
   p {
-    line-height: 1.6;
+    line-height: 1.5;
     color: hsl(var(--muted-foreground));
+    font-weight: 400;
   }
 
   /* Perfect reduced motion support */
@@ -333,25 +334,25 @@
     @apply bg-accent/50;
   }
 
-  /* Apple typography */
+  /* Clean typography classes */
   .text-display {
-    @apply text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-none;
+    @apply text-3xl sm:text-4xl lg:text-5xl font-medium tracking-normal leading-tight;
   }
 
   .text-heading {
-    @apply text-2xl sm:text-3xl font-semibold tracking-tight;
+    @apply text-xl sm:text-2xl font-medium tracking-normal;
   }
 
   .text-subheading {
-    @apply text-lg sm:text-xl font-medium;
+    @apply text-lg font-normal;
   }
 
   .text-body {
-    @apply text-base leading-normal;
+    @apply text-base leading-normal font-normal;
   }
 
   .text-caption {
-    @apply text-sm text-muted-foreground;
+    @apply text-sm text-muted-foreground font-normal;
   }
 
   /* Container */
