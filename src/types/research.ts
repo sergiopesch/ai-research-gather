@@ -13,7 +13,7 @@ export interface Paper {
 export interface ResearchArea {
   id: string;
   label: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   keywords: string[];
   color: string;
   gradient: string;

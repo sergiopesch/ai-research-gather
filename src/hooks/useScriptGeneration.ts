@@ -52,8 +52,8 @@ export const useScriptGeneration = () => {
         title: "Episode Script Generated",
         description: `Created ${data.segments.length} conversation segments for your studio`,
       });
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to generate podcast script';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate podcast script';
       setError(errorMessage);
       toast({
         title: "Script Generation Failed",

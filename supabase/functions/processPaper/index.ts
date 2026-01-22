@@ -33,10 +33,12 @@ function chunkText(text: string, maxTokensPerChunk: number = 2500): string[] {
   return chunks
 }
 
+type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
+
 // Function to call OpenAI with retry logic
 async function callOpenAI(
   apiKey: string,
-  messages: any[],
+  messages: ChatMessage[],
   model: string = "gpt-4o",
   maxRetries: number = 2
 ): Promise<string> {
@@ -106,7 +108,7 @@ async function extractPdfText(url: string): Promise<string> {
   // For now, we'll extract text from the first page as a placeholder
   // In a real implementation, you'd use a PDF parsing library
   const decoder = new TextDecoder()
-  let rawText = decoder.decode(arrayBuffer)
+  const rawText = decoder.decode(arrayBuffer)
   
   // Simple text extraction (this would be replaced with proper PDF parsing)
   // Extract text between common PDF text markers

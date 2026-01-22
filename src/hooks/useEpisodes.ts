@@ -2,13 +2,25 @@ import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+export type EpisodeScript = {
+  id: string;
+  title: string;
+  segments: Array<{
+    speaker: string;
+    text: string;
+    duration?: number;
+  }>;
+  totalDuration: string;
+  createdAt: string;
+};
+
 export type Episode = {
   id: string;
   episode_number: number;
   title: string;
   paper_id: string;
   paper_title: string;
-  script: any;
+  script: EpisodeScript;
   status: string;
   created_at: string;
   updated_at: string;
@@ -32,8 +44,8 @@ export const useEpisodes = () => {
 
       if (error) throw error;
       setEpisodes(data || []);
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to fetch episodes';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch episodes';
       setError(errorMessage);
       toast({
         title: "Failed to Load Episodes",
@@ -45,7 +57,7 @@ export const useEpisodes = () => {
     }
   }, [toast]);
 
-  const createEpisode = useCallback(async (paperId: string, paperTitle: string, script: any) => {
+  const createEpisode = useCallback(async (paperId: string, paperTitle: string, script: EpisodeScript) => {
     try {
       const nextNumber = await getNextEpisodeNumber();
       const { data, error } = await supabase
@@ -71,8 +83,8 @@ export const useEpisodes = () => {
       });
       
       return data;
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to create episode';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create episode';
       toast({
         title: "Failed to Create Episode",
         description: errorMessage,
@@ -102,8 +114,8 @@ export const useEpisodes = () => {
         title: "Episode Deleted",
         description: "Episode has been removed from your studio",
       });
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to delete episode';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete episode';
       toast({
         title: "Failed to Delete Episode",
         description: errorMessage,
