@@ -8,12 +8,12 @@ export const RESEARCH_AREAS: ResearchArea[] = [
     icon: Brain,
     keywords: [
       'artificial intelligence', 'ai', 'machine learning', 'ml', 'deep learning', 'neural network',
-      'llm', 'language model', 'transformer', 'gpt', 'bert', 'nlp', 'natural language',
-      'reinforcement learning', 'supervised learning', 'unsupervised learning', 'classification',
+      'transformer', 'supervised learning', 'unsupervised learning', 'classification',
       'regression', 'clustering', 'generative', 'discriminative', 'attention', 'embedding'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-indigo-600',
+    gradient: 'bg-indigo-50',
+    colorClass: 'ai'
   },
   {
     id: 'robotics',
@@ -24,8 +24,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'motion planning', 'humanoid', 'drone', 'uav', 'mobile robot', 'path planning',
       'localization', 'mapping', 'control', 'actuator', 'sensor fusion', 'kinematics'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-pink-600',
+    gradient: 'bg-pink-50',
+    colorClass: 'robotics'
   },
   {
     id: 'cv',
@@ -36,8 +37,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'detection', 'recognition', 'cnn', 'yolo', 'object detection', 'image classification',
       'face recognition', 'optical', 'pixel', 'convolution', 'feature extraction', 'tracking'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-green-600',
+    gradient: 'bg-green-50',
+    colorClass: 'cv'
   },
   {
     id: 'nlp',
@@ -48,8 +50,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'machine translation', 'question answering', 'text generation', 'summarization',
       'chatbot', 'dialogue', 'speech recognition', 'language understanding', 'semantic'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-purple-600',
+    gradient: 'bg-purple-50',
+    colorClass: 'nlp'
   },
   {
     id: 'llm',
@@ -60,8 +63,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'foundation model', 'pre-training', 'fine-tuning', 'prompt engineering', 'rag',
       'retrieval augmented', 'instruction tuning', 'alignment', 'rlhf', 'chain of thought'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-orange-600',
+    gradient: 'bg-orange-50',
+    colorClass: 'llm'
   },
   {
     id: 'multimodal',
@@ -72,8 +76,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'image generation', 'text to image', 'video generation', 'audio visual',
       'cross modal', 'vision transformer', 'diffusion model', 'generative ai'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-cyan-600',
+    gradient: 'bg-cyan-50',
+    colorClass: 'multimodal'
   },
   {
     id: 'agents',
@@ -84,8 +89,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'planning', 'reasoning', 'decision making', 'task automation', 'agentic',
       'self-improvement', 'cognitive architecture', 'goal-oriented'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-rose-600',
+    gradient: 'bg-rose-50',
+    colorClass: 'agents'
   },
   {
     id: 'mlops',
@@ -96,8 +102,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'distributed training', 'gpu cluster', 'inference optimization', 'quantization',
       'pruning', 'knowledge distillation', 'edge ai', 'tinyml', 'model compression'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-sky-600',
+    gradient: 'bg-sky-50',
+    colorClass: 'mlops'
   },
   {
     id: 'safety',
@@ -108,8 +115,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'bias', 'robustness', 'adversarial', 'trustworthy ai', 'responsible ai',
       'ethics', 'governance', 'regulation', 'transparency', 'accountability'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-amber-600',
+    gradient: 'bg-amber-50',
+    colorClass: 'safety'
   },
   {
     id: 'rl',
@@ -120,8 +128,9 @@ export const RESEARCH_AREAS: ResearchArea[] = [
       'actor-critic', 'ppo', 'dqn', 'exploration', 'exploitation', 'markov',
       'bandit', 'monte carlo', 'temporal difference', 'value function'
     ],
-    color: 'text-foreground',
-    gradient: 'bg-muted'
+    color: 'text-emerald-600',
+    gradient: 'bg-emerald-50',
+    colorClass: 'rl'
   }
 ];
 

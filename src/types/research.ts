@@ -17,6 +17,7 @@ export interface ResearchArea {
   keywords: string[];
   color: string;
   gradient: string;
+  colorClass: string;
 }
 
 export interface ApiResponse {
