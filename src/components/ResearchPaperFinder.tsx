@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Play, Loader2, Search, Sparkles, RefreshCw, Filter } from 'lucide-react';
+import { Loader2, Search, RefreshCw } from 'lucide-react';
 import { usePaperSearch } from '@/hooks/usePaperSearch';
-import { RESEARCH_AREAS, TOPIC_ITEMS } from '@/constants/research-areas';
+import { TOPIC_ITEMS } from '@/constants/research-areas';
 import { HeroSection } from '@/components/research/HeroSection';
 import { AreaSelector } from '@/components/research/AreaSelector';
 import { PaperCard } from '@/components/research/PaperCard';
@@ -10,27 +10,20 @@ import { PaperGridSkeleton } from '@/components/research/PaperCardSkeleton';
 import { useToast } from '@/hooks/use-toast';
 
 const ResearchPaperFinder = () => {
-  const [selectedAreas, setSelectedAreas] = useState<string[]>(['ai', 'llm', 'cv']);
+  // Default to all 3 areas selected
+  const [selectedAreas, setSelectedAreas] = useState<string[]>(['robotics', 'cv', 'llm']);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [paperCount, setPaperCount] = useState(6);
   const [hasSearched, setHasSearched] = useState(false);
   const { papers, loading, searchPapers, clearPapers } = usePaperSearch();
   const { toast } = useToast();
 
-  // Memoize keywords calculation - FIXED: Send area labels that backend recognizes
+  // Memoize keywords calculation - map frontend area IDs to backend-compatible area names
   const selectedKeywords = useMemo(() => {
-    // Map frontend area IDs to backend-compatible area names
     const areaNameMap: Record<string, string> = {
-      'ai': 'Artificial Intelligence',
       'robotics': 'Robotics',
       'cv': 'Computer Vision',
-      'nlp': 'Natural Language Processing',
-      'llm': 'Large Language Models',
-      'multimodal': 'Multimodal AI',
-      'agents': 'AI Agents',
-      'mlops': 'MLOps',
-      'safety': 'AI Safety',
-      'rl': 'Reinforcement Learning'
+      'llm': 'Large Language Models'
     };
 
     // Get the backend-compatible area names for selected areas
@@ -97,7 +90,7 @@ const ResearchPaperFinder = () => {
     <div className="min-h-screen bg-background">
       <HeroSection />
 
-      <div className="relative -mt-16 z-10">
+      <div className="relative -mt-8 z-10">
         <AreaSelector
           selectedAreas={selectedAreas}
           onToggleArea={handleAreaToggle}
@@ -106,23 +99,20 @@ const ResearchPaperFinder = () => {
         />
 
         {/* Search controls section */}
-        <div className="py-12">
+        <div className="py-8">
           <div className="comet-container">
             {/* Paper count selector */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 animate-fade-in">
-              <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-                <Filter className="w-4 h-4" />
-                <span>Papers to fetch:</span>
-              </div>
-              <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 animate-fade-in">
+              <span className="text-sm text-neutral-500">Papers:</span>
+              <div className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
                 {[3, 6, 9, 12].map((count) => (
                   <button
                     key={count}
                     onClick={() => setPaperCount(count)}
-                    className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-150 ${
                       paperCount === count
-                        ? 'bg-white text-indigo-600 shadow-soft'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-white text-neutral-900 shadow-sm'
+                        : 'text-neutral-500 hover:text-neutral-700'
                     }`}
                   >
                     {count}
@@ -136,23 +126,23 @@ const ResearchPaperFinder = () => {
               <button
                 onClick={handleSearch}
                 disabled={loading || selectedAreas.length === 0}
-                className={`search-button comet-button text-lg px-14 py-5 inline-flex items-center gap-3 transition-all duration-300 ${
+                className={`comet-button text-sm px-8 py-3 inline-flex items-center gap-2 transition-all duration-200 ${
                   loading || selectedAreas.length === 0
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:scale-[1.03]'
+                    ? 'opacity-40 cursor-not-allowed'
+                    : ''
                 }`}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Searching arXiv...</span>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Searching...</span>
                   </>
                 ) : (
                   <>
-                    <Search className="w-5 h-5" />
+                    <Search className="w-4 h-4" />
                     <span>Find Papers</span>
-                    <kbd className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-white/20 rounded-md ml-1">
-                      <span className="text-[10px]">⌘</span>
+                    <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] bg-white/20 rounded ml-1">
+                      <span>⌘</span>
                       <span>↵</span>
                     </kbd>
                   </>
@@ -160,7 +150,7 @@ const ResearchPaperFinder = () => {
               </button>
 
               {selectedAreas.length === 0 && (
-                <p className="text-sm text-slate-500 mt-4 animate-fade-in">
+                <p className="text-xs text-neutral-400 mt-3 animate-fade-in">
                   Select research areas above to begin
                 </p>
               )}
@@ -169,9 +159,9 @@ const ResearchPaperFinder = () => {
               {papers.length > 0 && !loading && (
                 <button
                   onClick={handleClearAndReset}
-                  className="mt-4 text-sm text-slate-500 hover:text-slate-700 inline-flex items-center gap-2 transition-colors"
+                  className="mt-3 text-xs text-neutral-400 hover:text-neutral-600 inline-flex items-center gap-1.5 transition-colors"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-3 h-3" />
                   Clear and search again
                 </button>
               )}
@@ -183,17 +173,17 @@ const ResearchPaperFinder = () => {
         {loading && (
           <div className="comet-section">
             <div className="comet-container">
-              <div className="text-center mb-12 animate-fade-in">
-                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-indigo-50 border border-indigo-100 mb-6">
-                  <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
-                  <span className="text-sm font-semibold text-indigo-600">Searching arXiv...</span>
+              <div className="text-center mb-8 animate-fade-in">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100 mb-4">
+                  <Loader2 className="w-3.5 h-3.5 text-neutral-500 animate-spin" />
+                  <span className="text-xs font-medium text-neutral-600">Searching arXiv...</span>
                 </div>
 
-                <h2 className="text-heading text-slate-900 mb-4">
-                  Discovering Research Papers
+                <h2 className="text-heading text-neutral-900 mb-2">
+                  Discovering Papers
                 </h2>
-                <p className="text-slate-600 max-w-2xl mx-auto">
-                  Fetching the latest papers from arXiv based on your interests...
+                <p className="text-sm text-neutral-500">
+                  Fetching the latest papers based on your interests...
                 </p>
               </div>
 
@@ -202,32 +192,29 @@ const ResearchPaperFinder = () => {
           </div>
         )}
 
-        {/* Results section with staggered animations */}
+        {/* Results section */}
         {papers.length > 0 && !loading && (
           <div className="comet-section animate-fade-in">
             <div className="comet-container">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-green-50 border border-green-100 mb-6 animate-bounce-in">
-                  <Sparkles className="w-4 h-4 text-green-600 animate-pulse-glow" />
-                  <span className="text-sm font-semibold text-green-700">
-                    {papers.length} {papers.length === 1 ? 'Paper' : 'Papers'} Found
-                  </span>
-                </div>
+              <div className="text-center mb-8">
+                <span className="text-xs font-medium text-neutral-500 mb-3 block">
+                  {papers.length} {papers.length === 1 ? 'paper' : 'papers'} found
+                </span>
 
-                <h2 className="text-heading text-slate-900 mb-4 animate-slide-up">
+                <h2 className="text-heading text-neutral-900 mb-2">
                   Research Papers
                 </h2>
-                <p className="text-slate-600 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '100ms' }}>
-                  Generate podcast scripts from these cutting-edge research papers
+                <p className="text-sm text-neutral-500">
+                  Generate podcast scripts from these papers
                 </p>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {papers.map((paper, index) => (
                   <div
                     key={`${paper.doi || paper.url}-${index}`}
                     className="animate-slide-up"
-                    style={{ animationDelay: `${(index + 1) * 100}ms`, animationFillMode: 'backwards' }}
+                    style={{ animationDelay: `${(index + 1) * 80}ms`, animationFillMode: 'backwards' }}
                   >
                     <PaperCard paper={paper} index={index} />
                   </div>
@@ -236,8 +223,8 @@ const ResearchPaperFinder = () => {
 
               {/* Load more suggestion */}
               {papers.length >= paperCount && (
-                <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '500ms' }}>
-                  <p className="text-sm text-slate-500 mb-4">
+                <div className="text-center mt-8 animate-fade-in" style={{ animationDelay: '400ms' }}>
+                  <p className="text-xs text-neutral-400 mb-3">
                     Want more papers? Increase the count and search again.
                   </p>
                   <button
@@ -246,10 +233,10 @@ const ResearchPaperFinder = () => {
                       handleSearch();
                     }}
                     disabled={loading || paperCount >= 12}
-                    className="comet-button-secondary inline-flex items-center gap-2"
+                    className="comet-button-secondary inline-flex items-center gap-2 text-sm"
                   >
-                    <RefreshCw className="w-4 h-4" />
-                    Load More Papers
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Load More
                   </button>
                 </div>
               )}
@@ -261,19 +248,19 @@ const ResearchPaperFinder = () => {
         {papers.length === 0 && !loading && hasSearched && (
           <div className="comet-section animate-fade-in">
             <div className="comet-container text-center">
-              <div className="max-w-md mx-auto">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-100 flex items-center justify-center">
-                  <Search className="w-10 h-10 text-slate-400" />
+              <div className="max-w-sm mx-auto">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-lg bg-neutral-100 flex items-center justify-center">
+                  <Search className="w-5 h-5 text-neutral-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">No papers found</h3>
-                <p className="text-slate-600 mb-6">
-                  Try selecting different research areas or topics, or try again later as new papers are published daily.
+                <h3 className="text-base font-medium text-neutral-900 mb-2">No papers found</h3>
+                <p className="text-sm text-neutral-500 mb-4">
+                  Try selecting different research areas or topics.
                 </p>
                 <button
                   onClick={handleClearAndReset}
-                  className="comet-button inline-flex items-center gap-2"
+                  className="comet-button inline-flex items-center gap-2 text-sm"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-3.5 h-3.5" />
                   Try Again
                 </button>
               </div>
