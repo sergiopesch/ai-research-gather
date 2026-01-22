@@ -12,8 +12,10 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
+
 // Enhanced OpenAI API call with retry logic
-async function callOpenAI(apiKey: string, messages: any[], retryCount = 0): Promise<string> {
+async function callOpenAI(apiKey: string, messages: ChatMessage[], retryCount = 0): Promise<string> {
   const maxRetries = 2
   const retryDelay = 1000 * Math.pow(2, retryCount)
   

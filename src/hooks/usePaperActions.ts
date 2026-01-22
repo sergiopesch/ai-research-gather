@@ -66,12 +66,13 @@ export const usePaperActions = () => {
       });
       setTimeout(() => navigate('/processing'), 1000);
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Selection error:', error);
-      
+
       // Check for 409 conflict error in multiple possible places
-      const errorStatus = error?.context?.status || error?.status;
-      const errorMessage = error?.message || '';
+      const err = error as { context?: { status?: number }; status?: number; message?: string };
+      const errorStatus = err?.context?.status || err?.status;
+      const errorMessage = err?.message || '';
       
       if (errorStatus === 409 || errorMessage.includes('already selected') || errorMessage.includes('409')) {
         setSelectedPaper(paperId);
@@ -85,7 +86,7 @@ export const usePaperActions = () => {
 
       toast({
         title: "Selection Failed",
-        description: error?.message || "Failed to select paper",
+        description: errorMessage || "Failed to select paper",
         variant: "destructive",
       });
       throw error;
@@ -111,11 +112,11 @@ export const usePaperActions = () => {
       });
 
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error processing paper:', error);
       toast({
         title: "Processing Failed",
-        description: error?.message || "Failed to process paper",
+        description: error instanceof Error ? error.message : "Failed to process paper",
         variant: "destructive",
       });
       throw error;
