@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
-import { RequestSchema, type RequestData, type Paper, type PaperResponse } from './types.ts'
+import { RequestSchema, type Paper, type PaperWithId, type PaperResponse } from './types.ts'
 import { RESEARCH_AREAS } from './research-areas.ts'
 import { fetchArxivPapersForCategory } from './arxiv.ts'
 import { categorizePaper } from './categorization.ts'
@@ -103,8 +103,8 @@ serve(async (req: Request): Promise<Response> => {
     console.log(`Saving ${selectedPapers.length} papers to database`)
     
     // Save papers to database and generate summaries
-    const papersWithSummaries = await Promise.all(
-      selectedPapers.map(async (paper) => {
+    const papersWithSummaries: PaperWithId[] = await Promise.all(
+      selectedPapers.map(async (paper): Promise<PaperWithId> => {
         // Check if paper already exists in database
         const { data: existingPaper } = await supabase
           .from('papers')

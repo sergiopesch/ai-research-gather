@@ -9,8 +9,9 @@ export const RequestSchema = z.object({
 
 export type RequestData = z.infer<typeof RequestSchema>
 
+// Internal paper type (before DB save, id is optional)
 export interface Paper {
-  id: string
+  id?: string
   title: string
   url: string
   doi?: string
@@ -21,8 +22,13 @@ export interface Paper {
   importance?: string
 }
 
+// Paper with required id (after DB save)
+export interface PaperWithId extends Paper {
+  id: string
+}
+
 export interface PaperResponse {
-  papers: Paper[]
+  papers: PaperWithId[]
 }
 
 export interface ResearchArea {

@@ -43,27 +43,47 @@ export const usePaperSearch = () => {
       }
 
       const data = await response.json();
-      
+
+      // Check for API error response
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       if (!validateApiResponse(data)) {
+        console.error('Validation failed for response:', data);
         throw new Error('Invalid response format from server');
       }
 
       setPapers(data.papers);
-      
-      toast({
-        title: "Papers loaded",
-        description: `Found ${data.papers.length} research papers`
-      });
+
+      if (data.papers.length === 0) {
+        toast({
+          title: "No papers found",
+          description: "Try selecting different research areas or check back later"
+        });
+      } else {
+        toast({
+          title: "Papers loaded",
+          description: `Found ${data.papers.length} research papers`
+        });
+      }
     } catch (error) {
       console.error('Search error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setError(errorMessage);
-      
+
+      let description = "Please check your connection and try again";
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          description = "Request timed out. Please try again.";
+        } else if (error.message.includes('API Error')) {
+          description = error.message;
+        }
+      }
+
       toast({
         title: "Failed to load papers",
-        description: error instanceof Error && error.name === 'AbortError' 
-          ? "Request timed out. Please try again." 
-          : "Please check your connection and try again",
+        description,
         variant: "destructive"
       });
       setPapers([]);
