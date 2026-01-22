@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { validateApiResponse } from '@/utils/validation';
+import { getApiError, getValidPapers } from '@/utils/validation';
 import type { Paper } from '@/types/research';
 
 const API_URL = 'https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/paperFinder';
@@ -13,10 +13,10 @@ export const usePaperSearch = () => {
 
   const searchPapers = useCallback(async (keywords: string[], limit: number = 6) => {
     if (loading) return; // Prevent multiple concurrent requests
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
@@ -27,7 +27,7 @@ export const usePaperSearch = () => {
 
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -43,27 +43,48 @@ export const usePaperSearch = () => {
       }
 
       const data = await response.json();
-      
-      if (!validateApiResponse(data)) {
-        throw new Error('Invalid response format from server');
+
+      // Check for API-level errors first
+      const apiError = getApiError(data);
+      if (apiError) {
+        throw new Error(apiError);
       }
 
-      setPapers(data.papers);
-      
-      toast({
-        title: "Papers loaded",
-        description: `Found ${data.papers.length} research papers`
-      });
+      // Get valid papers (filters out any malformed entries)
+      const validPapers = getValidPapers(data) as Paper[];
+      setPapers(validPapers);
+
+      if (validPapers.length > 0) {
+        toast({
+          title: "Papers loaded",
+          description: `Found ${validPapers.length} research papers`
+        });
+      } else {
+        toast({
+          title: "No papers found",
+          description: "Try selecting different research areas or topics"
+        });
+      }
     } catch (error) {
       console.error('Search error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setError(errorMessage);
-      
+
+      // Provide specific error messages based on error type
+      let toastDescription = "Please check your connection and try again";
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          toastDescription = "Request timed out. The server may be busy - please try again.";
+        } else if (error.message.includes('API Error')) {
+          toastDescription = error.message;
+        } else if (error.message.includes('Internal server error')) {
+          toastDescription = "Server error occurred. Please try again in a moment.";
+        }
+      }
+
       toast({
         title: "Failed to load papers",
-        description: error instanceof Error && error.name === 'AbortError' 
-          ? "Request timed out. Please try again." 
-          : "Please check your connection and try again",
+        description: toastDescription,
         variant: "destructive"
       });
       setPapers([]);
