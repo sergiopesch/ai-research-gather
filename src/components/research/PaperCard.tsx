@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, ExternalLink, Users, Brain, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
+import { Calendar, ExternalLink, Users, ArrowRight } from 'lucide-react';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
 import { usePaperActions } from '@/hooks/usePaperActions';
 import { useToast } from '@/hooks/use-toast';
@@ -11,24 +11,9 @@ interface PaperCardProps {
   index: number;
 }
 
-// Area color mappings
-const areaColorMap: Record<string, { bg: string; text: string; border: string; badge: string; icon: string }> = {
-  ai: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200', badge: 'bg-indigo-100', icon: 'bg-indigo-500' },
-  robotics: { bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200', badge: 'bg-pink-100', icon: 'bg-pink-500' },
-  cv: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', badge: 'bg-green-100', icon: 'bg-green-500' },
-  nlp: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', badge: 'bg-purple-100', icon: 'bg-purple-500' },
-  llm: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', badge: 'bg-orange-100', icon: 'bg-orange-500' },
-  multimodal: { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200', badge: 'bg-cyan-100', icon: 'bg-cyan-500' },
-  agents: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', badge: 'bg-rose-100', icon: 'bg-rose-500' },
-  mlops: { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', badge: 'bg-sky-100', icon: 'bg-sky-500' },
-  safety: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', badge: 'bg-amber-100', icon: 'bg-amber-500' },
-  rl: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', badge: 'bg-emerald-100', icon: 'bg-emerald-500' },
-};
-
 export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const { selectPaper, isSelecting, isPaperSelected } = usePaperActions();
   const { toast } = useToast();
-  const [isHovered, setIsHovered] = useState(false);
   const [showFullSummary, setShowFullSummary] = useState(false);
 
   const handleSelectPaper = async () => {
@@ -58,9 +43,9 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
       for (const keyword of area.keywords) {
         const keywordLower = keyword.toLowerCase();
         if (titleLower.includes(keywordLower)) {
-          if (['artificial intelligence', 'machine learning', 'deep learning', 'robotics', 'computer vision', 'large language model'].includes(keywordLower)) {
+          if (['robotics', 'computer vision', 'large language model', 'llm'].includes(keywordLower)) {
             score += 10;
-          } else if (['ai', 'ml', 'cv', 'robot', 'vision', 'llm', 'nlp'].includes(keywordLower)) {
+          } else if (['robot', 'vision', 'gpt'].includes(keywordLower)) {
             score += 5;
           } else {
             score += 1;
@@ -76,7 +61,6 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
     return {
       id: bestMatch.area.id,
       label: bestMatch.area.label,
-      color: bestMatch.area.color,
       icon: bestMatch.area.icon
     };
   };
@@ -92,7 +76,6 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const areaInfo = getPaperAreaInfo(paper.title);
   const AreaIcon = areaInfo.icon;
   const isAlreadySelected = isPaperSelected(paper.id);
-  const colors = areaColorMap[areaInfo.id] || areaColorMap.ai;
 
   return (
     <div
@@ -101,60 +84,49 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
         animationDelay: `${index * 100}ms`,
         animationFillMode: 'backwards'
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Subtle gradient background on hover */}
-      <div
-        className={`absolute inset-0 rounded-2xl transition-opacity duration-500 ${colors.bg} ${
-          isHovered ? 'opacity-50' : 'opacity-0'
-        }`}
-      />
-
-      <div className="relative space-y-6">
+      <div className="space-y-5">
         {/* Header with area badge and icon */}
-        <div className="flex items-start justify-between gap-6">
+        <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-3">
             {/* Area badge */}
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${colors.badge} ${colors.text}`}>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-neutral-100 text-neutral-600">
                 <AreaIcon className="w-3 h-3" />
                 {areaInfo.label}
               </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-neutral-400">
                 {paper.source}
               </span>
             </div>
 
             {/* Title */}
-            <h3 className="text-xl font-semibold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors duration-300">
+            <h3 className="text-base font-medium text-neutral-900 leading-snug group-hover:text-neutral-700 transition-colors">
               {sanitizeText(paper.title)}
             </h3>
           </div>
 
           {/* Icon indicator */}
           <div
-            className={`flex-shrink-0 p-3 rounded-xl transition-all duration-300 transform ${
+            className={`flex-shrink-0 p-2.5 rounded-lg transition-all duration-200 ${
               isAlreadySelected
-                ? `${colors.icon} text-white scale-110`
-                : isHovered
-                  ? `${colors.badge} ${colors.text} scale-105`
-                  : 'bg-slate-100 text-slate-400'
+                ? 'bg-neutral-900 text-white'
+                : 'bg-neutral-100 text-neutral-400 group-hover:bg-neutral-200 group-hover:text-neutral-600'
             }`}
           >
-            <AreaIcon className="w-5 h-5" />
+            <AreaIcon className="w-4 h-4" />
           </div>
         </div>
 
         {/* Metadata row */}
-        <div className="flex items-center gap-4 text-sm text-slate-500">
+        <div className="flex items-center gap-4 text-xs text-neutral-500">
           <div className="flex items-center gap-1.5">
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-3.5 h-3.5" />
             {formatDate(paper.published_date)}
           </div>
           {paper.authors && paper.authors.length > 0 && (
             <div className="flex items-center gap-1.5">
-              <Users className="w-4 h-4" />
+              <Users className="w-3.5 h-3.5" />
               <span>
                 {paper.authors.slice(0, 2).join(', ')}
                 {paper.authors.length > 2 && ` +${paper.authors.length - 2}`}
@@ -165,50 +137,39 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
         {/* Summary section */}
         {paper.summary && (
-          <div
-            className={`p-5 rounded-xl space-y-3 transition-all duration-300 border ${
-              isHovered ? `${colors.bg} ${colors.border}` : 'bg-slate-50 border-transparent'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg ${isHovered ? colors.badge : 'bg-white'}`}>
-                <Sparkles className={`w-4 h-4 ${isHovered ? colors.text : 'text-slate-400'}`} />
-              </div>
-              <div className="flex-1">
-                <p
-                  className={`text-sm text-slate-700 leading-relaxed ${
-                    !showFullSummary ? 'line-clamp-3' : ''
-                  }`}
-                >
-                  {sanitizeText(paper.summary)}
-                </p>
-                {paper.summary.length > 200 && (
-                  <button
-                    onClick={() => setShowFullSummary(!showFullSummary)}
-                    className={`text-sm font-medium mt-2 transition-colors ${colors.text} hover:opacity-80`}
-                  >
-                    {showFullSummary ? 'Show less' : 'Read more'}
-                  </button>
-                )}
-              </div>
-            </div>
+          <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-100">
+            <p
+              className={`text-sm text-neutral-600 leading-relaxed ${
+                !showFullSummary ? 'line-clamp-2' : ''
+              }`}
+            >
+              {sanitizeText(paper.summary)}
+            </p>
+            {paper.summary.length > 150 && (
+              <button
+                onClick={() => setShowFullSummary(!showFullSummary)}
+                className="text-xs font-medium mt-2 text-neutral-500 hover:text-neutral-900 transition-colors"
+              >
+                {showFullSummary ? 'Show less' : 'Read more'}
+              </button>
+            )}
             {paper.importance && (
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-200">
-                <span className="text-xs font-medium text-slate-500">Impact:</span>
-                <span className="text-xs text-slate-700">{paper.importance}</span>
+              <div className="flex items-center gap-2 pt-3 mt-3 border-t border-neutral-200">
+                <span className="text-xs text-neutral-400">Impact:</span>
+                <span className="text-xs text-neutral-600">{paper.importance}</span>
               </div>
             )}
           </div>
         )}
 
         {/* Action buttons */}
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex items-center gap-3 pt-1">
           <button
             onClick={handleSelectPaper}
             disabled={isSelecting || isAlreadySelected}
-            className={`search-button comet-button flex-1 sm:flex-none inline-flex items-center justify-center gap-2.5 transition-all duration-300 ${
+            className={`comet-button flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-sm ${
               isAlreadySelected
-                ? 'bg-green-500 shadow-green-500/30'
+                ? 'bg-neutral-200 text-neutral-500'
                 : isSelecting
                   ? 'opacity-70 cursor-wait'
                   : ''
@@ -216,19 +177,15 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
           >
             {isSelecting ? (
               <>
-                <div className="loading-spinner w-4 h-4" />
+                <div className="loading-spinner w-3.5 h-3.5" />
                 <span>Processing...</span>
               </>
             ) : isAlreadySelected ? (
-              <>
-                <Sparkles className="w-4 h-4" />
-                <span>Script Generated</span>
-              </>
+              <span>Script Generated</span>
             ) : (
               <>
-                <Brain className="w-4 h-4" />
                 <span>Generate Script</span>
-                <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`} />
+                <ArrowRight className="w-3.5 h-3.5" />
               </>
             )}
           </button>
@@ -237,10 +194,10 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
             href={paper.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="comet-button-secondary inline-flex items-center gap-2 hover:-translate-y-0.5 transition-all duration-300"
+            className="comet-button-secondary inline-flex items-center gap-2 text-sm"
           >
-            <ExternalLink className="w-4 h-4" />
-            <span>View Paper</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>View</span>
           </a>
         </div>
       </div>
