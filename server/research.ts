@@ -3,13 +3,20 @@ import type { Paper } from "./types";
 
 type ResearchArea = {
   name: string;
+  categories: string[];
   keywords: string[];
-  query: string;
 };
+
+const ARXIV_RSS_URL = "https://rss.arxiv.org/rss";
+const ARXIV_TIMEOUT_MS = 10000;
+const ARXIV_USER_AGENT =
+  process.env.ARXIV_USER_AGENT ||
+  "ai-research-gather/1.0 (+https://github.com/sergiopesch/ai-research-gather)";
 
 const RESEARCH_AREAS: ResearchArea[] = [
   {
     name: "Robotics",
+    categories: ["cs.RO", "cs.SY"],
     keywords: [
       "Robotics",
       "robotics",
@@ -22,11 +29,10 @@ const RESEARCH_AREAS: ResearchArea[] = [
       "motion planning",
       "humanoid",
     ],
-    query:
-      '(cat:cs.RO OR cat:cs.SY) AND (all:"robotics" OR all:"robot" OR all:"autonomous" OR all:"manipulation" OR all:"navigation" OR all:"slam" OR all:"motion planning" OR all:"humanoid")',
   },
   {
     name: "Computer Vision",
+    categories: ["cs.CV"],
     keywords: [
       "Computer Vision",
       "computer vision",
@@ -41,11 +47,10 @@ const RESEARCH_AREAS: ResearchArea[] = [
       "yolo",
       "object detection",
     ],
-    query:
-      '(cat:cs.CV) AND (all:"computer vision" OR all:"image" OR all:"visual" OR all:"segmentation" OR all:"detection" OR all:"recognition" OR all:"object detection")',
   },
   {
     name: "Large Language Models",
+    categories: ["cs.CL", "cs.AI", "cs.LG"],
     keywords: [
       "Large Language Models",
       "large language model",
@@ -60,8 +65,6 @@ const RESEARCH_AREAS: ResearchArea[] = [
       "rag",
       "alignment",
     ],
-    query:
-      '(cat:cs.CL OR cat:cs.AI OR cat:cs.LG) AND (all:"large language model" OR all:"llm" OR all:"gpt" OR all:"foundation model" OR all:"instruction tuning" OR all:"prompt" OR all:"in-context learning" OR all:"chain of thought")',
   },
 ];
 
@@ -145,57 +148,96 @@ function selectDistributedPapers(papersByArea: Map<string, Paper[]>, selectedAre
   return selected.slice(0, limit);
 }
 
-async function fetchArxivPapersForArea(area: ResearchArea, since: string): Promise<Paper[]> {
-  const params = new URLSearchParams({
-    search_query: area.query,
-    start: "0",
-    max_results: "50",
-    sortBy: "submittedDate",
-    sortOrder: "descending",
-  });
+function extractTagValue(block: string, tagName: string): string | null {
+  const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = block.match(new RegExp(`<${escapedTagName}>([\\s\\S]*?)</${escapedTagName}>`, "i"));
+  return match ? cleanText(match[1]) : null;
+}
 
-  const response = await fetch(`https://export.arxiv.org/api/query?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error(`arXiv API error: ${response.status}`);
+function extractAbstract(description: string): string {
+  const abstractMatch = description.match(/Abstract:\s*([\s\S]*)$/i);
+  return cleanText(abstractMatch ? abstractMatch[1] : description);
+}
+
+function matchesKeywords(paper: Paper, area: ResearchArea, selectedKeywords: string[]): boolean {
+  const normalizedAreaKeywords = area.keywords.map((value) => value.toLowerCase());
+  const normalizedSelectedKeywords = selectedKeywords
+    .map((keyword) => keyword.toLowerCase())
+    .filter((keyword) => !normalizedAreaKeywords.includes(keyword));
+
+  if (normalizedSelectedKeywords.length === 0) {
+    return true;
   }
 
-  const xmlText = await response.text();
-  const entries = xmlText.match(/<entry>([\s\S]*?)<\/entry>/g) || [];
+  const haystack = `${paper.title} ${paper.summary || ""}`.toLowerCase();
+  return normalizedSelectedKeywords.some((keyword) => haystack.includes(keyword));
+}
+
+async function fetchRssFeed(category: string): Promise<string> {
+  const response = await fetch(`${ARXIV_RSS_URL}/${encodeURIComponent(category)}`, {
+    signal: AbortSignal.timeout(ARXIV_TIMEOUT_MS),
+    headers: {
+      Accept: "application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.8",
+      "User-Agent": ARXIV_USER_AGENT,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`arXiv RSS error: ${response.status}`);
+  }
+
+  return response.text();
+}
+
+async function fetchArxivPapersForArea(
+  area: ResearchArea,
+  since: string,
+  selectedKeywords: string[]
+): Promise<Paper[]> {
   const sinceDate = new Date(since);
+  const categoryFeeds = await Promise.all(area.categories.map((category) => fetchRssFeed(category)));
+  const items = categoryFeeds.flatMap((feed) => feed.match(/<item>([\s\S]*?)<\/item>/g) || []);
 
-  return entries.flatMap((entry) => {
-    const titleMatch = entry.match(/<title>([\s\S]*?)<\/title>/);
-    const summaryMatch = entry.match(/<summary>([\s\S]*?)<\/summary>/);
-    const publishedMatch = entry.match(/<published>(.*?)<\/published>/);
-    const idMatch = entry.match(/<id>(.*?)<\/id>/);
-    const authorMatches = [...entry.matchAll(/<author>[\s\S]*?<name>(.*?)<\/name>[\s\S]*?<\/author>/g)];
+  return items.flatMap((item) => {
+    const title = extractTagValue(item, "title");
+    const url = extractTagValue(item, "link");
+    const description = extractTagValue(item, "description");
+    const pubDate = extractTagValue(item, "pubDate");
+    const authorText = extractTagValue(item, "dc:creator");
 
-    if (!titleMatch || !summaryMatch || !publishedMatch || !idMatch) {
+    if (!title || !url || !description || !pubDate) {
       return [];
     }
 
-    const publishedDate = publishedMatch[1].split("T")[0];
+    const publishedAt = new Date(pubDate);
+    if (Number.isNaN(publishedAt.getTime())) {
+      return [];
+    }
+
+    const publishedDate = publishedAt.toISOString().split("T")[0];
     const paperDate = new Date(publishedDate);
     if (Number.isNaN(paperDate.getTime()) || paperDate < sinceDate) {
       return [];
     }
 
-    const doi = idMatch[1].split("/").pop()?.split("v")[0];
-    const authors = authorMatches.map((match) => cleanText(match[1])).slice(0, 4);
+    const doi = url.split("/").pop()?.split("v")[0];
+    const authors = authorText
+      ? authorText.split(",").map((author) => cleanText(author)).filter(Boolean).slice(0, 4)
+      : [];
 
-    return [
-      {
-        id: doi || randomUUID(),
-        title: cleanText(titleMatch[1]),
-        url: idMatch[1],
-        pdf_url: doi ? `https://arxiv.org/pdf/${doi}.pdf` : idMatch[1],
-        doi,
-        source: "arXiv",
-        published_date: publishedDate,
-        authors,
-        summary: cleanText(summaryMatch[1]),
-      },
-    ];
+    const paper: Paper = {
+      id: doi || randomUUID(),
+      title,
+      url,
+      pdf_url: doi ? `https://arxiv.org/pdf/${doi}.pdf` : url,
+      doi,
+      source: "arXiv",
+      published_date: publishedDate,
+      authors,
+      summary: extractAbstract(description),
+    };
+
+    return matchesKeywords(paper, area, selectedKeywords) ? [paper] : [];
   });
 }
 
@@ -203,15 +245,13 @@ export async function searchPapers(keywords: string[], since: string, limit: num
   const selectedAreas = detectSelectedAreas(keywords);
   const papersByArea = new Map<string, Paper[]>();
 
-  await Promise.all(
-    selectedAreas.map(async (area) => {
-      const papers = dedupePapers(await fetchArxivPapersForArea(area, since));
-      papersByArea.set(
-        area.name,
-        papers.sort((a, b) => b.published_date.localeCompare(a.published_date))
-      );
-    })
-  );
+  for (const area of selectedAreas) {
+    const papers = dedupePapers(await fetchArxivPapersForArea(area, since, keywords));
+    papersByArea.set(
+      area.name,
+      papers.sort((a, b) => b.published_date.localeCompare(a.published_date))
+    );
+  }
 
   return dedupePapers(
     selectDistributedPapers(

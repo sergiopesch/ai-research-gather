@@ -65,9 +65,11 @@ HOST=127.0.0.1
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4.1-mini
 PORT=3001
+ARXIV_USER_AGENT=
 ```
 
 Only `OPENAI_API_KEY` is required.
+`ARXIV_USER_AGENT` is optional and can be used to identify your deployment when calling arXiv RSS.
 
 ## Local Operations
 
@@ -84,8 +86,10 @@ This repo is optimized for lightweight POC hosting, not a full production platfo
 - Run the server with `npm run start`.
 - Set `OPENAI_API_KEY` in the runtime environment.
 - Serve the repository as a single Node process. The Express server will serve `dist/` automatically after a build.
+- Serverless-style `/api/*` entrypoints are included for Vercel-compatible hosting.
 
 Good fits:
+- Vercel
 - Railway
 - Render
 - Fly.io
