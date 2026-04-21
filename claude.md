@@ -6,7 +6,7 @@ Quick reference for development.
 
 ```bash
 npm install    # Install dependencies
-npm run dev    # Dev server at http://localhost:8080
+npm run dev    # Frontend on http://localhost:8080, API on http://localhost:3001
 npm run build  # Production build
 npm run lint   # ESLint check
 ```
@@ -17,47 +17,38 @@ npm run lint   # ESLint check
 src/
 ├── components/
 │   ├── research/           # HeroSection, AreaSelector, PaperCard
-│   ├── studio/             # EpisodeLibrary
 │   └── ui/                 # shadcn/ui components
 ├── hooks/
 │   ├── usePaperSearch.ts   # Paper discovery
 │   ├── usePaperActions.ts  # Paper selection
-│   ├── useScriptGeneration.ts  # Podcast scripts
-│   └── useEpisodes.ts      # Episode CRUD
+│   └── useScriptGeneration.ts  # Podcast scripts
 ├── pages/
 │   ├── Index.tsx           # Paper discovery
 │   └── ProcessingHub.tsx   # Podcast studio
 └── utils/
     └── validation.ts       # API validation helpers
 
-supabase/functions/
-├── paperFinder/            # arXiv API + AI summaries
-├── generatePodcastScript/  # OpenAI script generation
-├── processPaper/           # Paper processing
-└── selectPaper/            # Paper selection
+server/
+├── index.ts                # Express API
+├── research.ts             # arXiv fetching + filtering
+├── openai.ts               # OpenAI script generation
+└── types.ts                # Shared server-side types
 ```
 
 ## Data Flows
 
 ### Paper Discovery
 ```
-AreaSelector -> usePaperSearch -> paperFinder -> arXiv -> PaperCard
+AreaSelector -> usePaperSearch -> /api/papers -> arXiv -> PaperCard
 ```
 
 ### Script Generation
 ```
-PaperCard -> usePaperActions -> ProcessingHub -> generatePodcastScript -> OpenAI
+PaperCard -> usePaperActions -> ProcessingHub -> /api/generate-script -> OpenAI
 ```
-
-## Database Tables
-
-- `papers` - Paper metadata (title, url, doi, source, published_date)
-- `paper_assets` - Summaries and scripts
-- `episodes` - Saved podcast episodes
 
 ## Environment Variables
 
-Supabase Edge Functions:
 - `OPENAI_API_KEY` - Required
 
 ## Podcast Characters
@@ -69,9 +60,10 @@ Supabase Edge Functions:
 
 ### Add Research Area
 Edit `src/constants/research-areas.ts`
+Also update `server/research.ts`
 
 ### Modify Podcast Format
-Edit `supabase/functions/generatePodcastScript/index.ts`
+Edit `server/openai.ts`
 
 ### Change Voice Settings
 Edit `src/hooks/useScriptGeneration.ts`

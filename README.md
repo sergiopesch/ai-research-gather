@@ -1,88 +1,76 @@
 # AI Research Paper Finder
 
-A minimalist React application for discovering research papers from arXiv and transforming them into AI-generated podcast scripts.
+A small proof of concept for browsing recent arXiv papers and turning one selected paper into a podcast-style script.
 
-## Features
+## Architecture
 
-- **Paper Discovery** - Find latest papers from arXiv across Robotics, Computer Vision, and Large Language Models
-- **AI Summaries** - Get intelligent summaries powered by OpenAI
-- **Podcast Generation** - Transform papers into engaging podcast conversations
-- **ElevenLabs Export** - Download scripts in ElevenLabs-compatible format
+This version intentionally removes Supabase and all database persistence.
 
-## Tech Stack
+- Paper discovery is fetched live from arXiv.
+- Search results use the paper abstract directly.
+- Script generation happens on demand through a local Node API.
+- Nothing is stored. Download the generated script if you want to keep it.
 
-- **Frontend**: React 18, TypeScript, Vite, TanStack Query
-- **Styling**: Tailwind CSS, Radix UI, shadcn/ui
-- **Backend**: Supabase (PostgreSQL, Edge Functions)
-- **AI**: OpenAI GPT-4.1
+## Stack
+
+- Frontend: React 18, TypeScript, Vite, TanStack Query
+- Styling: Tailwind CSS, Radix UI, shadcn/ui
+- API: Express
+- AI: OpenAI
 
 ## Quick Start
 
 ```bash
-npm install     # Install dependencies
-npm run dev     # Start dev server at http://localhost:8080
-npm run build   # Build for production
-npm run lint    # Run ESLint
+npm install
+OPENAI_API_KEY=your_openai_api_key npm run dev
 ```
+
+Frontend: `http://localhost:8080`
+API: `http://localhost:3001`
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+## Environment
+
+```env
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
+PORT=3001
+```
+
+Only `OPENAI_API_KEY` is required.
 
 ## Project Structure
 
-```
+```text
 src/
-├── components/
-│   ├── research/     # Paper discovery components
-│   ├── studio/       # Podcast production components
-│   └── ui/           # shadcn/ui components
-├── hooks/            # Custom React hooks
-├── pages/            # Route pages
-├── types/            # TypeScript definitions
-├── utils/            # Utility functions
-└── constants/        # App constants
+  components/   React UI
+  hooks/        Frontend search, selection, and script hooks
+  pages/        App routes
+  constants/    Research area definitions
 
-supabase/functions/
-├── paperFinder/      # arXiv API integration
-├── generatePodcastScript/  # OpenAI script generation
-├── processPaper/     # Paper processing
-└── selectPaper/      # Paper selection handler
+server/
+  index.ts      Express API entrypoint
+  research.ts   arXiv search and filtering
+  openai.ts     Podcast script generation
+  types.ts      Shared server-side types
 ```
 
-## Configuration
+## POC Constraints
 
-The application uses Supabase for backend services:
-
-```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-Edge Functions require:
-- `OPENAI_API_KEY` - For AI summaries and script generation
-
-## Development
-
-### Testing Edge Functions
-
-```bash
-# Run Deno tests locally (requires local Supabase)
-deno test supabase/functions/paperFinder/test.ts
-```
-
-### Adding Research Areas
-
-Edit `src/constants/research-areas.ts` to add new areas with keywords.
-
-### Modifying Podcast Format
-
-Edit `supabase/functions/generatePodcastScript/index.ts` to customize the conversation flow.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with `npm run build`
-5. Submit a pull request
+- No auth
+- No paper history
+- No episode library
+- No background jobs
+- No database
 
 ## License
 
-MIT License
+MIT

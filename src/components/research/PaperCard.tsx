@@ -27,7 +27,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
     }
 
     try {
-      await selectPaper(paper.id);
+      await selectPaper(paper);
     } catch (error) {
       // Error handling is done in the hook
     }
@@ -178,10 +178,10 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
             {isSelecting ? (
               <>
                 <div className="loading-spinner w-3.5 h-3.5" />
-                <span>Processing...</span>
+                <span>Selecting...</span>
               </>
             ) : isAlreadySelected ? (
-              <span>Script Generated</span>
+              <span>Selected</span>
             ) : (
               <>
                 <span>Generate Script</span>

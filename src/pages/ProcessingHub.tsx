@@ -1,14 +1,11 @@
-import { ArrowLeft, FileText, Loader2, X, Download, FileDown, Mic2, Headphones, Lightbulb, Zap, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, FileText, Loader2, X, Download, FileDown, Mic2, Lightbulb, Zap, CheckCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { usePaperActions } from '@/hooks/usePaperActions';
 import { useScriptGeneration } from '@/hooks/useScriptGeneration';
-import { useEpisodes } from '@/hooks/useEpisodes';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
-import { EpisodeLibrary } from '@/components/studio/EpisodeLibrary';
 
 const ProcessingHub = () => {
   const { selectedPaper, hasSelectedPaper, clearSelectedPaper } = usePaperActions();
@@ -22,7 +19,6 @@ const ProcessingHub = () => {
     error,
     hasScript
   } = useScriptGeneration();
-  const { createEpisode } = useEpisodes();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -48,21 +44,6 @@ const ProcessingHub = () => {
       // Error handling is done in the hook
     }
   }, [selectedPaper, generateScript, toast]);
-
-  const handleSaveEpisode = useCallback(async () => {
-    if (!script || !selectedPaper) return;
-    
-    try {
-      const paperTitle = script.title.replace(/^The Notebook Pod:\s*/, '').trim();
-      await createEpisode(selectedPaper, paperTitle, script);
-      toast({
-        title: "Episode Saved",
-        description: "Episode has been added to your studio library",
-      });
-    } catch (error) {
-      // Error handling is done in the hook
-    }
-  }, [script, selectedPaper, createEpisode, toast]);
 
   if (!hasSelectedPaper) {
     return (
@@ -108,12 +89,6 @@ const ProcessingHub = () => {
           </div>
         </div>
         
-        {/* Episode Library */}
-        <div className="premium-section">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8">
-            <EpisodeLibrary />
-          </div>
-        </div>
       </div>
     );
   }
@@ -150,14 +125,14 @@ const ProcessingHub = () => {
         <div className="premium-card p-8 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-muted rounded-xl shadow-soft">
-                <FileText className="w-6 h-6 text-ai-primary" />
-              </div>
-              <div>
-                <h2 className="text-subheading text-foreground">Selected Research Paper</h2>
-                <p className="text-caption">Ready for podcast script generation</p>
-              </div>
+            <div className="p-3 bg-muted rounded-xl shadow-soft">
+              <FileText className="w-6 h-6 text-ai-primary" />
             </div>
+            <div>
+              <h2 className="text-subheading text-foreground">Selected Research Paper</h2>
+              <p className="text-caption">Ready for on-demand podcast script generation</p>
+            </div>
+          </div>
             <div className="flex items-center gap-3">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-foreground border border-border">
                 <CheckCircle className="w-3.5 h-3.5" />
@@ -175,10 +150,15 @@ const ProcessingHub = () => {
           </div>
           
           <div className="bg-muted p-6 rounded-xl border border-border/50">
-            <p className="text-caption mb-3">Paper Identifier:</p>
-            <div className="p-3 bg-muted rounded-lg border font-mono text-sm">
-              {selectedPaper}
+            <p className="text-caption mb-3">Paper Title:</p>
+            <div className="p-3 bg-muted rounded-lg border text-sm">
+              {selectedPaper.title}
             </div>
+            {selectedPaper.summary && (
+              <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
+                {selectedPaper.summary}
+              </p>
+            )}
           </div>
         </div>
 
@@ -191,7 +171,7 @@ const ProcessingHub = () => {
               </div>
               <div>
                 <h2 className="text-subheading text-foreground">AI Script Generation</h2>
-                <p className="text-caption">Professional podcast scripts with Dr. Rowan and Alex</p>
+                <p className="text-caption">Generate a script directly from the paper metadata and abstract</p>
               </div>
             </div>
             {isGenerating && (
@@ -234,14 +214,6 @@ const ProcessingHub = () => {
 
             {hasScript && !isGenerating && (
               <div className="flex flex-wrap items-center gap-4">
-                <button 
-                  onClick={handleSaveEpisode}
-                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-4 rounded-full text-lg inline-flex items-center gap-3 hover-scale shadow-lg"
-                >
-                  <Headphones className="w-6 h-6" />
-                  Save to Studio
-                </button>
-                
                 <button 
                   onClick={() => downloadElevenLabsScript(script!)}
                   className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-6 py-4 rounded-full inline-flex items-center gap-2 hover-scale border border-border"
@@ -370,12 +342,21 @@ const ProcessingHub = () => {
         {/* Episode Library */}
         <div className="space-y-8">
           <div className="text-center">
-            <h2 className="text-heading mb-4">Episode Library</h2>
+            <h2 className="text-heading mb-4">Proof of Concept Notes</h2>
             <p className="text-body text-muted-foreground">
-              Manage your created podcast episodes
+              This version does not persist episodes or paper history
             </p>
           </div>
-          <EpisodeLibrary />
+          <Card>
+            <CardHeader>
+              <CardTitle>Why this is simpler</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground space-y-3">
+              <p>The app searches arXiv live and generates scripts on demand.</p>
+              <p>There is no database, no background processing queue, and no saved episode library.</p>
+              <p>If you want to keep a script, download it after generation.</p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

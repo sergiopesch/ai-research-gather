@@ -3,7 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getApiError, getValidPapers } from '@/utils/validation';
 import type { Paper } from '@/types/research';
 
-const API_URL = 'https://eapnatbiodenijfrpqcn.supabase.co/functions/v1/paperFinder';
+const API_URL = '/api/papers';
 
 export const usePaperSearch = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
@@ -18,9 +18,9 @@ export const usePaperSearch = () => {
     setError(null);
 
     try {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const since = yesterday.toISOString().split('T')[0];
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 14);
+      const since = recentDate.toISOString().split('T')[0];
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);

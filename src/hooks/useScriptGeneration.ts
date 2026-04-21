@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '@/integrations/supabase/client';
+import type { Paper } from '@/types/research';
 
 export type ScriptSegment = {
   speaker: "DR ROWAN" | "ALEX";
@@ -43,7 +43,7 @@ export const useScriptGeneration = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const generateScript = useCallback(async (paperId: string) => {
+  const generateScript = useCallback(async (paper: Paper) => {
     if (isGenerating) return;
     
     setIsGenerating(true);
@@ -51,13 +51,12 @@ export const useScriptGeneration = () => {
     setScript(null);
 
     try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/generatePodcastScript`, {
+      const response = await fetch('/api/generate-script', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ paper_id: paperId })
+        body: JSON.stringify({ paper })
       });
 
       if (!response.ok) {
