@@ -63,67 +63,67 @@ export default {
 				'2xl': '1400px'
 			}
 		},
-		extend: {
-			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+			extend: {
+				colors: {
+					border: 'rgb(var(--border) / <alpha-value>)',
+					input: 'rgb(var(--input) / <alpha-value>)',
+					ring: 'rgb(var(--ring) / <alpha-value>)',
+					background: 'rgb(var(--background) / <alpha-value>)',
+					foreground: 'rgb(var(--foreground) / <alpha-value>)',
+					primary: {
+						DEFAULT: 'rgb(var(--primary) / <alpha-value>)',
+						foreground: 'rgb(var(--primary-foreground) / <alpha-value>)'
+					},
+					secondary: {
+						DEFAULT: 'rgb(var(--secondary) / <alpha-value>)',
+						foreground: 'rgb(var(--secondary-foreground) / <alpha-value>)'
+					},
+					destructive: {
+						DEFAULT: 'rgb(var(--destructive) / <alpha-value>)',
+						foreground: 'rgb(var(--destructive-foreground) / <alpha-value>)'
+					},
+					muted: {
+						DEFAULT: 'rgb(var(--muted) / <alpha-value>)',
+						foreground: 'rgb(var(--muted-foreground) / <alpha-value>)'
+					},
+					accent: {
+						DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+						foreground: 'rgb(var(--accent-foreground) / <alpha-value>)'
+					},
+					popover: {
+						DEFAULT: 'rgb(var(--popover) / <alpha-value>)',
+						foreground: 'rgb(var(--popover-foreground) / <alpha-value>)'
+					},
+					card: {
+						DEFAULT: 'rgb(var(--card) / <alpha-value>)',
+						foreground: 'rgb(var(--card-foreground) / <alpha-value>)'
+					},
+					sidebar: {
+						DEFAULT: 'rgb(var(--sidebar-background) / <alpha-value>)',
+						foreground: 'rgb(var(--sidebar-foreground) / <alpha-value>)',
+						primary: 'rgb(var(--sidebar-primary) / <alpha-value>)',
+						'primary-foreground': 'rgb(var(--sidebar-primary-foreground) / <alpha-value>)',
+						accent: 'rgb(var(--sidebar-accent) / <alpha-value>)',
+						'accent-foreground': 'rgb(var(--sidebar-accent-foreground) / <alpha-value>)',
+						border: 'rgb(var(--sidebar-border) / <alpha-value>)',
+						ring: 'rgb(var(--sidebar-ring) / <alpha-value>)'
+					},
+					ai: {
+						primary: 'rgb(var(--ai-primary) / <alpha-value>)',
+						bg: 'rgb(var(--ai-bg) / <alpha-value>)',
+						border: 'rgb(var(--ai-border) / <alpha-value>)'
+					},
+					robotics: {
+						primary: 'rgb(var(--robotics-primary) / <alpha-value>)',
+						bg: 'rgb(var(--robotics-bg) / <alpha-value>)',
+						border: 'rgb(var(--robotics-border) / <alpha-value>)'
+					},
+					cv: {
+						primary: 'rgb(var(--cv-primary) / <alpha-value>)',
+						bg: 'rgb(var(--cv-bg) / <alpha-value>)',
+						border: 'rgb(var(--cv-border) / <alpha-value>)'
+					}
 				},
-				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
-				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
-				},
-				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
-				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
-				},
-				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))'
-				},
-				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
-				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				},
-				ai: {
-					primary: 'hsl(var(--ai-primary))',
-					bg: 'hsl(var(--ai-bg))',
-					border: 'hsl(var(--ai-border))'
-				},
-				robotics: {
-					primary: 'hsl(var(--robotics-primary))',
-					bg: 'hsl(var(--robotics-bg))',
-					border: 'hsl(var(--robotics-border))'
-				},
-				cv: {
-					primary: 'hsl(var(--cv-primary))',
-					bg: 'hsl(var(--cv-bg))',
-					border: 'hsl(var(--cv-border))'
-				}
-			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
