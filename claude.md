@@ -5,6 +5,7 @@ Quick reference for development.
 ## Commands
 
 ```bash
+nvm use         # Node 20
 npm install    # Install dependencies
 npm run dev    # Frontend on http://localhost:8080, API on http://localhost:3001
 npm run build  # Production build
@@ -54,6 +55,10 @@ PaperCard -> usePaperActions -> ProcessingHub -> /api/generate-script -> OpenAI
 - `OPENAI_API_KEY` - Required
 - `OPENAI_MODEL` - Optional model override
 - `PORT` - Optional, defaults to `3001`
+
+## CI
+
+GitHub Actions validates `npm ci`, `npm run lint`, and `npm run build` on pushes to `main` and on pull requests.
 
 ## Podcast Characters
 

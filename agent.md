@@ -41,9 +41,11 @@ API: `http://localhost:3001`
 ## Operational Notes
 
 - Node 20+ is required.
+- `.nvmrc` pins the expected local runtime to Node 20.
 - The server loads environment variables from `.env`.
 - `npm run check` runs the expected pre-push validation for this repo.
 - `npm run healthcheck` verifies the local API is responding on `/api/health`.
+- GitHub Actions runs the same lint/build validation on pushes and pull requests.
 
 ## Common Tasks
 

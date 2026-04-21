@@ -21,6 +21,7 @@ This version intentionally removes Supabase and all database persistence.
 ## Quick Start
 
 ```bash
+nvm use
 npm install
 cp .env.example .env
 # fill in OPENAI_API_KEY
@@ -40,6 +41,12 @@ npm run lint
 npm run check
 npm run healthcheck
 ```
+
+## Tooling Baseline
+
+- Node 20 is the expected local and CI runtime.
+- `.nvmrc` is included for local version alignment.
+- A lightweight GitHub Actions workflow validates `npm ci`, `npm run lint`, and `npm run build`.
 
 ## Environment
 
