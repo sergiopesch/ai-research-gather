@@ -1,3 +1,3 @@
-import { healthHandler } from "../server/handlers";
+import { healthHandler } from "../server/handlers.js";
 
 export default healthHandler;

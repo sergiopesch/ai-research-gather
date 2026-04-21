@@ -3,7 +3,7 @@ import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
-import { generateScriptHandler, healthHandler, papersHandler } from "./handlers";
+import { generateScriptHandler, healthHandler, papersHandler } from "./handlers.js";
 
 const app = express();
 const host = process.env.HOST || "127.0.0.1";

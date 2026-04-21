@@ -1,9 +1,17 @@
 import { randomUUID } from "node:crypto";
-import type { Paper, PodcastScript, ScriptSegment } from "./types";
+import type { Paper, PodcastScript, ScriptSegment } from "./types.js";
 
 type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
+};
+
+type OpenAIChatCompletionResponse = {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
 };
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
@@ -37,8 +45,8 @@ async function callOpenAI(messages: ChatMessage[]): Promise<string> {
     throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
   }
 
-  const data = await response.json();
-  return data.choices[0]?.message?.content || "";
+  const data = (await response.json()) as OpenAIChatCompletionResponse;
+  return data.choices?.[0]?.message?.content || "";
 }
 
 export async function generatePodcastScript(paper: Paper): Promise<PodcastScript> {

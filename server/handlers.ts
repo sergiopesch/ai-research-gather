@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { generatePodcastScript } from "./openai";
-import { searchPapers } from "./research";
+import type { Paper } from "./types.js";
+import { generatePodcastScript } from "./openai.js";
+import { searchPapers } from "./research.js";
 
 export const SearchRequestSchema = z.object({
   since: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -101,7 +102,7 @@ export async function generateScriptHandler(req: RequestLike, res: ResponseLike)
   try {
     const body = await readJsonBody(req);
     const { paper } = ScriptRequestSchema.parse(body);
-    const script = await generatePodcastScript(paper);
+    const script = await generatePodcastScript(paper as Paper);
 
     setJsonHeaders(res);
     res.status(200).json(script);

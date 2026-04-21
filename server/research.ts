@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Paper } from "./types";
+import type { Paper } from "./types.js";
 
 type ResearchArea = {
   name: string;

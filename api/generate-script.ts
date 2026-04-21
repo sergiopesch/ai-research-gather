@@ -1,3 +1,3 @@
-import { generateScriptHandler } from "../server/handlers";
+import { generateScriptHandler } from "../server/handlers.js";
 
 export default generateScriptHandler;
