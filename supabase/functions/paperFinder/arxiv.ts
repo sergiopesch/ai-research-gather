@@ -52,14 +52,14 @@ export async function fetchArxivPapersForCategory(category: string, since: strin
 
       if (titleMatch && publishedMatch && idMatch) {
         const publishedDate = publishedMatch[1].split('T')[0]
-
-        // MUCH MORE LENIENT date filtering - get papers from last 90 days
         const paperDate = new Date(publishedDate)
         const sinceDate = new Date(since)
-        const daysDiff = Math.floor((sinceDate.getTime() - paperDate.getTime()) / (1000 * 60 * 60 * 24))
+        const isInRequestedWindow = !Number.isNaN(paperDate.getTime()) && !Number.isNaN(sinceDate.getTime()) && paperDate >= sinceDate
 
-        if (daysDiff <= 90) {
+        if (isInRequestedWindow) {
           const arxivId = idMatch[1].split('/').pop()?.split('v')[0]
+          const abstractUrl = idMatch[1]
+          const pdfUrl = arxivId ? `https://arxiv.org/pdf/${arxivId}.pdf` : abstractUrl
 
           // Extract authors with CORRECTED regex
           const authors = authorMatches ?
@@ -68,7 +68,8 @@ export async function fetchArxivPapersForCategory(category: string, since: strin
 
           papers.push({
             title: titleMatch[1].replace(/\s+/g, ' ').trim(),
-            url: idMatch[1],
+            url: abstractUrl,
+            pdf_url: pdfUrl,
             doi: arxivId,
             source: 'arXiv',
             published_date: publishedDate,

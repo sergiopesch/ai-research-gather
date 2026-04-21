@@ -53,7 +53,8 @@ const ProcessingHub = () => {
     if (!script || !selectedPaper) return;
     
     try {
-      await createEpisode(selectedPaper, script.title, script);
+      const paperTitle = script.title.replace(/^The Notebook Pod:\s*/, '').trim();
+      await createEpisode(selectedPaper, paperTitle, script);
       toast({
         title: "Episode Saved",
         description: "Episode has been added to your studio library",

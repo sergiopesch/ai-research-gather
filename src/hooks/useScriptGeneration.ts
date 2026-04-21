@@ -17,6 +17,26 @@ export type PodcastScript = {
   createdAt: string;
 };
 
+const DR_ROWAN_VOICE_ID = "9BWtsMINqrJLrRacOk9x";
+const ALEX_VOICE_ID = "TX3LPaxmHKxFdv7VOQHJ";
+
+const normalizeSpeaker = (speaker: string): ScriptSegment["speaker"] => {
+  const normalized = speaker.trim().toLowerCase();
+  return normalized.includes("rowan") ? "DR ROWAN" : "ALEX";
+};
+
+const normalizeSegmentText = (text: string): string =>
+  text.replace(/^(DR ROWAN|ALEX|Dr Rowan Patel|Alex Hughes)\s*:\s*/i, '').trim();
+
+const normalizeScript = (data: PodcastScript): PodcastScript => ({
+  ...data,
+  segments: data.segments.map((segment) => ({
+    ...segment,
+    speaker: normalizeSpeaker(segment.speaker),
+    text: normalizeSegmentText(segment.text),
+  })),
+});
+
 export const useScriptGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [script, setScript] = useState<PodcastScript | null>(null);
@@ -46,11 +66,12 @@ export const useScriptGeneration = () => {
       }
 
       const data = await response.json();
-      setScript(data);
+      const normalizedScript = normalizeScript(data);
+      setScript(normalizedScript);
       
       toast({
         title: "Episode Script Generated",
-        description: `Created ${data.segments.length} conversation segments for your studio`,
+        description: `Created ${normalizedScript.segments.length} conversation segments for your studio`,
       });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate podcast script';
@@ -72,7 +93,7 @@ export const useScriptGeneration = () => {
       segments: script.segments.map((segment, index) => ({
         id: `segment_${index + 1}`,
         speaker: segment.speaker,
-        voice_id: segment.speaker === "DR ROWAN" ? "9BWtsMINqrJLrRacOk9x" : "TX3LPaxmHKxFdv7VOQHJ", // Aria for Dr Rowan, Liam for Alex
+        voice_id: segment.speaker === "DR ROWAN" ? DR_ROWAN_VOICE_ID : ALEX_VOICE_ID,
         text: segment.text,
         settings: {
           stability: 0.5,

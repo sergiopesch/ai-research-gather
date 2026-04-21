@@ -9,6 +9,24 @@ import { categorizePaper } from './categorization.ts'
 import { selectPapersWithAbsolutePerfectDistribution } from './distribution.ts'
 import { generatePaperSummary } from './openai.ts'
 
+function getPaperKey(paper: Paper): string {
+  return (paper.doi || paper.url || paper.title).toLowerCase()
+}
+
+function dedupePapers(papers: Paper[]): Paper[] {
+  const seen = new Set<string>()
+
+  return papers.filter((paper) => {
+    const key = getPaperKey(paper)
+    if (seen.has(key)) {
+      return false
+    }
+
+    seen.add(key)
+    return true
+  })
+}
+
 serve(async (req: Request): Promise<Response> => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -91,13 +109,16 @@ serve(async (req: Request): Promise<Response> => {
         }
       })
       
-      papersByCategory[area] = highConfidencePapers
-      console.log(`📊 ${area}: ${highConfidencePapers.length} relevant papers after filtering`)
+      const dedupedPapers = dedupePapers(highConfidencePapers)
+      papersByCategory[area] = dedupedPapers
+      console.log(`📊 ${area}: ${dedupedPapers.length} relevant papers after filtering`)
     }
     
     // Apply BULLETPROOF distribution algorithm
     console.log(`=== APPLYING BULLETPROOF DISTRIBUTION ===`)
-    const selectedPapers = selectPapersWithAbsolutePerfectDistribution(papersByCategory, areasToSearch, limit)
+    const selectedPapers = dedupePapers(
+      selectPapersWithAbsolutePerfectDistribution(papersByCategory, areasToSearch, limit)
+    )
     
     console.log(`=== SAVING PAPERS TO DATABASE ===`)
     console.log(`Saving ${selectedPapers.length} papers to database`)
@@ -108,14 +129,21 @@ serve(async (req: Request): Promise<Response> => {
         // Check if paper already exists in database
         const { data: existingPaper } = await supabase
           .from('papers')
-          .select('id, title, url, doi, source, published_date')
+          .select('id, title, url, doi, source, published_date, pdf_url')
+          .eq('doi', paper.doi ?? '')
+          .maybeSingle()
+
+        const existingPaperByUrl = existingPaper ? null : await supabase
+          .from('papers')
+          .select('id, title, url, doi, source, published_date, pdf_url')
           .eq('url', paper.url)
           .maybeSingle()
 
         let paperId: string
+        const matchedPaper = existingPaper || existingPaperByUrl.data
         
-        if (existingPaper) {
-          paperId = existingPaper.id
+        if (matchedPaper) {
+          paperId = matchedPaper.id
           console.log(`📄 Paper already exists: ${paper.title.substring(0, 50)}...`)
         } else {
           // Insert new paper
@@ -124,6 +152,7 @@ serve(async (req: Request): Promise<Response> => {
             .insert({
               title: paper.title,
               url: paper.url,
+              pdf_url: paper.pdf_url,
               doi: paper.doi,
               source: paper.source,
               published_date: paper.published_date,

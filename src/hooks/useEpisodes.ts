@@ -59,19 +59,14 @@ export const useEpisodes = () => {
 
   const createEpisode = useCallback(async (paperId: string, paperTitle: string, script: EpisodeScript) => {
     try {
-      const nextNumber = await getNextEpisodeNumber();
-      const { data, error } = await supabase
-        .from('episodes')
-        .insert({
-          episode_number: nextNumber,
-          title: `Episode ${nextNumber}: ${paperTitle}`,
+      const { data, error } = await supabase.functions.invoke('manageEpisodes', {
+        body: {
+          action: 'create',
           paper_id: paperId,
           paper_title: paperTitle,
-          script: script,
-          status: 'GENERATED'
-        })
-        .select()
-        .single();
+          script,
+        }
+      });
 
       if (error) throw error;
       
@@ -101,10 +96,12 @@ export const useEpisodes = () => {
 
   const deleteEpisode = useCallback(async (episodeId: string) => {
     try {
-      const { error } = await supabase
-        .from('episodes')
-        .delete()
-        .eq('id', episodeId);
+      const { error } = await supabase.functions.invoke('manageEpisodes', {
+        body: {
+          action: 'delete',
+          episode_id: episodeId,
+        }
+      });
 
       if (error) throw error;
       

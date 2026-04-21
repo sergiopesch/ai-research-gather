@@ -1,5 +1,9 @@
 import type { Paper } from './types.ts'
 
+function getPaperKey(paper: Paper): string {
+  return (paper.doi || paper.url || paper.title).toLowerCase()
+}
+
 // BULLETPROOF distribution algorithm - GUARANTEED equal distribution
 export function selectPapersWithAbsolutePerfectDistribution(
   papersByCategory: { [key: string]: Paper[] }, 
@@ -15,10 +19,11 @@ export function selectPapersWithAbsolutePerfectDistribution(
   
   const selectedPapers: Paper[] = []
   const distributionLog: { [key: string]: number } = {}
+  const selectedKeys = new Set<string>()
   
   // STEP 1: Get EXACTLY papersPerArea from each selected area
   for (const area of selectedAreas) {
-    const availablePapers = papersByCategory[area] || []
+    const availablePapers = (papersByCategory[area] || []).filter((paper) => !selectedKeys.has(getPaperKey(paper)))
     console.log(`${area}: ${availablePapers.length} papers available`)
     
     if (availablePapers.length === 0) {
@@ -35,6 +40,7 @@ export function selectPapersWithAbsolutePerfectDistribution(
     // Take EXACTLY papersPerArea papers
     const taken = shuffledTopPapers.slice(0, Math.min(papersPerArea, shuffledTopPapers.length))
     selectedPapers.push(...taken)
+    taken.forEach((paper) => selectedKeys.add(getPaperKey(paper)))
     distributionLog[area] = taken.length
     
     console.log(`✅ ${area}: Selected ${taken.length} papers (target: ${papersPerArea})`)
@@ -47,25 +53,32 @@ export function selectPapersWithAbsolutePerfectDistribution(
   let remaining = targetTotal - selectedPapers.length
   if (remaining > 0) {
     console.log(`=== FILLING ${remaining} REMAINING SLOTS ===`)
-    
-    // Try each area again for additional papers
-    for (const area of selectedAreas) {
-      if (remaining <= 0) break
-      
-      const availablePapers = papersByCategory[area] || []
-      const alreadyTaken = distributionLog[area] || 0
-      const remainingInCategory = availablePapers.slice(alreadyTaken)
-      
-      if (remainingInCategory.length > 0) {
-        const shuffled = [...remainingInCategory].sort(() => Math.random() - 0.5)
-        const toTake = Math.min(1, remaining, shuffled.length)
-        const taken = shuffled.slice(0, toTake)
-        
-        selectedPapers.push(...taken)
-        distributionLog[area] = (distributionLog[area] || 0) + taken.length
-        remaining -= taken.length
-        
-        console.log(`${area}: Added ${taken.length} extra papers`)
+
+    while (remaining > 0) {
+      let addedThisPass = 0
+
+      for (const area of selectedAreas) {
+        if (remaining <= 0) break
+
+        const remainingInCategory = (papersByCategory[area] || [])
+          .filter((paper) => !selectedKeys.has(getPaperKey(paper)))
+          .sort((a, b) => b.published_date.localeCompare(a.published_date))
+
+        if (remainingInCategory.length > 0) {
+          const taken = remainingInCategory[0]
+
+          selectedPapers.push(taken)
+          selectedKeys.add(getPaperKey(taken))
+          distributionLog[area] = (distributionLog[area] || 0) + 1
+          remaining -= 1
+          addedThisPass += 1
+
+          console.log(`${area}: Added 1 extra paper`)
+        }
+      }
+
+      if (addedThisPass === 0) {
+        break
       }
     }
   }

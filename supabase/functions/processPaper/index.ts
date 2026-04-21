@@ -35,6 +35,25 @@ function chunkText(text: string, maxTokensPerChunk: number = 2500): string[] {
 
 type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
+function deriveArxivPdfUrl(paper: { pdf_url?: string | null; doi?: string | null; url?: string | null }): string | null {
+  if (paper.pdf_url) {
+    return paper.pdf_url
+  }
+
+  if (paper.doi) {
+    return `https://arxiv.org/pdf/${paper.doi}.pdf`
+  }
+
+  if (paper.url) {
+    const match = paper.url.match(/arxiv\.org\/abs\/([^/?#]+)/i)
+    if (match?.[1]) {
+      return `https://arxiv.org/pdf/${match[1].split('v')[0]}.pdf`
+    }
+  }
+
+  return null
+}
+
 // Function to call OpenAI with retry logic
 async function callOpenAI(
   apiKey: string,
@@ -276,7 +295,7 @@ serve(async (req: Request): Promise<Response> => {
     // Step 1: Download and extract PDF text
     let fullText: string
     try {
-      fullText = await extractPdfText(paper.url)
+      fullText = await extractPdfText(deriveArxivPdfUrl(paper) || paper.url)
     } catch (error) {
       console.error('PDF extraction failed:', error)
       // Fallback to using title and available metadata

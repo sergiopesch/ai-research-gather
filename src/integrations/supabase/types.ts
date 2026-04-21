@@ -93,6 +93,7 @@ export type Database = {
           created_at: string
           doi: string | null
           id: string
+          pdf_url: string | null
           published_date: string
           source: string
           status: Database["public"]["Enums"]["paper_status"]
@@ -104,6 +105,7 @@ export type Database = {
           created_at?: string
           doi?: string | null
           id?: string
+          pdf_url?: string | null
           published_date: string
           source: string
           status?: Database["public"]["Enums"]["paper_status"]
@@ -115,6 +117,7 @@ export type Database = {
           created_at?: string
           doi?: string | null
           id?: string
+          pdf_url?: string | null
           published_date?: string
           source?: string
           status?: Database["public"]["Enums"]["paper_status"]

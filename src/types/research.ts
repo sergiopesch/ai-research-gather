@@ -2,6 +2,7 @@ export interface Paper {
   id: string;
   title: string;
   url: string;
+  pdf_url?: string;
   doi?: string;
   source: string;
   published_date: string;

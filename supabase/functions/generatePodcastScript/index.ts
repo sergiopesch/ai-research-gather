@@ -13,6 +13,13 @@ const corsHeaders = {
 }
 
 type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
+type ScriptSpeaker = 'DR ROWAN' | 'ALEX';
+
+function normalizeGeneratedSegmentText(text: string): string {
+  return text
+    .replace(/^(DR ROWAN|ALEX|Dr Rowan Patel|Alex Hughes)\s*:\s*/i, '')
+    .trim()
+}
 
 // Enhanced OpenAI API call with retry logic
 async function callOpenAI(apiKey: string, messages: ChatMessage[], retryCount = 0): Promise<string> {
@@ -62,52 +69,52 @@ async function generateConversationSegments(paperTitle: string, openAIApiKey: st
   const segments = []
   const conversationFlow = [
     {
-      speaker: "Dr Rowan Patel",
+      speaker: "DR ROWAN" as ScriptSpeaker,
       prompt: `You are opening the podcast episode. Start with: "Hello and welcome to The Notebook Pod, Episode 1. I'm Dr Rowan Patel and with me is Alex Hughes. Today we're exploring '${paperTitle}' – [provide a one-line abstract in 40 words or less]." Keep it warm and welcoming, under 60 words total.`,
       systemPrompt: `You are Dr Rowan Patel, senior researcher, witty but humble. Mission: Translate every technical claim into everyday language, pre-empt likely confusions, offer one limitation or open question. Style: Short sentences, vivid analogies, inclusive "we/us". End each turn with a question to Alex. Use labelled turns: "DR ROWAN: <content>" and end with a mic-pass question.`
     },
     {
-      speaker: "Alex Hughes", 
+      speaker: "ALEX" as ScriptSpeaker,
       prompt: `Respond to Dr Rowan's intro with enthusiasm about "${paperTitle}". Say something like "Can't wait!" and show genuine curiosity about what makes this research exciting. Keep it under 60 words and bounce back enthusiastically.`,
       systemPrompt: `You are Alex Hughes, smart, inquisitive, representing the everyday listener. Mission: Ask questions a newcomer would ask, recap in plain English, light humour with British charm. Style: Active listening, tasteful humour, ≤120 words per turn. End each turn with a bounce-back question. Use labelled turns: "ALEX: <content>" and end with a bounce-back.`
     },
     {
-      speaker: "Dr Rowan Patel",
+      speaker: "DR ROWAN" as ScriptSpeaker,
       prompt: `Create a 90-second hook for "${paperTitle}". Start with a vivid image or anecdote, then explain why this research matters. Use concrete metaphors and everyday numbers. Keep it under 120 words and end with a natural hand-off question to Alex.`,
       systemPrompt: `You are Dr Rowan Patel, senior researcher, witty but humble. Mission: Translate every technical claim into everyday language, pre-empt likely confusions, offer one limitation or open question. Style: Short sentences, vivid analogies, inclusive "we/us". End each turn with a question to Alex. Use labelled turns: "DR ROWAN: <content>" and end with a mic-pass question.`
     },
     {
-      speaker: "Alex Hughes",
+      speaker: "ALEX" as ScriptSpeaker,
       prompt: `Respond to Dr Rowan's hook about "${paperTitle}". Ask the questions someone new to the topic would really ask. Reflect aloud, check understanding, admit curiosity. Keep it under 120 words and bounce back to Rowan.`,
       systemPrompt: `You are Alex Hughes, smart, inquisitive, representing the everyday listener. Mission: Ask questions a newcomer would ask, recap in plain English, light humour with British charm. Style: Active listening, tasteful humour, ≤120 words per turn. End each turn with a bounce-back question. Use labelled turns: "ALEX: <content>" and end with a bounce-back.`
     },
     {
-      speaker: "Dr Rowan Patel",
+      speaker: "DR ROWAN" as ScriptSpeaker,
       prompt: `Explain the problem and method from "${paperTitle}". Break it into digestible chunks, use concrete metaphors, define any jargon in plain English. Anticipate questions and pre-empt confusion. Keep under 120 words, hand off to Alex naturally.`,
       systemPrompt: `You are Dr Rowan Patel, senior researcher, witty but humble. Mission: Translate every technical claim into everyday language, pre-empt likely confusions, offer one limitation or open question. Style: Short sentences, vivid analogies, inclusive "we/us". End each turn with a question to Alex. Use labelled turns: "DR ROWAN: <content>" and end with a mic-pass question.`
     },
     {
-      speaker: "Alex Hughes",
+      speaker: "ALEX" as ScriptSpeaker,
       prompt: `Recap Dr Rowan's explanation in one sentence ("So basically...?"). Ask follow-up questions about the method, probe for clarity. Keep under 120 words and bounce back.`,
       systemPrompt: `You are Alex Hughes, smart, inquisitive, representing the everyday listener. Mission: Ask questions a newcomer would ask, recap in plain English, light humour with British charm. Style: Active listening, tasteful humour, ≤120 words per turn. End each turn with a bounce-back question. Use labelled turns: "ALEX: <content>" and end with a bounce-back.`
     },
     {
-      speaker: "Dr Rowan Patel", 
+      speaker: "DR ROWAN" as ScriptSpeaker,
       prompt: `Explain the results and why they matter from "${paperTitle}". Use tangible examples, mention at least one limitation or open question. Connect to daily life. Under 120 words, natural hand-off.`,
       systemPrompt: `You are Dr Rowan Patel, senior researcher, witty but humble. Mission: Translate every technical claim into everyday language, pre-empt likely confusions, offer one limitation or open question. Style: Short sentences, vivid analogies, inclusive "we/us". End each turn with a question to Alex. Use labelled turns: "DR ROWAN: <content>" and end with a mic-pass question.`
     },
     {
-      speaker: "Alex Hughes",
+      speaker: "ALEX" as ScriptSpeaker,
       prompt: `Rapid-fire Q&A about "${paperTitle}". Ask about real-world impact, bust a myth, or connect to pop culture. Keep energy high, under 120 words and bounce back.`,
       systemPrompt: `You are Alex Hughes, smart, inquisitive, representing the everyday listener. Mission: Ask questions a newcomer would ask, recap in plain English, light humour with British charm. Style: Active listening, tasteful humour, ≤120 words per turn. End each turn with a bounce-back question. Use labelled turns: "ALEX: <content>" and end with a bounce-back.`
     },
     {
-      speaker: "Dr Rowan Patel",
+      speaker: "DR ROWAN" as ScriptSpeaker,
       prompt: `Provide take-home summary in 3 crisp bullet points for "${paperTitle}". Include one actionable suggestion for listeners. End with "Alex, bring us home." Keep under 120 words.`,
       systemPrompt: `You are Dr Rowan Patel, senior researcher, witty but humble. Mission: Translate every technical claim into everyday language, pre-empt likely confusions, offer one limitation or open question. Style: Short sentences, vivid analogies, inclusive "we/us". Required: Deliver the take-home summary and end with "Alex, bring us home." Use labelled turns: "DR ROWAN: <content>".`
     },
     {
-      speaker: "Alex Hughes",
+      speaker: "ALEX" as ScriptSpeaker,
       prompt: `Close the episode with the required sign-off: "That wraps up Episode 1 of The Notebook Pod. Thanks for listening – and don't forget to tune in next time!" Keep it warm and engaging.`,
       systemPrompt: `You are Alex Hughes, smart, inquisitive, representing the everyday listener. Required Beats: End with the exact sign-off "That wraps up Episode 1 of The Notebook Pod. Thanks for listening – and don't forget to tune in next time!" This should be your final words of the episode. Use labelled turns: "ALEX: <content>".`
     }
@@ -128,7 +135,7 @@ async function generateConversationSegments(paperTitle: string, openAIApiKey: st
       
       segments.push({
         speaker: segment.speaker,
-        text: text.trim(),
+        text: normalizeGeneratedSegmentText(text),
         duration: Math.floor(text.length / 10) // Rough estimate: 10 chars per second
       })
       
@@ -138,7 +145,7 @@ async function generateConversationSegments(paperTitle: string, openAIApiKey: st
       console.error(`Failed to generate segment ${i + 1}:`, error)
       
       // Fallback content
-      const fallback = segment.speaker === "Dr Rowan Patel" 
+      const fallback = segment.speaker === "DR ROWAN"
         ? `Thank you for joining us on The Notebook Pod. Today we're discussing "${paperTitle}", which presents fascinating insights into cutting-edge research. This work demonstrates innovative approaches that could significantly impact the field.`
         : `That's really interesting, Rowan! Can you tell our listeners more about the practical applications of this research and what makes it particularly groundbreaking?`
       
