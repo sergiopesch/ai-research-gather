@@ -11,6 +11,16 @@ This version intentionally removes Supabase and all database persistence.
 - Script generation happens on demand through a local Node API.
 - Nothing is stored. Download the generated script if you want to keep it.
 
+## Screenshots
+
+### Home
+
+![Home screen](docs/screenshots/home.png)
+
+### Processing Studio
+
+![Processing studio empty state](docs/screenshots/processing-empty.png)
+
 ## Stack
 
 - Frontend: React 18, TypeScript, Vite, TanStack Query
