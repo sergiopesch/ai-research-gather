@@ -3,13 +3,18 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "concurrently -k \"tsx watch server/index.ts\" \"vite\"",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "check": "npm run lint && npm run build",
     "lint": "eslint .",
     "preview": "npm run build && tsx server/index.ts",
-    "start": "tsx server/index.ts"
+    "start": "tsx server/index.ts",
+    "healthcheck": "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 3001) + '/api/health').then(r=>r.text()).then(t=>{console.log(t);process.exit(0)}).catch(e=>{console.error(e.message);process.exit(1)})\""
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.1",
@@ -22,6 +27,7 @@
     "@tanstack/react-query": "^5.56.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "lucide-react": "^0.462.0",
     "react": "^18.3.1",

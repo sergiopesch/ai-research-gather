@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,6 +8,7 @@ import { generatePodcastScript } from "./openai";
 import { searchPapers } from "./research";
 
 const app = express();
+const host = process.env.HOST || "127.0.0.1";
 const port = Number(process.env.PORT || 3001);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distPath = path.resolve(__dirname, "../dist");
@@ -77,6 +79,6 @@ if (existsSync(distPath)) {
   });
 }
 
-app.listen(port, () => {
-  console.log(`API server listening on http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`API server listening on http://${host}:${port}`);
 });

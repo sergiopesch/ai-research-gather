@@ -30,11 +30,20 @@ A React + TypeScript frontend with a small Express API that:
 ## Development
 
 ```bash
-OPENAI_API_KEY=your_key_here npm run dev
+cp .env.example .env
+# set OPENAI_API_KEY
+npm run dev
 ```
 
 Frontend: `http://localhost:8080`
 API: `http://localhost:3001`
+
+## Operational Notes
+
+- Node 20+ is required.
+- The server loads environment variables from `.env`.
+- `npm run check` runs the expected pre-push validation for this repo.
+- `npm run healthcheck` verifies the local API is responding on `/api/health`.
 
 ## Common Tasks
 

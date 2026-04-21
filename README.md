@@ -22,7 +22,9 @@ This version intentionally removes Supabase and all database persistence.
 
 ```bash
 npm install
-OPENAI_API_KEY=your_openai_api_key npm run dev
+cp .env.example .env
+# fill in OPENAI_API_KEY
+npm run dev
 ```
 
 Frontend: `http://localhost:8080`
@@ -35,17 +37,49 @@ npm run dev
 npm run build
 npm run preview
 npm run lint
+npm run check
+npm run healthcheck
 ```
 
 ## Environment
 
 ```env
+HOST=127.0.0.1
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4.1-mini
 PORT=3001
 ```
 
 Only `OPENAI_API_KEY` is required.
+
+## Local Operations
+
+- `npm run dev` starts both the Vite frontend and the local API server.
+- `npm run preview` builds the frontend and serves the built app through the API server.
+- `npm run healthcheck` hits `GET /api/health` on the configured local port.
+- The frontend proxies `/api/*` requests to the local server during development.
+
+## Deployment Notes
+
+This repo is optimized for lightweight POC hosting, not a full production platform.
+
+- Build the frontend with `npm run build`.
+- Run the server with `npm run start`.
+- Set `OPENAI_API_KEY` in the runtime environment.
+- Serve the repository as a single Node process. The Express server will serve `dist/` automatically after a build.
+
+Good fits:
+- Railway
+- Render
+- Fly.io
+- A small VPS with Node 20+
+
+Not included on purpose:
+- Docker
+- CI/CD workflows
+- database migrations
+- background workers
+- secrets management beyond env vars
 
 ## Project Structure
 
@@ -70,6 +104,14 @@ server/
 - No episode library
 - No background jobs
 - No database
+
+## Health Endpoint
+
+`GET /api/health` returns:
+
+```json
+{"ok":true}
+```
 
 ## License
 

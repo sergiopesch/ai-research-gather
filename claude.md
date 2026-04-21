@@ -9,6 +9,7 @@ npm install    # Install dependencies
 npm run dev    # Frontend on http://localhost:8080, API on http://localhost:3001
 npm run build  # Production build
 npm run lint   # ESLint check
+npm run check  # Lint + production build
 ```
 
 ## Architecture
@@ -49,7 +50,10 @@ PaperCard -> usePaperActions -> ProcessingHub -> /api/generate-script -> OpenAI
 
 ## Environment Variables
 
+- `HOST` - Optional, defaults to `127.0.0.1`
 - `OPENAI_API_KEY` - Required
+- `OPENAI_MODEL` - Optional model override
+- `PORT` - Optional, defaults to `3001`
 
 ## Podcast Characters
 
@@ -64,6 +68,9 @@ Also update `server/research.ts`
 
 ### Modify Podcast Format
 Edit `server/openai.ts`
+
+### Local Health Check
+Run `npm run healthcheck`
 
 ### Change Voice Settings
 Edit `src/hooks/useScriptGeneration.ts`
