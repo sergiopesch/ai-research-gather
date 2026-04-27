@@ -1,0 +1,82 @@
+[
+  {
+    "id": "ai-retrieval-001",
+    "title": "Grounded Retrieval Planning for Long-Context Question Answering",
+    "summary": "The paper studies how language models answer multi-step questions when relevant evidence is spread across long documents. It proposes a retrieval planning method that first decomposes the question into evidence needs, then retrieves passages for each need before generating an answer. Evaluation on long-context question answering benchmarks focuses on answer faithfulness, citation coverage, and failure modes when retrieved passages conflict.",
+    "authors": ["Mina Park", "Owen Hart", "Leila Mensah"],
+    "published_date": "2025-02-14",
+    "source": "arXiv",
+    "expected_topics": ["retrieval planning", "long-context question answering", "answer faithfulness", "citation coverage", "retrieved passages conflict"],
+    "forbidden_claims": ["human-level reasoning", "100 percent accuracy", "clinical deployment", "ImageNet", "Stanford University"]
+  },
+  {
+    "id": "robotics-contact-002",
+    "title": "Tactile Residual Policies for Contact-Rich Robot Assembly",
+    "summary": "This work addresses robot assembly tasks where small pose errors can cause jamming or failed insertion. The authors combine a vision-based nominal policy with a tactile residual controller that reacts to contact patterns during the final insertion phase. Experiments in a tabletop assembly setting compare success rate, recovery behavior, and sensitivity to object tolerances, while noting that results are limited to controlled fixtures.",
+    "authors": ["Rafael Kim", "Anika Bose"],
+    "published_date": "2024-11-03",
+    "source": "RSS Workshop",
+    "expected_topics": ["tactile residual controller", "contact-rich robot assembly", "vision-based nominal policy", "controlled fixtures", "object tolerances"],
+    "forbidden_claims": ["warehouse deployment", "fully autonomous factory", "surgical robot", "million trial dataset", "Boston Dynamics"]
+  },
+  {
+    "id": "healthcare-triage-003",
+    "title": "Uncertainty-Aware Summaries for Emergency Department Triage Notes",
+    "summary": "The study evaluates a clinical language model that summarizes triage notes while attaching uncertainty markers to symptoms, history, and recommended follow-up questions. The system is designed to support clinician review rather than automated diagnosis. A retrospective evaluation uses de-identified emergency department notes and measures omitted critical details, unsupported additions, and clinician-rated usefulness, with limitations around single-site data.",
+    "authors": ["Sara Iqbal", "Jonas Meyer", "Priya Nair"],
+    "published_date": "2025-01-22",
+    "source": "medRxiv",
+    "expected_topics": ["uncertainty markers", "triage notes", "clinician review", "unsupported additions", "single-site data"],
+    "forbidden_claims": ["FDA approved", "replaces clinicians", "prospective randomized trial", "zero missed cases", "commercial diagnostic system"]
+  },
+  {
+    "id": "education-feedback-004",
+    "title": "Worked-Example Feedback for Algebra Tutors Using Error-State Models",
+    "summary": "The paper explores an AI tutoring approach for introductory algebra that maps student mistakes to latent error states and selects worked examples as feedback. A classroom pilot compares example-based feedback with generic hints, measuring revision attempts, time on task, and short post-test performance. The authors caution that the pilot is small and cannot isolate long-term learning effects.",
+    "authors": ["Elena Rossi", "Marcus Chen"],
+    "published_date": "2024-09-18",
+    "source": "ACM Learning at Scale",
+    "expected_topics": ["AI tutoring", "latent error states", "worked examples", "classroom pilot", "long-term learning effects"],
+    "forbidden_claims": ["nationwide rollout", "guaranteed learning gains", "replaces teachers", "college admissions", "large randomized controlled trial"]
+  },
+  {
+    "id": "hardware-sensor-005",
+    "title": "Event-Driven Analog Front Ends for Low-Power Wearable Sensing",
+    "summary": "This hardware paper presents an event-driven analog front end for wearable physiological sensors that wakes downstream digital processing only when signal changes exceed adaptive thresholds. Measurements from a prototype board report power behavior, noise tradeoffs, and latency under synthetic and bench-top biosignal inputs. The authors emphasize that the prototype is not a finished medical device and needs validation with real-world motion artifacts.",
+    "authors": ["Noah Stein", "Aditi Rao", "Felix Grant"],
+    "published_date": "2025-03-07",
+    "source": "IEEE Sensors Letters",
+    "expected_topics": ["event-driven analog front end", "wearable physiological sensors", "adaptive thresholds", "power behavior", "motion artifacts"],
+    "forbidden_claims": ["clinical trial", "Bluetooth standard", "mass production", "noiseless sensor", "FDA cleared wearable"]
+  },
+  {
+    "id": "benchmark-agents-006",
+    "title": "PatchBench-Lite: A Small Benchmark for Evaluating Code-Editing Agents",
+    "summary": "The benchmark introduces a compact suite of code-editing tasks drawn from real bug fixes in small open-source projects. Each task includes tests, a natural-language issue description, and metadata about changed files. The paper evaluates agent performance using pass rate, patch size, and regression tests, and discusses limitations from benchmark leakage, task diversity, and overfitting to public repositories.",
+    "authors": ["Hannah Volk", "Diego Alvarez"],
+    "published_date": "2024-12-12",
+    "source": "arXiv",
+    "expected_topics": ["code-editing agents", "real bug fixes", "pass rate", "regression tests", "benchmark leakage"],
+    "forbidden_claims": ["all programming languages", "production-ready agents", "private enterprise code", "10 million tasks", "security certification"]
+  },
+  {
+    "id": "ai-safety-eval-007",
+    "title": "Counterfactual Refusal Tests for Measuring Policy Robustness in Chat Models",
+    "summary": "The authors propose an evaluation protocol that rewrites safety-sensitive prompts into counterfactual variants while preserving the underlying user intent. The goal is to measure whether chat models apply policy boundaries consistently across wording, role framing, and contextual distractions. Results are reported as refusal consistency, helpful alternative rate, and explanation quality, with a warning that automated prompt generation may miss realistic adversarial behavior.",
+    "authors": ["Nadia Bell", "Ibrahim Saleh", "Tessa Wong"],
+    "published_date": "2025-04-01",
+    "source": "arXiv",
+    "expected_topics": ["counterfactual variants", "policy robustness", "refusal consistency", "helpful alternative rate", "adversarial behavior"],
+    "forbidden_claims": ["perfect safety", "jailbreak-proof", "government certification", "user surveillance", "model weights released"]
+  },
+  {
+    "id": "robotics-education-008",
+    "title": "Embodied Debugging Exercises for Teaching Robot Perception Failures",
+    "summary": "This education and robotics paper describes lab exercises where students diagnose perception failures in a mobile robot using logs, camera snapshots, and controlled environment changes. The intervention aims to teach the gap between model accuracy and system reliability. A mixed-method evaluation combines quiz results, student reflections, and instructor observations, but the authors note that the course context and robot platform limit generalization.",
+    "authors": ["Grace Liu", "Thomas Becker"],
+    "published_date": "2024-10-27",
+    "source": "IEEE Frontiers in Education",
+    "expected_topics": ["robot perception failures", "mobile robot", "model accuracy", "system reliability", "mixed-method evaluation"],
+    "forbidden_claims": ["industrial deployment", "autonomous vehicles", "perfect perception", "national curriculum", "thousands of students"]
+  }
+]

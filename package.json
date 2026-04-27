@@ -12,6 +12,7 @@
     "build:dev": "vite build --mode development",
     "typecheck:server": "tsc -p tsconfig.server.json",
     "check": "npm run lint && npm run typecheck:server && npm run build",
+    "eval:scripts": "tsx evals/run-script-eval.ts",
     "lint": "eslint .",
     "preview": "npm run build && tsx server/index.ts",
     "start": "tsx server/index.ts",
