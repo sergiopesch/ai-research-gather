@@ -4,7 +4,7 @@ A small proof of concept for browsing recent arXiv papers and turning one select
 
 ## Architecture
 
-This version intentionally removes Supabase and all database persistence.
+This version intentionally has no database persistence.
 
 - Paper discovery is fetched live from arXiv.
 - Search results use the paper abstract directly.
