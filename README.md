@@ -19,6 +19,10 @@ This version intentionally has no database persistence.
 - Script generation happens on demand through a local Node API and the OpenAI Responses API.
 - Nothing is stored. Download the generated script if you want to keep it.
 
+## Project View
+
+![Project view](docs/screenshots/project-view.png)
+
 ## Screenshots
 
 ### Home
