@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
-import type { Paper, PodcastScript, ScriptSegment } from "./types.js";
+import type { Paper, PodcastScript, ScriptModel, ScriptSegment, ScriptSpeakerConfig, ScriptSpeakerId } from "./types.js";
+
+export type { PodcastScript };
 
 export interface ResearchPaperInput {
   id: string;
@@ -11,31 +13,99 @@ export interface ResearchPaperInput {
 }
 
 type ChatMessage = {
-  role: "system" | "user" | "assistant";
+  role: "user" | "assistant";
   content: string;
 };
 
-type OpenAIChatCompletionResponse = {
-  choices?: Array<{
-    message?: {
-      content?: string;
-    };
+type OpenAIResponse = {
+  output_text?: string;
+  output?: Array<{
+    type?: string;
+    content?: Array<{
+      type?: string;
+      text?: string;
+    }>;
   }>;
 };
 
-type OpenAIScriptPayload = {
-  title?: string;
+type OpenAIJsonPayload = {
+  text?: string;
   segments?: Array<{
     speaker?: string;
     text?: string;
   }>;
 };
 
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-const SCRIPT_MODEL = process.env.OPENAI_SCRIPT_MODEL || process.env.OPENAI_MODEL || "gpt-4.1-mini";
-const SCRIPT_TEMPERATURE = Number.parseFloat(process.env.OPENAI_SCRIPT_TEMPERATURE ?? "0.35");
-const SCRIPT_MAX_TOKENS = Number.parseInt(process.env.OPENAI_SCRIPT_MAX_TOKENS ?? "1200", 10);
-const SPEAKERS = ["DR ROWAN", "ALEX"] as const;
+type SpeakerRole = {
+  position: number;
+  style: string;
+};
+
+export const SCRIPT_MODELS = ["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5-mini", "gpt-5-nano"] as const satisfies readonly ScriptModel[];
+export const DEFAULT_SCRIPT_MODEL: ScriptModel = "gpt-5.5";
+
+const DEFAULT_SPEAKERS: ScriptSpeakerConfig[] = [
+  { id: "speaker_1", name: "DR ROWAN", model: DEFAULT_SCRIPT_MODEL },
+  { id: "speaker_2", name: "ALEX", model: "gpt-5.4-mini" },
+];
+
+const OPENAI_API_URL = "https://api.openai.com/v1/responses";
+const FALLBACK_SCRIPT_MODEL = process.env.OPENAI_SCRIPT_MODEL || process.env.OPENAI_MODEL || DEFAULT_SCRIPT_MODEL;
+const SCRIPT_MAX_TOKENS = Number.parseInt(process.env.OPENAI_SCRIPT_MAX_TOKENS ?? "1600", 10);
+const SCRIPT_TURN_MAX_TOKENS = Number.parseInt(process.env.OPENAI_SCRIPT_TURN_MAX_TOKENS ?? "1200", 10);
+const SPEAKER_IDS = ["speaker_1", "speaker_2"] as const satisfies readonly ScriptSpeakerId[];
+
+const TURN_PLAN = [
+  "Set up the paper, name the problem, and ask a short clarifying question.",
+  'Answer the setup, include "Let me make sure I understand", and identify the contribution.',
+  "Explain the method from the abstract and connect it to the previous turn.",
+  "Pressure-test the method, ask what evidence or evaluation would matter, and keep it grounded.",
+  "Name a limitation from the source text or say the summary does not specify it.",
+  "Clarify the limitation, mention what a listener should check before trusting the claim.",
+  "Summarize how the problem, method, and contribution fit together.",
+  "Close with one concise shared takeaway and do not introduce a new topic.",
+] as const;
+
+const REQUIRED_TERMS_BY_TURN = [
+  "problem",
+  "contribution",
+  "method",
+  "evaluation",
+  "limitation",
+  "evidence",
+  "contribution",
+  "takeaway",
+] as const;
+
+export function isScriptModel(value: string): value is ScriptModel {
+  return SCRIPT_MODELS.includes(value as ScriptModel);
+}
+
+function resolveScriptModel(model?: string): ScriptModel {
+  if (model && isScriptModel(model)) {
+    return model;
+  }
+
+  return isScriptModel(FALLBACK_SCRIPT_MODEL) ? FALLBACK_SCRIPT_MODEL : DEFAULT_SCRIPT_MODEL;
+}
+
+function normalizeSpeakerName(name: string, fallback: string): string {
+  const normalized = name.replace(/\s+/g, " ").trim();
+  return normalized.length > 0 ? normalized.slice(0, 40) : fallback;
+}
+
+function resolveSpeakerConfigs(speakers?: ScriptSpeakerConfig[], legacyModel?: ScriptModel): ScriptSpeakerConfig[] {
+  const fallbackModel = resolveScriptModel(legacyModel);
+
+  return DEFAULT_SPEAKERS.map((defaultSpeaker, index) => {
+    const provided = speakers?.[index];
+    return {
+      id: SPEAKER_IDS[index],
+      name: normalizeSpeakerName(provided?.name ?? defaultSpeaker.name, defaultSpeaker.name),
+      model: resolveScriptModel(provided?.model ?? legacyModel ?? defaultSpeaker.model ?? fallbackModel),
+    };
+  });
+}
 
 function estimateDurationSeconds(text: string): number {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
@@ -48,16 +118,23 @@ function formatDuration(totalSeconds: number): string {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-function normalizeSegmentText(text: string): string {
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeSegmentText(text: string, speakers: ScriptSpeakerConfig[]): string {
+  const speakerPattern = speakers.map((speaker) => escapeRegExp(speaker.name)).join("|");
+  const labelPattern = speakerPattern.length > 0 ? `(?:${speakerPattern}|DR\\s+ROWAN|ALEX|Rowan|Alex)` : "(?:DR\\s+ROWAN|ALEX)";
+
   return text
-    .replace(/^\s*(DR\s+ROWAN|Dr\.?\s+Rowan(?:\s+Patel)?|Rowan|ALEX|Alex(?:\s+Hughes)?):\s*/i, "")
+    .replace(new RegExp(`^\\s*${labelPattern}:\\s*`, "i"), "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function parseJsonObject(raw: string): OpenAIScriptPayload {
+function parseJsonObject(raw: string): OpenAIJsonPayload {
   try {
-    return JSON.parse(raw) as OpenAIScriptPayload;
+    return JSON.parse(raw) as OpenAIJsonPayload;
   } catch {
     const start = raw.indexOf("{");
     const end = raw.lastIndexOf("}");
@@ -65,7 +142,7 @@ function parseJsonObject(raw: string): OpenAIScriptPayload {
       throw new Error("OpenAI response was not valid JSON.");
     }
 
-    return JSON.parse(raw.slice(start, end + 1)) as OpenAIScriptPayload;
+    return JSON.parse(raw.slice(start, end + 1)) as OpenAIJsonPayload;
   }
 }
 
@@ -80,11 +157,18 @@ function toResearchPaperInput(paper: Paper | ResearchPaperInput): ResearchPaperI
   };
 }
 
-function buildScript(paper: ResearchPaperInput, segments: Array<{ speaker?: string; text?: string }>): PodcastScript {
+function buildScript(
+  paper: ResearchPaperInput,
+  speakers: ScriptSpeakerConfig[],
+  segments: Array<{ speaker?: string; text?: string }>
+): PodcastScript {
   const normalizedSegments: ScriptSegment[] = segments.map((segment, index) => {
-    const text = normalizeSegmentText(segment.text || "");
+    const speaker = speakers[index % speakers.length];
+    const text = normalizeSegmentText(segment.text || "", speakers);
     return {
-      speaker: SPEAKERS[index % SPEAKERS.length],
+      speaker: speaker.name,
+      speakerId: speaker.id,
+      speakerModel: speaker.model,
       text,
       duration: estimateDurationSeconds(text),
     };
@@ -99,85 +183,118 @@ function buildScript(paper: ResearchPaperInput, segments: Array<{ speaker?: stri
   return {
     id: paper.id,
     title: `The Notebook Pod: ${paper.title}`,
+    model: speakers[0].model,
+    speakers,
     segments: normalizedSegments,
     totalDuration: formatDuration(totalSeconds),
     createdAt: new Date().toISOString(),
   };
 }
 
-function buildGroundedPrompt(paper: ResearchPaperInput): ChatMessage[] {
-  return [
+function buildPaperJson(paper: ResearchPaperInput): string {
+  return JSON.stringify(
     {
-      role: "system",
-      content: `You create compact, grounded podcast dialogue that sounds like two intelligent agents discussing a paper in real time.
+      title: paper.title,
+      summary: paper.summary,
+      authors: paper.authors,
+      published_date: paper.published_date,
+      source: paper.source,
+    },
+    null,
+    2,
+  );
+}
+
+function buildTurnInstructions(
+  speakers: ScriptSpeakerConfig[],
+  currentSpeaker: ScriptSpeakerConfig,
+  turnIndex: number,
+): string {
+  const otherSpeaker = speakers.find((speaker) => speaker.id !== currentSpeaker.id) ?? speakers[0];
+  const role: SpeakerRole =
+    currentSpeaker.id === "speaker_1"
+      ? { position: 1, style: "precise, explanatory, careful about what the abstract actually says" }
+      : { position: 2, style: "curious, direct, pressure-testing, focused on listener understanding" };
+
+  return `You are ${currentSpeaker.name}, speaker ${role.position} in a two-person research podcast.
+
+The other speaker is ${otherSpeaker.name}.
+Your style is ${role.style}.
 
 Evidence boundary:
 - Use only title, summary, authors, published_date, and source.
 - Do not invent benchmarks, datasets, institutions, quotes, numeric results, deployments, author affiliations, or claims absent from those fields.
-- Preserve paper-specific technical phrases from the title and summary when natural.
-- Cover every named method, task, metric, benchmark/evaluation concept, limitation, and application area from the title or summary at least once.
-- Do not sacrifice paper-specific coverage for conversational style.
-- If the abstract is thin, say what is not specified. Do not fill gaps.
+- If the abstract is thin, say what is not specified.
+- Preserve paper-specific technical phrases when natural.
 
-Conversation style:
-- Make it feel live: short reactions, clarifying questions, and natural handoffs.
-- DR ROWAN is precise and explanatory. ALEX pressure-tests, asks the listener's question, and checks understanding.
-- Include at least two clarifying questions.
-- Include exactly one ALEX turn with "Let me make sure I understand".
-- Every turn after the first must explicitly reference one of: the previous segment's question, a phrase from the previous segment, or the previous segment's main idea.
-- At least five turns after the first must start with a short natural bridge of 3 to 8 words, then add new information.
-- Allowed bridge styles include "Exactly, and the key point is", "Right, but the caveat is", "That connects to the method", "So the practical takeaway is", "Let me make sure I understand", and "Good question, the abstract says".
-- Use adjacent-turn bridge moves naturally: answer the previous question, challenge or clarify the previous point, summarise and pass, or connect "what this means" to the next point.
-- After a bridge, name the referenced idea briefly instead of using a generic transition alone.
-- Use short handoff questions when useful, but do not force every turn to end with a question.
-- Vary bridge phrasing. Do not repeat the same bridge phrase or stock phrases such as "does that distinction hold" or "what would you check next".
-- Keep handoffs short and purposeful. Do not add fake banter, compliments, or filler.
-- Avoid essay paragraphs split between speakers.
-- Avoid generic hype such as groundbreaking, cutting-edge, fascinating, game-changing, or rapidly evolving.
-- Avoid fake certainty. Use "the abstract says", "the summary does not specify", or "we should be careful" where appropriate.
+Conversation rules:
+- Write exactly one turn for ${currentSpeaker.name}.
+- Do not include speaker labels inside text.
+- The turn must sound like a live answer, clarification, handoff, or concise challenge.
+- Reference the previous turn directly when one exists.
+- Avoid fake banter, stage directions, markdown, and generic hype.
+- Use TTS-ready spoken language.
 
-Hard rules:
-- Strict JSON only.
-- No markdown.
-- No speaker labels inside text.
-- No stage directions.
-- TTS-ready spoken language only.
+Turn task:
+- This is turn ${turnIndex + 1} of 8.
+- ${TURN_PLAN[turnIndex]}
+- Include the word ${REQUIRED_TERMS_BY_TURN[turnIndex]} naturally.
+- Keep it between 24 and 58 words.
 
-Return exactly this JSON shape:
-{
-  "segments": [
-    { "speaker": "DR ROWAN", "text": "..." },
-    { "speaker": "ALEX", "text": "..." }
-  ]
+Hard output rule:
+- Return strict JSON only.
+- Return exactly this JSON shape: { "text": "..." }`;
 }
 
-Requirements:
-- Exactly 8 segments.
-- Speakers must alternate, starting with DR ROWAN.
-- Each segment should be 24 to 58 words.
-- Include the words problem, method, contribution, limitation, and takeaway naturally across the dialogue.
-- If the source text mentions "classroom pilot", include that exact phrase.
-- At least four transitions should clearly answer, clarify, summarise, or hand over from the previous turn.
-- Keep the final turn as a concise shared takeaway, not a new topic.`,
-    },
+function buildTurnInput(
+  paper: ResearchPaperInput,
+  speakers: ScriptSpeakerConfig[],
+  history: ScriptSegment[],
+): ChatMessage[] {
+  return [
     {
       role: "user",
-      content: JSON.stringify(
-        {
-          title: paper.title,
-          summary: paper.summary,
-          authors: paper.authors,
-          published_date: paper.published_date,
-          source: paper.source,
-        },
-        null,
-        2,
-      ),
+      content: `Return JSON for the next dialogue turn.
+
+Paper:
+${buildPaperJson(paper)}
+
+Speakers:
+${JSON.stringify(
+  speakers.map((speaker) => ({ id: speaker.id, name: speaker.name, model: speaker.model })),
+  null,
+  2,
+)}
+
+Conversation so far:
+${history.length > 0 ? history.map((segment) => `${segment.speaker}: ${segment.text}`).join("\n") : "No turns yet."}`,
     },
   ];
 }
 
-async function callOpenAI(messages: ChatMessage[], apiKey = process.env.OPENAI_API_KEY): Promise<string> {
+function extractResponseText(data: OpenAIResponse): string | undefined {
+  if (data.output_text) {
+    return data.output_text;
+  }
+
+  for (const item of data.output || []) {
+    for (const content of item.content || []) {
+      if (content.text) {
+        return content.text;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+async function callOpenAI(
+  messages: ChatMessage[],
+  model: ScriptModel,
+  instructions: string,
+  maxOutputTokens = SCRIPT_MAX_TOKENS,
+  apiKey = process.env.OPENAI_API_KEY
+): Promise<string> {
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
@@ -189,11 +306,12 @@ async function callOpenAI(messages: ChatMessage[], apiKey = process.env.OPENAI_A
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: SCRIPT_MODEL,
-      messages,
-      temperature: Number.isFinite(SCRIPT_TEMPERATURE) ? SCRIPT_TEMPERATURE : 0.35,
-      max_tokens: Number.isFinite(SCRIPT_MAX_TOKENS) ? SCRIPT_MAX_TOKENS : 1200,
-      response_format: { type: "json_object" },
+      model,
+      instructions,
+      input: messages,
+      reasoning: { effort: "low" },
+      max_output_tokens: Number.isFinite(maxOutputTokens) ? maxOutputTokens : SCRIPT_MAX_TOKENS,
+      text: { format: { type: "json_object" } },
     }),
   });
 
@@ -202,8 +320,8 @@ async function callOpenAI(messages: ChatMessage[], apiKey = process.env.OPENAI_A
     throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
   }
 
-  const data = (await response.json()) as OpenAIChatCompletionResponse;
-  const content = data.choices?.[0]?.message?.content;
+  const data = (await response.json()) as OpenAIResponse;
+  const content = extractResponseText(data);
 
   if (!content) {
     throw new Error("OpenAI response did not contain message content");
@@ -214,21 +332,48 @@ async function callOpenAI(messages: ChatMessage[], apiKey = process.env.OPENAI_A
 
 export async function generatePodcastScriptFromPaper(
   paper: ResearchPaperInput,
+  speakers?: ScriptSpeakerConfig[] | ScriptModel,
   apiKey = process.env.OPENAI_API_KEY,
 ): Promise<PodcastScript> {
   const normalizedPaper = toResearchPaperInput(paper);
-  const raw = await callOpenAI(buildGroundedPrompt(normalizedPaper), apiKey);
-  const payload = parseJsonObject(raw);
+  const speakerConfigs = Array.isArray(speakers) ? resolveSpeakerConfigs(speakers) : resolveSpeakerConfigs(undefined, speakers);
+  const generatedSegments: ScriptSegment[] = [];
 
-  if (!Array.isArray(payload.segments) || payload.segments.length < 6) {
-    throw new Error("OpenAI response did not include the required segments array.");
+  for (let index = 0; index < 8; index += 1) {
+    const currentSpeaker = speakerConfigs[index % speakerConfigs.length];
+    const raw = await callOpenAI(
+      buildTurnInput(normalizedPaper, speakerConfigs, generatedSegments),
+      currentSpeaker.model,
+      buildTurnInstructions(speakerConfigs, currentSpeaker, index),
+      SCRIPT_TURN_MAX_TOKENS,
+      apiKey,
+    );
+    const payload = parseJsonObject(raw);
+    const text = payload.text || payload.segments?.[0]?.text;
+
+    if (!text) {
+      throw new Error("OpenAI response did not include dialogue text.");
+    }
+
+    generatedSegments.push({
+      speaker: currentSpeaker.name,
+      speakerId: currentSpeaker.id,
+      speakerModel: currentSpeaker.model,
+      text,
+      duration: estimateDurationSeconds(text),
+    });
   }
 
-  return buildScript(normalizedPaper, payload.segments.slice(0, 8));
+  return buildScript(normalizedPaper, speakerConfigs, generatedSegments);
 }
 
-export function generateMockPodcastScriptFromPaper(paper: ResearchPaperInput): PodcastScript {
+export function generateMockPodcastScriptFromPaper(
+  paper: ResearchPaperInput,
+  speakers: ScriptSpeakerConfig[] | ScriptModel = DEFAULT_SCRIPT_MODEL
+): PodcastScript {
   const normalizedPaper = toResearchPaperInput(paper);
+  const speakerConfigs = Array.isArray(speakers) ? resolveSpeakerConfigs(speakers) : resolveSpeakerConfigs(undefined, speakers);
+  const [firstSpeaker, secondSpeaker] = speakerConfigs;
   const authorLine = normalizedPaper.authors.length > 0 ? normalizedPaper.authors.join(", ") : "the paper's authors";
   const summarySentences = normalizedPaper.summary
     .split(/(?<=[.!?])\s+/)
@@ -241,9 +386,9 @@ export function generateMockPodcastScriptFromPaper(paper: ResearchPaperInput): P
   const thirdSentence =
     summarySentences[2] ?? "Some implementation details, measurements, and deployment constraints are not specified.";
 
-  return buildScript(normalizedPaper, [
+  return buildScript(normalizedPaper, speakerConfigs, [
     {
-      text: `Quick setup: we are looking at ${normalizedPaper.title}, published on ${normalizedPaper.published_date} from ${normalizedPaper.source}. The authors listed are ${authorLine}. The problem starts here: ${firstSentence} Alex, what would you pin down first?`,
+      text: `Quick setup: we are looking at ${normalizedPaper.title}, published on ${normalizedPaper.published_date} from ${normalizedPaper.source}. The authors listed are ${authorLine}. The problem starts here: ${firstSentence} ${secondSpeaker.name}, what would you pin down first?`,
     },
     {
       text: `First reaction to that problem: I want to know what is actually claimed, not what the title makes me imagine. Let me make sure I understand: we are staying inside the abstract and checking what it says was improved, right?`,
@@ -264,11 +409,15 @@ export function generateMockPodcastScriptFromPaper(paper: ResearchPaperInput): P
       text: `That evidence check is the bridge. The summary gives enough for a careful conversation, not a victory lap. The practical contribution is useful only if those checks hold up.`,
     },
     {
-      text: `So the practical takeaway is measured: this is a focused research contribution with useful specifics, but the responsible read separates grounded claims from future work.`,
+      text: `So the practical takeaway is measured: ${firstSpeaker.name} and I would call this a focused research contribution with useful specifics, while separating grounded claims from future work.`,
     },
   ]);
 }
 
-export async function generatePodcastScript(paper: Paper): Promise<PodcastScript> {
-  return generatePodcastScriptFromPaper(toResearchPaperInput(paper));
+export async function generatePodcastScript(
+  paper: Paper,
+  speakers?: ScriptSpeakerConfig[],
+  legacyModel?: ScriptModel,
+): Promise<PodcastScript> {
+  return generatePodcastScriptFromPaper(toResearchPaperInput(paper), speakers ?? legacyModel);
 }

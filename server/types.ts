@@ -11,10 +11,20 @@ export type Paper = {
   importance?: string;
 };
 
-export type ScriptSpeaker = "DR ROWAN" | "ALEX";
+export type ScriptSpeakerId = "speaker_1" | "speaker_2";
+
+export type ScriptModel = "gpt-5.5" | "gpt-5.4" | "gpt-5.4-mini" | "gpt-5-mini" | "gpt-5-nano";
+
+export type ScriptSpeakerConfig = {
+  id: ScriptSpeakerId;
+  name: string;
+  model: ScriptModel;
+};
 
 export type ScriptSegment = {
-  speaker: ScriptSpeaker;
+  speaker: string;
+  speakerId: ScriptSpeakerId;
+  speakerModel: ScriptModel;
   text: string;
   duration?: number;
 };
@@ -22,6 +32,8 @@ export type ScriptSegment = {
 export type PodcastScript = {
   id: string;
   title: string;
+  model: ScriptModel;
+  speakers: ScriptSpeakerConfig[];
   segments: ScriptSegment[];
   totalDuration: string;
   createdAt: string;

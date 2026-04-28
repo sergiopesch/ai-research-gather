@@ -2,11 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Minimalist monochromatic design system */
-
 @layer base {
   :root {
-    /* Pure monochrome palette */
     --background: 255 255 255;
     --foreground: 10 10 10;
 
@@ -16,39 +13,27 @@
     --popover: 255 255 255;
     --popover-foreground: 10 10 10;
 
-    /* Primary - pure black */
     --primary: 10 10 10;
     --primary-foreground: 255 255 255;
 
-    /* Secondary - light gray */
     --secondary: 250 250 250;
     --secondary-foreground: 64 64 64;
 
-    /* Muted tones */
     --muted: 250 250 250;
     --muted-foreground: 115 115 115;
 
-    /* Accent */
     --accent: 245 245 245;
     --accent-foreground: 10 10 10;
 
-    /* Destructive */
     --destructive: 10 10 10;
     --destructive-foreground: 255 255 255;
 
-    /* Borders and inputs */
     --border: 229 229 229;
     --input: 229 229 229;
     --ring: 10 10 10;
 
     --radius: 0.5rem;
 
-    /* Minimal shadows */
-    --shadow-minimal: 0 1px 2px 0 rgb(0 0 0 / 0.03);
-    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.05);
-    --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-
-    /* Focus ring */
     --focus-ring: 0 0 0 2px rgb(10 10 10 / 0.1);
 
     --sidebar-background: 255 255 255;
@@ -116,7 +101,7 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.011em;
+    letter-spacing: 0;
   }
 
   html {
@@ -138,7 +123,7 @@
   h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
     line-height: 1.2;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     color: rgb(var(--foreground));
   }
 
@@ -163,35 +148,12 @@
 }
 
 @layer utilities {
-  /* Shadow system */
-  .shadow-minimal { box-shadow: var(--shadow-minimal); }
-  .shadow-soft { box-shadow: var(--shadow-soft); }
-  .shadow-medium { box-shadow: var(--shadow-medium); }
-
-  /* Hover effects */
-  .hover-lift {
-    @apply transition-all duration-200 ease-out;
-  }
-  .hover-lift:hover {
-    @apply -translate-y-0.5;
-    box-shadow: var(--shadow-soft);
-  }
-
-  /* Spacing system */
-  .space-y-micro > * + * { margin-top: 0.25rem; }
-  .space-y-xs > * + * { margin-top: 0.5rem; }
-  .space-y-sm > * + * { margin-top: 1rem; }
-  .space-y-md > * + * { margin-top: 1.5rem; }
-  .space-y-lg > * + * { margin-top: 2rem; }
-  .space-y-xl > * + * { margin-top: 3rem; }
-
   .space-y-4 > * + * { margin-top: 1rem; }
   .space-y-6 > * + * { margin-top: 1.5rem; }
   .space-y-8 > * + * { margin-top: 2rem; }
 }
 
 @layer components {
-  /* Minimal cards */
   .comet-card {
     @apply bg-card border border-border rounded-lg transition-all duration-200;
   }
@@ -200,7 +162,6 @@
     @apply border-neutral-300;
   }
 
-  /* Primary button - minimal black */
   .comet-button {
     @apply px-6 py-3 rounded-lg font-medium text-white bg-neutral-900 transition-all duration-200;
   }
@@ -217,7 +178,6 @@
     @apply opacity-40 cursor-not-allowed;
   }
 
-  /* Secondary button */
   .comet-button-secondary {
     @apply bg-neutral-100 text-neutral-700 px-6 py-3 rounded-lg font-medium transition-all duration-200;
   }
@@ -226,29 +186,6 @@
     @apply bg-neutral-200 text-neutral-900;
   }
 
-  /* Sections */
-  .comet-section {
-    @apply py-12 lg:py-16 relative;
-  }
-
-  .comet-hero {
-    @apply py-16 lg:py-24 relative;
-  }
-
-  /* Research area cards - minimal */
-  .research-area-card {
-    @apply comet-card p-5 cursor-pointer;
-  }
-
-  .research-area-card:hover {
-    @apply border-neutral-400;
-  }
-
-  .research-area-card.selected {
-    @apply border-2 border-neutral-900 bg-neutral-50;
-  }
-
-  /* Paper cards */
   .paper-card {
     @apply comet-card p-6 lg:p-8 space-y-5;
   }
@@ -257,38 +194,14 @@
     @apply border-neutral-300;
   }
 
-  /* Typography classes */
   .text-display {
-    @apply text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight leading-[1.1];
+    @apply text-3xl sm:text-4xl lg:text-5xl font-medium tracking-normal leading-[1.1];
   }
 
   .text-heading {
-    @apply text-lg sm:text-xl font-medium tracking-tight;
+    @apply text-lg sm:text-xl font-medium tracking-normal;
   }
 
-  .text-subheading {
-    @apply text-base font-medium;
-  }
-
-  .text-body {
-    @apply text-base leading-relaxed font-normal;
-  }
-
-  .text-caption {
-    @apply text-sm text-muted-foreground font-normal;
-  }
-
-  /* Container */
-  .comet-container {
-    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-
-  /* Minimal badge */
-  .badge-minimal {
-    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600;
-  }
-
-  /* Skeleton shimmer */
   .skeleton-shimmer {
     @apply bg-neutral-100;
     background: linear-gradient(
@@ -306,7 +219,6 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Loading spinner */
   .loading-spinner {
     @apply w-4 h-4 border-2 border-white/30 border-t-white rounded-full;
     animation: spin 0.6s linear infinite;
@@ -317,37 +229,6 @@
     100% { transform: rotate(360deg); }
   }
 
-  /* Fade in animation */
-  @keyframes fade-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.3s ease-out forwards;
-  }
-
-  /* Slide up animation */
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.4s ease-out forwards;
-  }
-
-  /* Bounce in animation */
-  @keyframes bounce-in {
-    0% { opacity: 0; transform: scale(0.95); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-
-  .animate-bounce-in {
-    animation: bounce-in 0.3s ease-out forwards;
-  }
-
-  /* Line clamp utilities */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -362,7 +243,6 @@
     overflow: hidden;
   }
 
-  /* Card interactive */
   .card-interactive {
     @apply transition-all duration-200 ease-out;
   }

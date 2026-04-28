@@ -42,10 +42,11 @@ API: `http://localhost:3001`
 
 - Node 20+ is required.
 - `.nvmrc` pins the expected local runtime to Node 20.
-- The server loads environment variables from `.env`.
-- `npm run check` runs the expected pre-push validation for this repo.
+- The server loads environment variables from `.env` and `.env.local`.
+- `npm run check` runs lint, server typecheck, and production build validation.
+- `npm run eval:scripts -- --mock` validates local script quality without an OpenAI call.
 - `npm run healthcheck` verifies the local API is responding on `/api/health`.
-- GitHub Actions runs the same lint/build validation on pushes and pull requests.
+- GitHub Actions runs install, audit, mock script evaluation, check, and a server health smoke test.
 
 ## Common Tasks
 
@@ -58,5 +59,5 @@ API: `http://localhost:3001`
 
 ## Git Workflow
 
-- Run `npm run build` before committing
-- Run `npm run lint` before committing
+- Run `npm run check` before committing.
+- Run `npm run eval:scripts -- --mock` when script generation behavior changes.

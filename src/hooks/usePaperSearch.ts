@@ -12,7 +12,7 @@ export const usePaperSearch = () => {
   const { toast } = useToast();
 
   const searchPapers = useCallback(async (keywords: string[], limit: number = 6) => {
-    if (loading) return; // Prevent multiple concurrent requests
+    if (loading) return;
 
     setLoading(true);
     setError(null);
@@ -44,13 +44,11 @@ export const usePaperSearch = () => {
 
       const data = await response.json();
 
-      // Check for API-level errors first
       const apiError = getApiError(data);
       if (apiError) {
         throw new Error(apiError);
       }
 
-      // Get valid papers (filters out any malformed entries)
       const validPapers = getValidPapers(data) as Paper[];
       setPapers(validPapers);
 
@@ -70,7 +68,6 @@ export const usePaperSearch = () => {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setError(errorMessage);
 
-      // Provide specific error messages based on error type
       let toastDescription = "Please check your connection and try again";
       if (error instanceof Error) {
         if (error.name === 'AbortError') {

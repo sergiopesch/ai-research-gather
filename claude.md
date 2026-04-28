@@ -10,7 +10,7 @@ npm install    # Install dependencies
 npm run dev    # Frontend on http://localhost:8080, API on http://localhost:3001
 npm run build  # Production build
 npm run lint   # ESLint check
-npm run check  # Lint + production build
+npm run check  # Lint + server typecheck + production build
 ```
 
 ## Architecture
@@ -18,7 +18,7 @@ npm run check  # Lint + production build
 ```
 src/
 ├── components/
-│   ├── research/           # HeroSection, AreaSelector, PaperCard
+│   ├── research/           # AreaSelector, PaperCard
 │   └── ui/                 # shadcn/ui components
 ├── hooks/
 │   ├── usePaperSearch.ts   # Paper discovery
@@ -53,17 +53,18 @@ PaperCard -> usePaperActions -> ProcessingHub -> /api/generate-script -> OpenAI
 
 - `HOST` - Optional, defaults to `127.0.0.1`
 - `OPENAI_API_KEY` - Required
-- `OPENAI_MODEL` - Optional model override
+- `OPENAI_SCRIPT_MODEL` - Optional script model fallback
+- `OPENAI_SCRIPT_MAX_TOKENS` - Optional total script generation cap
+- `OPENAI_SCRIPT_TURN_MAX_TOKENS` - Optional per-speaker turn generation cap
 - `PORT` - Optional, defaults to `3001`
 
 ## CI
 
-GitHub Actions validates `npm ci`, `npm run lint`, and `npm run build` on pushes to `main` and on pull requests.
+GitHub Actions validates install, audit, mock script evaluation, `npm run check`, and a server health smoke test on pushes to `main` and on pull requests.
 
-## Podcast Characters
+## Podcast Speakers
 
-- **Dr. Rowan Patel** (Aria voice) - Expert researcher
-- **Alex Hughes** (Liam voice) - Curious host
+The studio lets users name both speakers and assign a different OpenAI model to each speaker before generation.
 
 ## Common Tasks
 

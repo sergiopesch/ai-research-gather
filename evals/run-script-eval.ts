@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import "../server/env";
 import {
   generateMockPodcastScriptFromPaper,
   generatePodcastScriptFromPaper,
@@ -80,7 +81,7 @@ async function main() {
     const startedAt = performance.now();
     const script =
       mode === "real"
-        ? await generatePodcastScriptFromPaper(paper, process.env.OPENAI_API_KEY)
+        ? await generatePodcastScriptFromPaper(paper)
         : generateMockPodcastScriptFromPaper(paper);
     const durationMs = Math.round(performance.now() - startedAt);
     scores.push(scoreScript(fixture, script, durationMs));

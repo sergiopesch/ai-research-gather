@@ -3,7 +3,6 @@ import { StrictMode } from 'react'
 import App from './App.tsx'
 import './index.css'
 
-// Performance optimized root rendering
 const container = document.getElementById("root");
 if (!container) throw new Error("Root element not found");
 

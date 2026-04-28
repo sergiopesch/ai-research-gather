@@ -2,13 +2,21 @@
 
 A small proof of concept for browsing recent arXiv papers and turning one selected paper into a podcast-style script.
 
+## Features
+
+- Browse recent arXiv papers across focused research areas.
+- Generate an 8-turn grounded dialogue from a selected paper.
+- Name both speakers and choose a separate OpenAI model for each one.
+- Replay the generated script with live dialogue animation.
+- Export the script as plain text or ElevenLabs-compatible JSON.
+
 ## Architecture
 
 This version intentionally has no database persistence.
 
 - Paper discovery is fetched live from arXiv.
 - Search results use the paper abstract directly.
-- Script generation happens on demand through a local Node API.
+- Script generation happens on demand through a local Node API and the OpenAI Responses API.
 - Nothing is stored. Download the generated script if you want to keep it.
 
 ## Screenshots
@@ -23,8 +31,8 @@ This version intentionally has no database persistence.
 
 ## Stack
 
-- Frontend: React 18, TypeScript, Vite, TanStack Query
-- Styling: Tailwind CSS, Radix UI, shadcn/ui
+- Frontend: React 18, TypeScript, Vite
+- Styling: Tailwind CSS, Radix UI primitives
 - API: Express
 - AI: OpenAI
 
@@ -56,19 +64,23 @@ npm run healthcheck
 
 - Node 20 is the expected local and CI runtime.
 - `.nvmrc` is included for local version alignment.
-- A lightweight GitHub Actions workflow validates `npm ci`, `npm run lint`, and `npm run build`.
+- GitHub Actions validates dependency install, audit, mock script evaluation, lint, typecheck, build, and a server health smoke test.
 
 ## Environment
 
 ```env
 HOST=127.0.0.1
 OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4.1-mini
+OPENAI_SCRIPT_MODEL=gpt-5.5
+OPENAI_SCRIPT_MAX_TOKENS=1600
+OPENAI_SCRIPT_TURN_MAX_TOKENS=1200
 PORT=3001
 ARXIV_USER_AGENT=
 ```
 
 Only `OPENAI_API_KEY` is required.
+For local-only secrets, `.env.local` is also loaded by the Node API and can contain the same keys.
+The UI lets each speaker choose between `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5-mini`, and `gpt-5-nano` before script generation.
 `ARXIV_USER_AGENT` is optional and can be used to identify your deployment when calling arXiv RSS.
 
 ## Local Operations
@@ -97,7 +109,6 @@ Good fits:
 
 Not included on purpose:
 - Docker
-- CI/CD workflows
 - database migrations
 - background workers
 - secrets management beyond env vars

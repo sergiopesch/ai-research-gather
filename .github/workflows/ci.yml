@@ -11,6 +11,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -20,14 +23,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit dependencies
+        run: npm audit --audit-level=moderate
+
+      - name: Run script evaluation
+        run: npm run eval:scripts -- --mock
+
       - name: Validate
         run: npm run check
+
+      - name: Smoke test server
+        run: |
+          npm run start > /tmp/ai-research-gather.log 2>&1 &
+          server_pid=$!
+          trap "kill $server_pid" EXIT
+
+          for attempt in {1..20}; do
+            if npm run healthcheck; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/ai-research-gather.log
+          exit 1

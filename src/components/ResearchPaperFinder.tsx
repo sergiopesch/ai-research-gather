@@ -1,83 +1,71 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Loader2, Search, RefreshCw } from 'lucide-react';
-import { usePaperSearch } from '@/hooks/usePaperSearch';
-import { TOPIC_ITEMS } from '@/constants/research-areas';
-import { HeroSection } from '@/components/research/HeroSection';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Loader2, RefreshCw, Search } from 'lucide-react';
 import { AreaSelector } from '@/components/research/AreaSelector';
 import { PaperCard } from '@/components/research/PaperCard';
-import { EmptyState } from '@/components/research/EmptyState';
 import { PaperGridSkeleton } from '@/components/research/PaperCardSkeleton';
+import { RESEARCH_AREAS } from '@/constants/research-areas';
+import { usePaperSearch } from '@/hooks/usePaperSearch';
 import { useToast } from '@/hooks/use-toast';
 
+const AREA_NAME_MAP: Record<string, string> = {
+  robotics: 'Robotics',
+  cv: 'Computer Vision',
+  llm: 'Large Language Models',
+};
+
+const PAPER_COUNTS = [3, 6, 9, 12];
+
 const ResearchPaperFinder = () => {
-  // Default to all 3 areas selected
-  const [selectedAreas, setSelectedAreas] = useState<string[]>(['robotics', 'cv', 'llm']);
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedAreas, setSelectedAreas] = useState<string[]>(RESEARCH_AREAS.map((area) => area.id));
   const [paperCount, setPaperCount] = useState(6);
   const [hasSearched, setHasSearched] = useState(false);
   const { papers, loading, searchPapers, clearPapers } = usePaperSearch();
   const { toast } = useToast();
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
-  // Memoize keywords calculation - map frontend area IDs to backend-compatible area names
-  const selectedKeywords = useMemo(() => {
-    const areaNameMap: Record<string, string> = {
-      'robotics': 'Robotics',
-      'cv': 'Computer Vision',
-      'llm': 'Large Language Models'
-    };
-
-    // Get the backend-compatible area names for selected areas
-    const areaNames = selectedAreas.map(areaId => areaNameMap[areaId]).filter(Boolean);
-
-    // Also include specific keywords from selected topics for additional filtering
-    const topicKeywords = selectedTopics.map(topicId => {
-      const topic = TOPIC_ITEMS.find(t => t.id === topicId);
-      return topic ? topic.label.toLowerCase() : '';
-    }).filter(Boolean);
-
-    // Combine area names (for backend mapping) with topic keywords (for filtering)
-    return [...areaNames, ...topicKeywords];
-  }, [selectedAreas, selectedTopics]);
+  const selectedKeywords = useMemo(
+    () => selectedAreas.map((areaId) => AREA_NAME_MAP[areaId]).filter(Boolean),
+    [selectedAreas],
+  );
 
   const handleAreaToggle = useCallback((areaId: string) => {
-    setSelectedAreas(prev =>
-      prev.includes(areaId)
-        ? prev.filter(id => id !== areaId)
-        : [...prev, areaId]
+    setSelectedAreas((current) =>
+      current.includes(areaId)
+        ? current.filter((id) => id !== areaId)
+        : [...current, areaId],
     );
   }, []);
 
-  const handleTopicToggle = useCallback((topicId: string) => {
-    setSelectedTopics(prev =>
-      prev.includes(topicId)
-        ? prev.filter(id => id !== topicId)
-        : [...prev, topicId]
-    );
-  }, []);
-
-  const handleSearch = useCallback(async () => {
+  const executeSearch = useCallback(async (limit: number) => {
     if (selectedAreas.length === 0) {
       toast({
-        title: "No research areas selected",
-        description: "Please select at least one research area to search for papers.",
-        variant: "destructive"
+        title: "Select an area",
+        description: "Choose at least one research area.",
+        variant: "destructive",
       });
       return;
     }
 
     setHasSearched(true);
-    await searchPapers(selectedKeywords, paperCount);
-  }, [selectedAreas.length, selectedKeywords, searchPapers, paperCount, toast]);
+    await searchPapers(selectedKeywords, limit);
+  }, [searchPapers, selectedAreas.length, selectedKeywords, toast]);
 
-  const handleClearAndReset = useCallback(() => {
+  const handleSearch = useCallback(() => executeSearch(paperCount), [executeSearch, paperCount]);
+
+  const handleLoadMore = useCallback(async () => {
+    const nextCount = Math.min(paperCount + 6, 12);
+    setPaperCount(nextCount);
+    await executeSearch(nextCount);
+  }, [executeSearch, paperCount]);
+
+  const handleReset = useCallback(() => {
     clearPapers();
     setHasSearched(false);
   }, [clearPapers]);
 
-  // Keyboard shortcut for search
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !loading) {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && !loading) {
         handleSearch();
       }
     };
@@ -86,33 +74,38 @@ const ResearchPaperFinder = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSearch, loading]);
 
+  useEffect(() => {
+    if (!loading && hasSearched) {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [hasSearched, loading, papers.length]);
+
   return (
-    <div className="min-h-screen bg-background">
-      <HeroSection />
+    <main className="min-h-screen bg-background">
+      <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mb-8">
+          <h1 className="text-display text-neutral-950">Research to script</h1>
+          <p className="mt-3 max-w-2xl text-sm text-neutral-500 sm:text-base">
+            Find recent arXiv papers and generate a grounded podcast script.
+          </p>
+        </div>
 
-      <div className="relative -mt-8 z-10">
-        <AreaSelector
-          selectedAreas={selectedAreas}
-          onToggleArea={handleAreaToggle}
-          selectedTopics={selectedTopics}
-          onToggleTopic={handleTopicToggle}
-        />
+        <div className="comet-card p-4 sm:p-5">
+          <AreaSelector selectedAreas={selectedAreas} onToggleArea={handleAreaToggle} />
 
-        {/* Search controls section */}
-        <div className="py-8">
-          <div className="comet-container">
-            {/* Paper count selector */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 animate-fade-in">
-              <span className="text-sm text-neutral-500">Papers:</span>
-              <div className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
-                {[3, 6, 9, 12].map((count) => (
+          <div className="mt-5 flex flex-col gap-3 border-t border-neutral-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-neutral-500">Papers</span>
+              <div className="flex rounded-lg bg-neutral-100 p-1">
+                {PAPER_COUNTS.map((count) => (
                   <button
                     key={count}
+                    type="button"
                     onClick={() => setPaperCount(count)}
-                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-150 ${
+                    className={`min-w-10 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                       paperCount === count
-                        ? 'bg-white text-neutral-900 shadow-sm'
-                        : 'text-neutral-500 hover:text-neutral-700'
+                        ? 'bg-white text-neutral-950 shadow-sm'
+                        : 'text-neutral-500 hover:text-neutral-800'
                     }`}
                   >
                     {count}
@@ -121,157 +114,77 @@ const ResearchPaperFinder = () => {
               </div>
             </div>
 
-            {/* Main search button */}
-            <div className="text-center">
-              <button
-                onClick={handleSearch}
-                disabled={loading || selectedAreas.length === 0}
-                className={`comet-button text-sm px-8 py-3 inline-flex items-center gap-2 transition-all duration-200 ${
-                  loading || selectedAreas.length === 0
-                    ? 'opacity-40 cursor-not-allowed'
-                    : ''
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Searching...</span>
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4" />
-                    <span>Find Papers</span>
-                    <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] bg-white/20 rounded ml-1">
-                      <span>⌘</span>
-                      <span>↵</span>
-                    </kbd>
-                  </>
-                )}
-              </button>
-
-              {selectedAreas.length === 0 && (
-                <p className="text-xs text-neutral-400 mt-3 animate-fade-in">
-                  Select research areas above to begin
-                </p>
+            <button
+              type="button"
+              onClick={handleSearch}
+              disabled={loading || selectedAreas.length === 0}
+              className="comet-button inline-flex items-center justify-center gap-2 text-sm"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Searching
+                </>
+              ) : (
+                <>
+                  <Search className="h-4 w-4" />
+                  Find papers
+                </>
               )}
-
-              {/* Quick reset button when papers are loaded */}
-              {papers.length > 0 && !loading && (
-                <button
-                  onClick={handleClearAndReset}
-                  className="mt-3 text-xs text-neutral-400 hover:text-neutral-600 inline-flex items-center gap-1.5 transition-colors"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  Clear and search again
-                </button>
-              )}
-            </div>
+            </button>
           </div>
         </div>
+      </section>
 
-        {/* Loading skeleton */}
-        {loading && (
-          <div className="comet-section">
-            <div className="comet-container">
-              <div className="text-center mb-8 animate-fade-in">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100 mb-4">
-                  <Loader2 className="w-3.5 h-3.5 text-neutral-500 animate-spin" />
-                  <span className="text-xs font-medium text-neutral-600">Searching arXiv...</span>
-                </div>
+      <section ref={resultsRef} className="mx-auto max-w-4xl scroll-mt-6 px-4 pb-16 sm:px-6">
+        {loading && <PaperGridSkeleton count={paperCount} />}
 
-                <h2 className="text-heading text-neutral-900 mb-2">
-                  Discovering Papers
-                </h2>
-                <p className="text-sm text-neutral-500">
-                  Fetching the latest papers based on your interests...
-                </p>
-              </div>
-
-              <PaperGridSkeleton count={paperCount} />
+        {!loading && papers.length > 0 && (
+          <div>
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <h2 className="text-heading text-neutral-950">{papers.length} papers</h2>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-950"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                Reset
+              </button>
             </div>
-          </div>
-        )}
 
-        {/* Results section */}
-        {papers.length > 0 && !loading && (
-          <div className="comet-section animate-fade-in">
-            <div className="comet-container">
-              <div className="text-center mb-8">
-                <span className="text-xs font-medium text-neutral-500 mb-3 block">
-                  {papers.length} {papers.length === 1 ? 'paper' : 'papers'} found
-                </span>
-
-                <h2 className="text-heading text-neutral-900 mb-2">
-                  Research Papers
-                </h2>
-                <p className="text-sm text-neutral-500">
-                  Generate podcast scripts from these papers
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                {papers.map((paper, index) => (
-                  <div
-                    key={`${paper.doi || paper.url}-${index}`}
-                    className="animate-slide-up"
-                    style={{ animationDelay: `${(index + 1) * 80}ms`, animationFillMode: 'backwards' }}
-                  >
-                    <PaperCard paper={paper} index={index} />
-                  </div>
-                ))}
-              </div>
-
-              {/* Load more suggestion */}
-              {papers.length >= paperCount && (
-                <div className="text-center mt-8 animate-fade-in" style={{ animationDelay: '400ms' }}>
-                  <p className="text-xs text-neutral-400 mb-3">
-                    Want more papers? Increase the count and search again.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setPaperCount(prev => Math.min(prev + 6, 12));
-                      handleSearch();
-                    }}
-                    disabled={loading || paperCount >= 12}
-                    className="comet-button-secondary inline-flex items-center gap-2 text-sm"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    Load More
-                  </button>
-                </div>
-              )}
+            <div className="space-y-4">
+              {papers.map((paper, index) => (
+                <PaperCard
+                  key={`${paper.doi || paper.url}-${index}`}
+                  paper={paper}
+                  index={index}
+                />
+              ))}
             </div>
-          </div>
-        )}
 
-        {/* Empty State */}
-        {papers.length === 0 && !loading && hasSearched && (
-          <div className="comet-section animate-fade-in">
-            <div className="comet-container text-center">
-              <div className="max-w-sm mx-auto">
-                <div className="w-12 h-12 mx-auto mb-4 rounded-lg bg-neutral-100 flex items-center justify-center">
-                  <Search className="w-5 h-5 text-neutral-400" />
-                </div>
-                <h3 className="text-base font-medium text-neutral-900 mb-2">No papers found</h3>
-                <p className="text-sm text-neutral-500 mb-4">
-                  Try selecting different research areas or topics.
-                </p>
+            {papers.length >= paperCount && paperCount < 12 && (
+              <div className="mt-8 text-center">
                 <button
-                  onClick={handleClearAndReset}
-                  className="comet-button inline-flex items-center gap-2 text-sm"
+                  type="button"
+                  onClick={handleLoadMore}
+                  className="comet-button-secondary inline-flex items-center gap-2 text-sm"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Try Again
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  Load more
                 </button>
               </div>
-            </div>
+            )}
           </div>
         )}
 
-        {/* Initial empty state */}
-        {papers.length === 0 && !loading && !hasSearched && <EmptyState />}
-      </div>
-    </div>
+        {!loading && hasSearched && papers.length === 0 && (
+          <div className="py-12 text-center">
+            <p className="text-sm text-neutral-500">No papers found. Try a broader area.</p>
+          </div>
+        )}
+      </section>
+    </main>
   );
 };
 

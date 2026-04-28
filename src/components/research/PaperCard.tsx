@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Calendar, ExternalLink, Users, ArrowRight } from 'lucide-react';
 import { RESEARCH_AREAS } from '@/constants/research-areas';
 import { usePaperActions } from '@/hooks/usePaperActions';
@@ -14,7 +13,6 @@ interface PaperCardProps {
 export const PaperCard = ({ paper, index }: PaperCardProps) => {
   const { selectPaper, isSelecting, isPaperSelected } = usePaperActions();
   const { toast } = useToast();
-  const [showFullSummary, setShowFullSummary] = useState(false);
 
   const handleSelectPaper = async () => {
     if (!paper.id || paper.id.trim() === '') {
@@ -28,8 +26,8 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
 
     try {
       await selectPaper(paper);
-    } catch (error) {
-      // Error handling is done in the hook
+    } catch {
+      return;
     }
   };
 
@@ -85,48 +83,41 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
         animationFillMode: 'backwards'
       }}
     >
-      <div className="space-y-5">
-        {/* Header with area badge and icon */}
+      <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 space-y-3">
-            {/* Area badge */}
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-neutral-100 text-neutral-600">
-                <AreaIcon className="w-3 h-3" />
+          <div className="min-w-0 flex-1 space-y-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-neutral-100 px-2.5 py-1 font-medium text-neutral-600">
+                <AreaIcon className="h-3 w-3" />
                 {areaInfo.label}
               </span>
-              <span className="text-xs text-neutral-400">
-                {paper.source}
-              </span>
+              <span>{paper.source}</span>
             </div>
 
-            {/* Title */}
-            <h3 className="text-base font-medium text-neutral-900 leading-snug group-hover:text-neutral-700 transition-colors">
+            <h3 className="text-base font-medium leading-snug text-neutral-900 transition-colors group-hover:text-neutral-700">
               {sanitizeText(paper.title)}
             </h3>
           </div>
 
-          {/* Icon indicator */}
           <div
-            className={`flex-shrink-0 p-2.5 rounded-lg transition-all duration-200 ${
+            className={`flex-shrink-0 rounded-lg p-2.5 transition-all duration-200 ${
               isAlreadySelected
                 ? 'bg-neutral-900 text-white'
                 : 'bg-neutral-100 text-neutral-400 group-hover:bg-neutral-200 group-hover:text-neutral-600'
             }`}
           >
-            <AreaIcon className="w-4 h-4" />
+            <AreaIcon className="h-4 w-4" />
           </div>
         </div>
 
-        {/* Metadata row */}
         <div className="flex items-center gap-4 text-xs text-neutral-500">
           <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="h-3.5 w-3.5" />
             {formatDate(paper.published_date)}
           </div>
           {paper.authors && paper.authors.length > 0 && (
             <div className="flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5" />
+              <Users className="h-3.5 w-3.5" />
               <span>
                 {paper.authors.slice(0, 2).join(', ')}
                 {paper.authors.length > 2 && ` +${paper.authors.length - 2}`}
@@ -135,39 +126,19 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
           )}
         </div>
 
-        {/* Summary section */}
         {paper.summary && (
-          <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-100">
-            <p
-              className={`text-sm text-neutral-600 leading-relaxed ${
-                !showFullSummary ? 'line-clamp-2' : ''
-              }`}
-            >
+          <div className="rounded-lg border border-neutral-100 bg-neutral-50 p-4">
+            <p className="line-clamp-2 text-sm leading-relaxed text-neutral-600">
               {sanitizeText(paper.summary)}
             </p>
-            {paper.summary.length > 150 && (
-              <button
-                onClick={() => setShowFullSummary(!showFullSummary)}
-                className="text-xs font-medium mt-2 text-neutral-500 hover:text-neutral-900 transition-colors"
-              >
-                {showFullSummary ? 'Show less' : 'Read more'}
-              </button>
-            )}
-            {paper.importance && (
-              <div className="flex items-center gap-2 pt-3 mt-3 border-t border-neutral-200">
-                <span className="text-xs text-neutral-400">Impact:</span>
-                <span className="text-xs text-neutral-600">{paper.importance}</span>
-              </div>
-            )}
           </div>
         )}
 
-        {/* Action buttons */}
         <div className="flex items-center gap-3 pt-1">
           <button
             onClick={handleSelectPaper}
             disabled={isSelecting || isAlreadySelected}
-            className={`comet-button flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-sm ${
+            className={`comet-button inline-flex flex-1 items-center justify-center gap-2 text-sm sm:flex-none ${
               isAlreadySelected
                 ? 'bg-neutral-200 text-neutral-500'
                 : isSelecting
@@ -177,7 +148,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
           >
             {isSelecting ? (
               <>
-                <div className="loading-spinner w-3.5 h-3.5" />
+                <div className="loading-spinner h-3.5 w-3.5" />
                 <span>Selecting...</span>
               </>
             ) : isAlreadySelected ? (
@@ -185,7 +156,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
             ) : (
               <>
                 <span>Generate Script</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </>
             )}
           </button>
@@ -196,7 +167,7 @@ export const PaperCard = ({ paper, index }: PaperCardProps) => {
             rel="noopener noreferrer"
             className="comet-button-secondary inline-flex items-center gap-2 text-sm"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="h-3.5 w-3.5" />
             <span>View</span>
           </a>
         </div>

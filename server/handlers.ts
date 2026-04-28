@@ -1,6 +1,7 @@
+import "./env.js";
 import { z } from "zod";
-import type { Paper } from "./types.js";
-import { generatePodcastScript } from "./openai.js";
+import type { Paper, ScriptSpeakerConfig } from "./types.js";
+import { generatePodcastScript, SCRIPT_MODELS } from "./openai.js";
 import { searchPapers } from "./research.js";
 
 export const SearchRequestSchema = z.object({
@@ -10,6 +11,21 @@ export const SearchRequestSchema = z.object({
 });
 
 export const ScriptRequestSchema = z.object({
+  model: z.enum(SCRIPT_MODELS).optional(),
+  speakers: z
+    .tuple([
+      z.object({
+        id: z.enum(["speaker_1", "speaker_2"]).optional(),
+        name: z.string().trim().min(1).max(40),
+        model: z.enum(SCRIPT_MODELS),
+      }),
+      z.object({
+        id: z.enum(["speaker_1", "speaker_2"]).optional(),
+        name: z.string().trim().min(1).max(40),
+        model: z.enum(SCRIPT_MODELS),
+      }),
+    ])
+    .optional(),
   paper: z.object({
     id: z.string(),
     title: z.string(),
@@ -101,8 +117,12 @@ export async function papersHandler(req: RequestLike, res: ResponseLike): Promis
 export async function generateScriptHandler(req: RequestLike, res: ResponseLike): Promise<void> {
   try {
     const body = await readJsonBody(req);
-    const { paper } = ScriptRequestSchema.parse(body);
-    const script = await generatePodcastScript(paper as Paper);
+    const { paper, model, speakers } = ScriptRequestSchema.parse(body);
+    const script = await generatePodcastScript(
+      paper as Paper,
+      speakers as ScriptSpeakerConfig[] | undefined,
+      model,
+    );
 
     setJsonHeaders(res);
     res.status(200).json(script);

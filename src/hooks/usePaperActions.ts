@@ -8,7 +8,6 @@ const SELECTED_PAPER_KEY = 'selectedPaper';
 export const usePaperActions = () => {
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedPaper, setSelectedPaperState] = useState<Paper | null>(() => {
-    // Initialize from localStorage
     try {
       const stored = localStorage.getItem(SELECTED_PAPER_KEY);
       return stored ? JSON.parse(stored) as Paper : null;
@@ -19,7 +18,6 @@ export const usePaperActions = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Persist selectedPaper to localStorage whenever it changes
   const setSelectedPaper = useCallback((paper: Paper | null) => {
     setSelectedPaperState(paper);
     try {
@@ -41,9 +39,9 @@ export const usePaperActions = () => {
       setSelectedPaper(paper);
       toast({
         title: "Paper Selected",
-        description: "Redirecting to processing hub...",
+        description: "Opening the production studio...",
       });
-      setTimeout(() => navigate('/processing'), 1000);
+      navigate('/processing');
       return { success: true };
     } catch (error: unknown) {
       console.error('Selection error:', error);
@@ -67,7 +65,6 @@ export const usePaperActions = () => {
     setSelectedPaper(null);
   }, [setSelectedPaper]);
 
-  // Memoize return object to prevent unnecessary re-renders
   return useMemo(() => ({
     selectPaper,
     isPaperSelected,

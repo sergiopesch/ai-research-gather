@@ -1,41 +1,61 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import type { Paper } from '@/types/research';
+import type { Paper, ScriptModel, ScriptSpeakerConfig, ScriptSpeakerId } from '@/types/research';
 
-export type ScriptSegment = {
-  speaker: "DR ROWAN" | "ALEX";
+type ScriptSegment = {
+  speaker: string;
+  speakerId: ScriptSpeakerId;
+  speakerModel: ScriptModel;
   text: string;
   voiceId?: string;
   duration?: number;
 };
 
-export type PodcastScript = {
+export type { ScriptSegment };
+
+type PodcastScript = {
   id: string;
   title: string;
+  model?: ScriptModel;
+  speakers?: ScriptSpeakerConfig[];
   segments: ScriptSegment[];
   totalDuration: string;
   createdAt: string;
 };
 
-const DR_ROWAN_VOICE_ID = "9BWtsMINqrJLrRacOk9x";
-const ALEX_VOICE_ID = "TX3LPaxmHKxFdv7VOQHJ";
-
-const normalizeSpeaker = (speaker: string): ScriptSegment["speaker"] => {
-  const normalized = speaker.trim().toLowerCase();
-  return normalized.includes("rowan") ? "DR ROWAN" : "ALEX";
-};
+const SPEAKER_1_VOICE_ID = "9BWtsMINqrJLrRacOk9x";
+const SPEAKER_2_VOICE_ID = "TX3LPaxmHKxFdv7VOQHJ";
 
 const normalizeSegmentText = (text: string): string =>
-  text.replace(/^(DR ROWAN|ALEX|Dr Rowan Patel|Alex Hughes)\s*:\s*/i, '').trim();
+  text.replace(/^[\w .'-]{1,48}:\s*/i, '').trim();
 
 const normalizeScript = (data: PodcastScript): PodcastScript => ({
   ...data,
   segments: data.segments.map((segment) => ({
     ...segment,
-    speaker: normalizeSpeaker(segment.speaker),
     text: normalizeSegmentText(segment.text),
   })),
 });
+
+const getScriptGenerationError = async (response: Response): Promise<string> => {
+  const fallback = `Failed to generate script: ${response.status}`;
+  const responseText = await response.text();
+
+  if (!responseText) {
+    return fallback;
+  }
+
+  try {
+    const parsed = JSON.parse(responseText) as { error?: string };
+    if (parsed.error === "OPENAI_API_KEY is not configured") {
+      return "OpenAI API key is missing. Add OPENAI_API_KEY to .env.local or export it before starting npm run dev, then restart the server.";
+    }
+
+    return parsed.error ? `${fallback} - ${parsed.error}` : `${fallback} - ${responseText}`;
+  } catch {
+    return `${fallback} - ${responseText}`;
+  }
+};
 
 export const useScriptGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -43,7 +63,7 @@ export const useScriptGeneration = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const generateScript = useCallback(async (paper: Paper) => {
+  const generateScript = useCallback(async (paper: Paper, speakers: ScriptSpeakerConfig[]) => {
     if (isGenerating) return;
     
     setIsGenerating(true);
@@ -56,12 +76,11 @@ export const useScriptGeneration = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ paper })
+        body: JSON.stringify({ paper, speakers })
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to generate script: ${response.status} - ${errorText}`);
+        throw new Error(await getScriptGenerationError(response));
       }
 
       const data = await response.json();
@@ -86,13 +105,14 @@ export const useScriptGeneration = () => {
   }, [isGenerating, toast]);
 
   const downloadElevenLabsScript = useCallback((script: PodcastScript) => {
-    // Create ElevenLabs compatible format
     const elevenLabsFormat = {
       title: script.title,
+      speakers: script.speakers,
       segments: script.segments.map((segment, index) => ({
         id: `segment_${index + 1}`,
         speaker: segment.speaker,
-        voice_id: segment.speaker === "DR ROWAN" ? DR_ROWAN_VOICE_ID : ALEX_VOICE_ID,
+        model: segment.speakerModel,
+        voice_id: segment.speakerId === "speaker_1" ? SPEAKER_1_VOICE_ID : SPEAKER_2_VOICE_ID,
         text: segment.text,
         settings: {
           stability: 0.5,
@@ -124,7 +144,7 @@ export const useScriptGeneration = () => {
 
   const downloadTextScript = useCallback((script: PodcastScript) => {
     const textContent = script.segments
-      .map(segment => `${segment.speaker}: ${segment.text}`)
+      .map(segment => `${segment.speaker} (${segment.speakerModel}): ${segment.text}`)
       .join('\n\n');
     
     const fullScript = `# ${script.title}\n\nGenerated: ${new Date(script.createdAt).toLocaleString()}\nTotal Duration: ${script.totalDuration}\n\n---\n\n${textContent}`;

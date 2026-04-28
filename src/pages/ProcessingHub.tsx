@@ -1,365 +1,315 @@
-import { ArrowLeft, FileText, Loader2, X, Download, FileDown, Mic2, Lightbulb, Zap, CheckCircle, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowLeft, CheckCircle, Download, ExternalLink, FileDown, Loader2, RefreshCw, Sparkles, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { DEFAULT_SCRIPT_SPEAKERS, SCRIPT_MODEL_OPTIONS } from '@/constants/script-models';
 import { usePaperActions } from '@/hooks/usePaperActions';
 import { useScriptGeneration } from '@/hooks/useScriptGeneration';
 import { useToast } from '@/hooks/use-toast';
-import { Link, useNavigate } from 'react-router-dom';
-import { useCallback } from 'react';
+import type { ScriptSegment } from '@/hooks/useScriptGeneration';
+import type { ScriptModel, ScriptSpeakerConfig, ScriptSpeakerId } from '@/types/research';
+
+const STREAM_CHARS_PER_TICK = 5;
+
+interface StreamingSegmentProps {
+  segment: ScriptSegment;
+  active: boolean;
+  complete: boolean;
+  onDone: () => void;
+}
+
+const StreamingSegment = ({ segment, active, complete, onDone }: StreamingSegmentProps) => {
+  const [visibleText, setVisibleText] = useState(complete ? segment.text : '');
+
+  useEffect(() => {
+    if (complete) {
+      setVisibleText(segment.text);
+      return;
+    }
+
+    if (!active) {
+      setVisibleText('');
+      return;
+    }
+
+    setVisibleText('');
+    let index = 0;
+    const interval = window.setInterval(() => {
+      index = Math.min(index + STREAM_CHARS_PER_TICK, segment.text.length);
+      setVisibleText(segment.text.slice(0, index));
+
+      if (index >= segment.text.length) {
+        window.clearInterval(interval);
+        onDone();
+      }
+    }, 24);
+
+    return () => window.clearInterval(interval);
+  }, [active, complete, onDone, segment.text]);
+
+  return (
+    <article className="rounded-lg border border-neutral-200 p-4">
+      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-500">
+        <span>{segment.speaker}</span>
+        <span className="font-medium text-neutral-400">{segment.speakerModel}</span>
+      </div>
+      <p className="min-h-14 text-sm leading-7 text-neutral-700">
+        {visibleText}
+        {active && !complete && <span className="ml-0.5 inline-block h-4 w-1 animate-pulse bg-neutral-900 align-middle" />}
+      </p>
+    </article>
+  );
+};
 
 const ProcessingHub = () => {
   const { selectedPaper, hasSelectedPaper, clearSelectedPaper } = usePaperActions();
-  const { 
+  const {
     generateScript,
     downloadElevenLabsScript,
     downloadTextScript,
     clearScript,
-    isGenerating, 
-    script, 
+    isGenerating,
+    script,
     error,
-    hasScript
+    hasScript,
   } = useScriptGeneration();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const scriptRef = useRef<HTMLDivElement | null>(null);
+  const [speakers, setSpeakers] = useState<ScriptSpeakerConfig[]>(DEFAULT_SCRIPT_SPEAKERS);
+  const [visibleSegmentCount, setVisibleSegmentCount] = useState(0);
 
-  const handleClearSelection = useCallback(() => {
+  const handleChangePaper = useCallback(() => {
     clearSelectedPaper();
     clearScript();
     navigate('/');
-  }, [clearSelectedPaper, clearScript, navigate]);
+  }, [clearScript, clearSelectedPaper, navigate]);
 
   const handleGenerateScript = useCallback(async () => {
     if (!selectedPaper) {
       toast({
-        title: "No Paper Selected",
-        description: "Please select a paper first",
+        title: "No paper selected",
+        description: "Choose a paper first.",
         variant: "destructive",
       });
       return;
     }
 
-    try {
-      await generateScript(selectedPaper);
-    } catch (error) {
-      // Error handling is done in the hook
+    const normalizedNames = speakers.map((speaker) => speaker.name.trim());
+    if (normalizedNames.some((name) => name.length === 0)) {
+      toast({
+        title: "Name each speaker",
+        description: "Both speakers need a name.",
+        variant: "destructive",
+      });
+      return;
     }
-  }, [selectedPaper, generateScript, toast]);
+
+    if (new Set(normalizedNames.map((name) => name.toLowerCase())).size !== normalizedNames.length) {
+      toast({
+        title: "Use distinct names",
+        description: "Each speaker needs a different name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await generateScript(
+      selectedPaper,
+      speakers.map((speaker, index) => ({
+        ...speaker,
+        id: (index === 0 ? 'speaker_1' : 'speaker_2') as ScriptSpeakerId,
+        name: speaker.name.trim(),
+      })),
+    );
+  }, [generateScript, selectedPaper, speakers, toast]);
+
+  useEffect(() => {
+    if (hasScript) {
+      setVisibleSegmentCount(0);
+      scriptRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [hasScript]);
+
+  const handleSegmentDone = useCallback(() => {
+    setVisibleSegmentCount((current) => current + 1);
+  }, []);
+
+  const updateSpeaker = useCallback((id: ScriptSpeakerId, updates: Partial<ScriptSpeakerConfig>) => {
+    setSpeakers((current) =>
+      current.map((speaker) => (speaker.id === id ? { ...speaker, ...updates } : speaker)),
+    );
+  }, []);
 
   if (!hasSelectedPaper) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="premium-hero min-h-[60vh]">
-          <div className="organic-bg">
-            <div className="absolute top-20 left-20 w-64 h-64 bg-muted/20 rounded-full"></div>
-            <div className="absolute bottom-20 right-20 w-48 h-48 bg-muted/20 rounded-full"></div>
-          </div>
-          
-          <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-16">
-            <Link 
-              to="/" 
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-12 group"
-            >
-              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-              <span>Back to Research</span>
-            </Link>
-            
-            <div className="max-w-4xl text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border/30 mb-6">
-                <Lightbulb className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">Production Studio</span>
-              </div>
-              
-              <h1 className="text-display mb-6">
-                Select Research to
-                <span className="block text-foreground">
-                  Create Episodes
-                </span>
-              </h1>
-              
-              <p className="text-subheading text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-                Choose a research paper from the discovery page to begin transforming it into an engaging podcast episode.
-              </p>
-              
-              <Button asChild className="comet-button">
-                <Link to="/">
-                  Browse Research Papers
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-        
-      </div>
+      <main className="mx-auto min-h-screen max-w-3xl px-4 py-10 sm:px-6">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-950">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Link>
+
+        <section className="mt-10">
+          <h1 className="text-display text-neutral-950">No paper selected</h1>
+          <p className="mt-3 text-sm text-neutral-500">Pick a paper from discovery to generate a script.</p>
+          <Link to="/" className="comet-button mt-6 inline-flex text-sm">
+            Browse papers
+          </Link>
+        </section>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Premium Header */}
-      <div className="premium-section py-12 border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <div className="flex items-center gap-6 mb-8">
-            <Link 
-              to="/" 
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-            >
-              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-              <span>Back to Research</span>
-            </Link>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-muted rounded-xl shadow-soft">
-              <Mic2 className="w-8 h-8 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-heading">Production Studio</h1>
-              <p className="text-body text-muted-foreground">Transform research into podcast episodes</p>
-            </div>
-          </div>
-        </div>
+    <main className="mx-auto min-h-screen max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-950">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Link>
+        <button
+          type="button"
+          onClick={handleChangePaper}
+          className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-950"
+        >
+          <X className="h-3.5 w-3.5" />
+          Change
+        </button>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 py-16 space-y-16">
-        {/* Selected Paper Card */}
-        <div className="premium-card p-8 space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-            <div className="p-3 bg-muted rounded-xl shadow-soft">
-              <FileText className="w-6 h-6 text-ai-primary" />
-            </div>
-            <div>
-              <h2 className="text-subheading text-foreground">Selected Research Paper</h2>
-              <p className="text-caption">Ready for on-demand podcast script generation</p>
-            </div>
-          </div>
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-foreground border border-border">
-                <CheckCircle className="w-3.5 h-3.5" />
-                <span className="text-sm font-medium">Selected</span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleClearSelection}
-                className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-          
-          <div className="bg-muted p-6 rounded-xl border border-border/50">
-            <p className="text-caption mb-3">Paper Title:</p>
-            <div className="p-3 bg-muted rounded-lg border text-sm">
-              {selectedPaper.title}
-            </div>
-            {selectedPaper.summary && (
-              <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-                {selectedPaper.summary}
-              </p>
-            )}
-          </div>
+      <section className="comet-card p-5 sm:p-6">
+        <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-neutral-500">
+          <span>{selectedPaper.source}</span>
+          <span>{selectedPaper.published_date}</span>
+          <a
+            href={selectedPaper.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-medium text-neutral-700 hover:text-neutral-950"
+          >
+            View
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
         </div>
 
-        {/* Script Generation */}
-        <div className="premium-card p-8 space-y-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-muted rounded-xl shadow-soft">
-                <Zap className="w-6 h-6 text-robotics-primary" />
-              </div>
-              <div>
-                <h2 className="text-subheading text-foreground">AI Script Generation</h2>
-                <p className="text-caption">Generate a script directly from the paper metadata and abstract</p>
-              </div>
-            </div>
-            {isGenerating && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 animate-pulse">
-                <Clock className="w-3.5 h-3.5" />
-                <span className="text-sm font-medium">Generating</span>
-              </div>
-            )}
-          </div>
-          
-          {/* Error Display */}
-          {error && (
-            <div className="p-6 bg-destructive/5 border border-destructive/20 rounded-xl">
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          )}
+        <h1 className="text-2xl font-medium leading-tight text-neutral-950 sm:text-3xl">
+          {selectedPaper.title}
+        </h1>
 
-          {/* Control Buttons */}
-          <div className="flex flex-wrap items-center gap-4">
-            {!hasScript && !isGenerating && (
-              <button 
-                onClick={handleGenerateScript}
-                disabled={!selectedPaper}
-                className="comet-button inline-flex items-center gap-3"
-              >
-                <Mic2 className="w-6 h-6" />
-                Generate Podcast Script
-              </button>
-            )}
+        {selectedPaper.summary && (
+          <p className="mt-5 line-clamp-3 text-sm leading-7 text-neutral-600">
+            {selectedPaper.summary}
+          </p>
+        )}
 
-            {isGenerating && (
-              <button 
-                disabled
-                className="bg-muted text-muted-foreground px-8 py-4 rounded-full text-lg inline-flex items-center gap-3 cursor-not-allowed"
-              >
-                <Loader2 className="w-6 h-6 animate-spin" />
-                Generating Script...
-              </button>
-            )}
-
-            {hasScript && !isGenerating && (
-              <div className="flex flex-wrap items-center gap-4">
-                <button 
-                  onClick={() => downloadElevenLabsScript(script!)}
-                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-6 py-4 rounded-full inline-flex items-center gap-2 hover-scale border border-border"
-                >
-                  <Download className="w-5 h-5" />
-                  Download ElevenLabs
-                </button>
-                
-                <button 
-                  onClick={() => downloadTextScript(script!)}
-                  className="comet-button-secondary inline-flex items-center gap-2"
-                >
-                  <FileDown className="w-5 h-5" />
-                  Download Text
-                </button>
-                
-                <Button 
-                  onClick={clearScript}
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="w-3 h-3 mr-2" />
-                  Clear
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Script Preview */}
-          {hasScript && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-6 bg-muted rounded-xl border border-border/50">
-                <div>
-                  <h3 className="text-subheading text-foreground">Generated Script Preview</h3>
-                  <p className="text-caption">
-                    {script!.segments.length} segments • {script!.totalDuration} estimated duration
-                  </p>
-                </div>
-              </div>
-
-              {/* Script Segments Display */}
-              <div className="space-y-4 max-h-96 overflow-y-auto bg-muted rounded-xl p-6 border border-border/50">
-                {script!.segments.map((segment, index) => (
-                  <div 
-                    key={index}
-                    className="flex gap-4 p-4 rounded-xl bg-background/50 hover:bg-background/80 transition-colors border border-border/30"
-                  >
-                    <div className="flex-shrink-0">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                        segment.speaker === "DR ROWAN" 
-                          ? "bg-muted text-foreground border-2 border-border" 
-                          : "bg-secondary text-secondary-foreground border-2 border-border"
-                      }`}>
-                        {segment.speaker === "DR ROWAN" ? "R" : "A"}
-                      </div>
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-foreground">
-                          {segment.speaker}
-                        </span>
-                        <div className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">
-                          Segment {index + 1}
-                        </div>
-                        {segment.duration && (
-                          <div className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">
-                            ~{Math.floor(segment.duration / 60)}:{(segment.duration % 60).toString().padStart(2, '0')}
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-sm leading-relaxed text-foreground">{segment.text}</p>
-                    </div>
+        <div className="mt-6">
+          {!hasScript && !isGenerating && (
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {speakers.map((speaker, index) => (
+                  <div key={speaker.id} className="rounded-lg border border-neutral-200 p-3">
+                    <div className="mb-2 text-xs font-medium text-neutral-500">Speaker {index + 1}</div>
+                    <input
+                      value={speaker.name}
+                      onChange={(event) => updateSpeaker(speaker.id, { name: event.target.value })}
+                      maxLength={40}
+                      className="mb-2 min-h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-800 outline-none transition-colors hover:border-neutral-400 focus:border-neutral-950"
+                      aria-label={`Speaker ${index + 1} name`}
+                    />
+                    <select
+                      value={speaker.model}
+                      onChange={(event) => updateSpeaker(speaker.id, { model: event.target.value as ScriptModel })}
+                      className="min-h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 outline-none transition-colors hover:border-neutral-400 focus:border-neutral-950"
+                      aria-label={`Speaker ${index + 1} model`}
+                    >
+                      {SCRIPT_MODEL_OPTIONS.map((model) => (
+                        <option key={model.id} value={model.id}>
+                          {model.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 ))}
               </div>
-
-              {/* ElevenLabs Instructions */}
-              <div className="p-6 bg-muted rounded-xl border border-border">
-                <h4 className="font-semibold text-sm mb-3 text-foreground flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4" />
-                  ElevenLabs Integration Guide
-                </h4>
-                <ul className="text-sm text-foreground space-y-2">
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Download the ElevenLabs JSON file using the button above</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Dr. Rowan uses voice: <strong>Aria</strong> (9BWtsMINqrJLrRacOk9x)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Alex uses voice: <strong>Liam</strong> (TX3LPaxmHKxFdv7VOQHJ)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-foreground rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Import the JSON into ElevenLabs Projects or use their API</span>
-                  </li>
-                </ul>
-              </div>
+              <button
+                type="button"
+                onClick={handleGenerateScript}
+                className="comet-button inline-flex items-center gap-2 text-sm"
+              >
+                <Sparkles className="h-4 w-4" />
+                Generate script
+              </button>
             </div>
           )}
 
-          {/* Features List */}
-          <div className="space-y-4 pt-6 border-t border-border/30">
-            <h3 className="text-subheading text-foreground">Script Features</h3>
-            <div className="grid gap-3">
-              {[
-                "Natural conversation between Dr. Rowan (expert) and Alex (host)",
-                "ElevenLabs JSON format with optimized voice settings",
-                "Structured segments with estimated timing",
-                "Engaging dialogue flow for podcast format",
-                "Optimized for text-to-speech synthesis"
-              ].map((feature, index) => (
-                <div key={index} className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 bg-foreground rounded-full"></div>
-                  <span className="text-foreground">{feature}</span>
-                </div>
-              ))}
+          {isGenerating && (
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                disabled
+                className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-neutral-100 px-6 py-3 text-sm font-medium text-neutral-500"
+              >
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating
+              </button>
             </div>
-          </div>
+          )}
+
+          {hasScript && !isGenerating && (
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => downloadElevenLabsScript(script!)}
+                className="comet-button inline-flex items-center gap-2 text-sm"
+              >
+                <Download className="h-4 w-4" />
+                ElevenLabs
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadTextScript(script!)}
+                className="comet-button-secondary inline-flex items-center gap-2 text-sm"
+              >
+                <FileDown className="h-4 w-4" />
+                Text
+              </button>
+              <button
+                type="button"
+                onClick={clearScript}
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm text-neutral-500 hover:text-neutral-950"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Regenerate
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Episode Library */}
-        <div className="space-y-8">
-          <div className="text-center">
-            <h2 className="text-heading mb-4">Proof of Concept Notes</h2>
-            <p className="text-body text-muted-foreground">
-              This version does not persist episodes or paper history
-            </p>
+        {error && (
+          <div className="mt-5 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+            <p className="text-sm text-neutral-700">{error}</p>
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Why this is simpler</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-3">
-              <p>The app searches arXiv live and generates scripts on demand.</p>
-              <p>There is no database, no background processing queue, and no saved episode library.</p>
-              <p>If you want to keep a script, download it after generation.</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+        )}
+      </section>
+
+      {hasScript && (
+        <section ref={scriptRef} className="mt-6 scroll-mt-6 space-y-3">
+          <div className="mb-4 flex items-center gap-2 text-sm font-medium text-neutral-950">
+            <CheckCircle className="h-4 w-4" />
+            Script ready
+          </div>
+
+          {script!.segments.map((segment, index) => (
+            <StreamingSegment
+              key={`${script!.id}-${index}`}
+              segment={segment}
+              active={index === visibleSegmentCount}
+              complete={index < visibleSegmentCount}
+              onDone={handleSegmentDone}
+            />
+          ))}
+        </section>
+      )}
+    </main>
   );
 };
 
