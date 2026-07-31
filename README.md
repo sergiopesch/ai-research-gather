@@ -1,152 +1,48 @@
-# AI Research Paper Finder
+# Research Notebook
 
-A small proof of concept for browsing recent arXiv papers and turning one selected paper into a podcast-style script.
+Turn recent research papers into grounded, multi-model conversations with optional AI voices.
 
-## Features
+[Try the live studio](https://ai-research-gather.vercel.app/) · [Sergio Peschiera](https://www.sergiopesch.com/)
 
-- Browse recent arXiv papers across focused research areas.
-- Generate an 8-turn grounded dialogue from a selected paper.
-- Name both speakers and choose a separate OpenAI model for each one.
-- Replay the generated script with live dialogue animation.
-- Export the script as plain text or ElevenLabs-compatible JSON.
+![Research Notebook home](docs/screenshots/home.jpg)
 
-## Architecture
+## What it does
 
-This version intentionally has no database persistence.
+- Finds recent arXiv papers by research area or custom topic.
+- Gives each speaker an independently selected model and voice.
+- Generates progressive conversations of up to 20 turns.
+- Plays the finished episode and exports its audio, transcript, and production data.
 
-- Paper discovery is fetched live from arXiv.
-- Search results use the paper abstract directly.
-- Script generation happens on demand through a local Node API and the OpenAI Responses API.
-- Nothing is stored. Download the generated script if you want to keep it.
+![A completed conversation ready to export](docs/screenshots/studio.jpg)
 
-## Project View
+## Run locally
 
-![Project view](docs/screenshots/project-view.png)
-
-## Screenshots
-
-### Home
-
-![Home screen](docs/screenshots/home.png)
-
-### Processing Studio
-
-![Processing studio empty state](docs/screenshots/processing-empty.png)
-
-## Stack
-
-- Frontend: React 18, TypeScript, Vite
-- Styling: Tailwind CSS, Radix UI primitives
-- API: Express
-- AI: OpenAI
-
-## Quick Start
+Requires Node.js 24 and npm.
 
 ```bash
 nvm use
-npm install
-cp .env.example .env
-# fill in OPENAI_API_KEY
+npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
-Frontend: `http://localhost:8080`
-API: `http://localhost:3001`
+Open [localhost:8080](http://localhost:8080). Demo mode works without a provider key. Add only the providers you want to use to `.env.local`.
 
-## Scripts
+## Access
+
+| Experience | Access |
+| --- | --- |
+| Hosted demo | Free, limited generation on supported shared models |
+| Private studio | Owner access to configured server-side providers |
+| Local studio | Your own provider keys or supported ChatGPT and Grok command-line sessions |
+
+Provider secrets stay on the server and generated audio stays in the browser until it is exported.
+
+## Useful commands
 
 ```bash
-npm run dev
-npm run build
-npm run preview
-npm run lint
 npm run check
-npm run healthcheck
-```
-
-## Tooling Baseline
-
-- Node 20 is the expected local and CI runtime.
-- `.nvmrc` is included for local version alignment.
-- GitHub Actions validates dependency install, audit, mock script evaluation, lint, typecheck, build, and a server health smoke test.
-
-## Environment
-
-```env
-HOST=127.0.0.1
-OPENAI_API_KEY=
-OPENAI_SCRIPT_MODEL=gpt-5.5
-OPENAI_SCRIPT_MAX_TOKENS=1600
-OPENAI_SCRIPT_TURN_MAX_TOKENS=1200
-PORT=3001
-ARXIV_USER_AGENT=
-```
-
-Only `OPENAI_API_KEY` is required.
-For local-only secrets, `.env.local` is also loaded by the Node API and can contain the same keys.
-The UI lets each speaker choose between `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5-mini`, and `gpt-5-nano` before script generation.
-`ARXIV_USER_AGENT` is optional and can be used to identify your deployment when calling arXiv RSS.
-
-## Local Operations
-
-- `npm run dev` starts both the Vite frontend and the local API server.
-- `npm run preview` builds the frontend and serves the built app through the API server.
-- `npm run healthcheck` hits `GET /api/health` on the configured local port.
-- The frontend proxies `/api/*` requests to the local server during development.
-
-## Deployment Notes
-
-This repo is optimized for lightweight POC hosting, not a full production platform.
-
-- Build the frontend with `npm run build`.
-- Run the server with `npm run start`.
-- Set `OPENAI_API_KEY` in the runtime environment.
-- Serve the repository as a single Node process. The Express server will serve `dist/` automatically after a build.
-- Serverless-style `/api/*` entrypoints are included for Vercel-compatible hosting.
-
-Good fits:
-- Vercel
-- Railway
-- Render
-- Fly.io
-- A small VPS with Node 20+
-
-Not included on purpose:
-- Docker
-- database migrations
-- background workers
-- secrets management beyond env vars
-
-## Project Structure
-
-```text
-src/
-  components/   React UI
-  hooks/        Frontend search, selection, and script hooks
-  pages/        App routes
-  constants/    Research area definitions
-
-server/
-  index.ts      Express API entrypoint
-  research.ts   arXiv search and filtering
-  openai.ts     Podcast script generation
-  types.ts      Shared server-side types
-```
-
-## POC Constraints
-
-- No auth
-- No paper history
-- No episode library
-- No background jobs
-- No database
-
-## Health Endpoint
-
-`GET /api/health` returns:
-
-```json
-{"ok":true}
+npm run check:ci
 ```
 
 ## License
