@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import type { Paper } from '@/types/research';
+import { useNavigate } from '@/lib/navigation';
+import type { Paper } from '@shared/research';
 
 const SELECTED_PAPER_KEY = 'selectedPaper';
 
@@ -32,7 +32,12 @@ export const usePaperActions = () => {
   }, []);
 
   const selectPaper = useCallback(async (paper: Paper) => {
-    if (isSelecting || selectedPaper?.id === paper.id) return;
+    if (isSelecting) return;
+
+    if (selectedPaper?.id === paper.id) {
+      navigate('/processing');
+      return { success: true };
+    }
     
     setIsSelecting(true);
     try {

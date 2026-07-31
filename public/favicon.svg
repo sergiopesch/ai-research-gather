@@ -1,10 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#2563eb" />
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="16" fill="url(#bg)" />
-  <text x="32" y="44" font-size="34" text-anchor="middle">🧠</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Research Notebook</title>
+  <rect width="64" height="64" rx="15" fill="#1c1917" />
+  <path d="M10 20c7-3 14-2 20 3v25c-5-5-12-7-20-4V20Z" fill="#fbf8f3" />
+  <path d="M54 20c-7-3-14-2-20 3v25c5-5 12-7 20-4V20Z" fill="#a76f87" />
+  <path d="M32 22v27" stroke="#1c1917" stroke-width="3" stroke-linecap="round" />
+  <path d="m32 8 1.8 4.2L38 14l-4.2 1.8L32 20l-1.8-4.2L26 14l4.2-1.8L32 8Z" fill="#fbf8f3" />
 </svg>

@@ -81,4 +81,4 @@ export const REQUIRED_STRUCTURE_TERMS = [
   "takeaway",
 ] as const;
 
-export const EXPECTED_SPEAKERS = ["DR ROWAN", "ALEX"] as const;
+export const EXPECTED_SPEAKER_IDS = ["speaker_1", "speaker_2"] as const;

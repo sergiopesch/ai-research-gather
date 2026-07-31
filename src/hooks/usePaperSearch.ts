@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getApiError, getValidPapers } from '@/utils/validation';
-import type { Paper } from '@/types/research';
+import type { Paper } from '@shared/research';
 
 const API_URL = '/api/papers';
 

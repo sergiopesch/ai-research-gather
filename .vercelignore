@@ -1,0 +1,10 @@
+.github/
+coverage/
+docs/
+evals/
+**/*.test.ts
+**/*.test.tsx
+src/test/
+*.log
+.env
+.env.*

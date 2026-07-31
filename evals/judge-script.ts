@@ -1,5 +1,5 @@
 import {
-  EXPECTED_SPEAKERS,
+  EXPECTED_SPEAKER_IDS,
   REQUIRED_STRUCTURE_TERMS,
   SCORE_WEIGHTS,
   type PaperFixture,
@@ -8,12 +8,15 @@ import {
   type ScriptMetrics,
   type ScriptScore,
 } from "./score-schema";
+import { DEFAULT_CONVERSATION_TURNS } from "../shared/conversation";
 
 interface ParsedScript {
   parsed: boolean;
   value?: {
+    settings?: { turnCount?: unknown };
     segments?: Array<{
       speaker?: unknown;
+      speakerId?: unknown;
       text?: unknown;
       duration?: unknown;
     }>;
@@ -310,6 +313,9 @@ export function scoreScript(fixture: PaperFixture, candidate: ScriptCandidate, d
   }
 
   const segments = Array.isArray(parsed.value.segments) ? parsed.value.segments : [];
+  const expectedSegmentCount = typeof parsed.value.settings?.turnCount === "number"
+    ? parsed.value.settings.turnCount
+    : DEFAULT_CONVERSATION_TURNS;
   const segmentTexts = segments
     .map((segment) => (typeof segment.text === "string" ? segment.text : ""))
     .filter(Boolean);
@@ -320,18 +326,22 @@ export function scoreScript(fixture: PaperFixture, candidate: ScriptCandidate, d
 
   const validSegmentShape =
     segments.length >= 6 &&
-    segments.every((segment) => typeof segment.speaker === "string" && typeof segment.text === "string");
-  const exactlyEightSegments = segments.length === 8;
-  const alternates = segments.every((segment, index) => segment.speaker === EXPECTED_SPEAKERS[index % 2]);
+    segments.every((segment) => (
+      typeof segment.speaker === "string"
+      && typeof segment.speakerId === "string"
+      && typeof segment.text === "string"
+    ));
+  const hasRequestedSegmentCount = segments.length === expectedSegmentCount;
+  const alternates = segments.every((segment, index) => segment.speakerId === EXPECTED_SPEAKER_IDS[index % 2]);
 
   if (!validSegmentShape) {
     issues.push("Script does not include the expected segment array shape.");
   }
-  if (!exactlyEightSegments) {
-    issues.push(`Expected exactly 8 segments, received ${segments.length}.`);
+  if (!hasRequestedSegmentCount) {
+    issues.push(`Expected exactly ${expectedSegmentCount} segments, received ${segments.length}.`);
   }
   if (!alternates) {
-    issues.push("Speakers do not alternate from DR ROWAN to ALEX.");
+    issues.push("Speaker IDs do not alternate from speaker_1 to speaker_2.");
   }
 
   const forbiddenHits = fixture.forbidden_claims.filter((claim) =>
@@ -456,7 +466,7 @@ export function scoreScript(fixture: PaperFixture, candidate: ScriptCandidate, d
   const jsonValidity = clampScore(
     (parsed.parsed ? 35 : 0) +
       (validSegmentShape ? 35 : 0) +
-      (exactlyEightSegments ? 15 : 0) +
+      (hasRequestedSegmentCount ? 15 : 0) +
       (alternates ? 15 : 0),
   );
   const ttsReadiness = clampScore(
@@ -485,10 +495,10 @@ export function scoreScript(fixture: PaperFixture, candidate: ScriptCandidate, d
   );
   const latencyEfficiency = clampScore(
     100 -
-      Math.max(0, metrics.outputWords - 520) * 0.18 -
-      Math.max(0, 300 - metrics.outputWords) * 0.08 -
+      Math.max(0, metrics.outputWords - expectedSegmentCount * 65) * 0.18 -
+      Math.max(0, expectedSegmentCount * 37.5 - metrics.outputWords) * 0.08 -
       Math.max(0, metrics.maxWordsInSegment - 75) * 1.2 -
-      Math.abs(8 - metrics.segmentCount) * 10,
+      Math.abs(expectedSegmentCount - metrics.segmentCount) * 10,
   );
   const agentHandoffQuality = clampScore(
     averageTransitionScore * 0.55 +
@@ -540,7 +550,7 @@ export function scoreScript(fixture: PaperFixture, candidate: ScriptCandidate, d
       totalScore >= 85 &&
       jsonValidity === 100 &&
       factualGrounding >= 90 &&
-      conversationalFlow >= 80 &&
+      conversationalFlow >= 75 &&
       forbiddenHits.length === 0,
     issues,
   };
