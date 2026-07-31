@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Paper } from "./types.js";
+import type { Paper } from "../shared/research.js";
 
 type ResearchArea = {
   name: string;
@@ -67,6 +67,11 @@ const RESEARCH_AREAS: ResearchArea[] = [
     ],
   },
 ];
+
+const AREA_FILTER_KEYWORDS = new Set(
+  RESEARCH_AREAS.flatMap((area) => area.keywords.map((keyword) => keyword.toLowerCase()))
+);
+const TOPIC_STOP_WORDS = new Set(["and", "for", "from", "into", "over", "the", "under", "using", "with"]);
 
 function decodeXmlText(text: string): string {
   return text
@@ -159,18 +164,30 @@ function extractAbstract(description: string): string {
   return cleanText(abstractMatch ? abstractMatch[1] : description);
 }
 
-function matchesKeywords(paper: Paper, area: ResearchArea, selectedKeywords: string[]): boolean {
-  const normalizedAreaKeywords = area.keywords.map((value) => value.toLowerCase());
+function matchesKeywords(paper: Paper, selectedKeywords: string[]): boolean {
   const normalizedSelectedKeywords = selectedKeywords
     .map((keyword) => keyword.toLowerCase())
-    .filter((keyword) => !normalizedAreaKeywords.includes(keyword));
+    .filter((keyword) => !AREA_FILTER_KEYWORDS.has(keyword));
 
   if (normalizedSelectedKeywords.length === 0) {
     return true;
   }
 
   const haystack = `${paper.title} ${paper.summary || ""}`.toLowerCase();
-  return normalizedSelectedKeywords.some((keyword) => haystack.includes(keyword));
+  const haystackTerms = new Set(haystack.match(/[a-z0-9]+/g) || []);
+
+  return normalizedSelectedKeywords.some((keyword) => {
+    if (haystack.includes(keyword)) {
+      return true;
+    }
+
+    const topicTerms = (keyword.match(/[a-z0-9]+/g) || [])
+      .filter((term) => !TOPIC_STOP_WORDS.has(term));
+    const requiredMatches = Math.max(1, Math.ceil(topicTerms.length * 0.6));
+    const matches = topicTerms.filter((term) => haystackTerms.has(term)).length;
+
+    return matches >= requiredMatches;
+  });
 }
 
 async function fetchRssFeed(category: string): Promise<string> {
@@ -237,7 +254,7 @@ async function fetchArxivPapersForArea(
       summary: extractAbstract(description),
     };
 
-    return matchesKeywords(paper, area, selectedKeywords) ? [paper] : [];
+    return matchesKeywords(paper, selectedKeywords) ? [paper] : [];
   });
 }
 

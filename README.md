@@ -17,7 +17,7 @@ Turn recent research papers into grounded, multi-model conversations with option
 
 ## Run locally
 
-Requires Node.js 24 and npm.
+Requires Node.js 24 or newer and npm.
 
 ```bash
 nvm use

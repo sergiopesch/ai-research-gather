@@ -1,0 +1,4 @@
+export const DEFAULT_CONVERSATION_TURNS = 8;
+export const MIN_CONVERSATION_TURNS = 6;
+export const MAX_CONVERSATION_TURNS = 20;
+export const CONVERSATION_TURN_PRESETS = [8, 12, 20] as const;

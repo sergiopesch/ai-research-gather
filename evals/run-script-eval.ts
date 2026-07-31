@@ -125,6 +125,7 @@ async function main() {
     for (const score of [...scores].sort((a, b) => a.totalScore - b.totalScore).slice(0, 3)) {
       console.log(`- ${score.fixtureId}: ${score.totalScore}/100 (${score.issues[0] ?? "no issue details"})`);
     }
+    process.exitCode = 1;
   }
 }
 

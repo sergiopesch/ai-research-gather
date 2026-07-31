@@ -1,5 +1,12 @@
 import { Bot, Eye, Network } from 'lucide-react';
-import type { ResearchArea } from '@/types/research';
+import type { ComponentType } from 'react';
+
+export type ResearchArea = {
+  id: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  keywords: string[];
+};
 
 export const RESEARCH_AREAS: ResearchArea[] = [
   {
