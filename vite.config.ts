@@ -5,12 +5,21 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
   server: {
-    host: "::",
+    host: "127.0.0.1",
     port: 8080,
     proxy: {
       "/api": {
         target: "http://localhost:3001",
-        changeOrigin: true,
+        changeOrigin: false,
+        configure(proxy) {
+          proxy.on("proxyReq", (proxyReq, req) => {
+            // Preserve the client boundary if development is explicitly exposed on a LAN.
+            const remote = req.socket.remoteAddress || "unknown";
+            if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
+              proxyReq.setHeader("x-forwarded-for", remote);
+            }
+          });
+        },
       },
     },
   },
