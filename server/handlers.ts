@@ -214,7 +214,7 @@ export async function papersHandler(req: RequestLike, res: ResponseLike): Promis
 
     setJsonHeaders(res);
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: "Invalid input", details: error.errors });
+      res.status(400).json({ error: "Invalid input", details: error.issues });
       return;
     }
 
@@ -326,7 +326,7 @@ export async function generateScriptHandler(req: RequestLike, res: ResponseLike)
 
     setJsonHeaders(res);
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: "Invalid input", details: error.errors });
+      res.status(400).json({ error: "Invalid input", details: error.issues });
       return;
     }
 
@@ -355,7 +355,7 @@ export async function generateSpeechHandler(req: RequestLike, res: ResponseLike)
     console.error("speech generation failed", error);
     setJsonHeaders(res);
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: "Invalid input", details: error.errors });
+      res.status(400).json({ error: "Invalid input", details: error.issues });
       return;
     }
     res.status(500).json({ error: error instanceof Error ? error.message : "Failed to generate speech" });
