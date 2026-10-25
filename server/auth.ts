@@ -131,9 +131,16 @@ export function isTrustedMutationOrigin(req: HttpRequestLike): boolean {
 }
 
 export function isLocalRequest(req: HttpRequestLike): boolean {
-  if (secureCookie()) return false;
-  const host = requestHeader(req, "host").split(":")[0];
+  if (secureCookie() || process.env.NODE_ENV === "production") return false;
+  // A forwarded request must authenticate even when its proxy runs on loopback.
+  if (["forwarded", "x-forwarded-for", "x-forwarded-host", "x-real-ip"].some((name) => requestHeader(req, name))) return false;
+  let host: string;
+  try {
+    host = new URL(`http://${requestHeader(req, "host")}`).hostname;
+  } catch {
+    return false;
+  }
   const remote = req.socket?.remoteAddress || "";
   return ["localhost", "127.0.0.1", "[::1]", "::1"].includes(host)
-    || ["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote);
+    && ["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote);
 }
